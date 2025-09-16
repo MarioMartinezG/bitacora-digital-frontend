@@ -1,30 +1,49 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
-import { AppFloatingConfigurator } from '../../../layout/component/app.floatingconfigurator';
+import { BlockUIModule } from 'primeng/blockui';
+import { ToastModule } from 'primeng/toast';
 
-//Servicios
-import { LoginService } from '../../../core/services/login-service';
+// Componentes
+import { AppFloatingConfigurator } from '../../../layout/component/app.floatingconfigurator';
+import { LoadingComponent } from '../../../utils/loading/loading';
+
+// Servicios
+import { LoginService, LoadingService, ToastService } from '../../../core/services';
 
 
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, RouterModule, RippleModule, AppFloatingConfigurator],
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    CheckboxModule,
+    InputTextModule,
+    PasswordModule,
+    RouterModule,
+    RippleModule,
+    BlockUIModule,
+    ToastModule,
+    AppFloatingConfigurator,
+    LoadingComponent],
   templateUrl: 'login.html',
 })
-export class Login {
+export class LoginComponent {
   loginForm: FormGroup;
 
   private constructor(
+    private fb: FormBuilder,
+    private router: Router,
     private loginService: LoginService,
-    private fb: FormBuilder
+    private loadingService: LoadingService,
+    private toastService: ToastService,
   ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -34,18 +53,22 @@ export class Login {
 
   login(): void {
     if (this.loginForm.valid) {
+      this.loadingService.show();
       const { username, password } = this.loginForm.value;
-      this.loginService.login(username, password);
 
-      console.log('Autenticado con: ', username, password);
+      this.loginService.login(username, password).subscribe({
+        next: (response) => {
+          this.loadingService.hide();
+          // TODO - Obtener rol del servicio y redirigir de acuerdo al rol
+          console.log('Autenticado', response);
+          this.router.navigate(['home']);
+        },
+        error: (err) => {
+          this.loadingService.hide();
+          this.toastService.showError('Error de autenticación', err.message);
+          console.error('Error en login:', err.message, 'Código:', err.error_code);
+        }
+      });
     }
   }
-
-  /*
-  username: string = '';
-
-  password: string = '';
-
-  checked: boolean = false;
-  */
 }
