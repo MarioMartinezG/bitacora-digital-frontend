@@ -29,7 +29,7 @@ export class AppMenu {
                 items: [
                     { label: 'Caracteriza tu Asignatura', icon: 'pi pi-fw pi-id-card', routerLink: ['/home/bitacora/caracteriza-asignatura'] },
                     { label: 'Factores Situacionales', icon: 'pi pi-fw pi-arrow-up-right-and-arrow-down-left-from-center', routerLink: ['/home/bitacora/factores-situacionales'] },
-                    { label: 'Ajustes Razonables', icon: 'pi pi-fw pi-wrench', class: 'rotated-icon', routerLink: ['/home/bitacora/ajustes-razonables'] },
+                    { label: 'Ambientes Sanos y seguros para el aprendizaje', icon: 'pi pi-fw pi-wrench', class: 'rotated-icon', routerLink: ['/home/bitacora/ajustes-razonables'] },
                     { label: 'RAP y RAC', icon: 'pi pi-fw pi-table', routerLink: ['/home/bitacora/rap-rac'] },
                     { label: 'Actividades de Aprendizaje', icon: 'pi pi-fw pi-list', routerLink: ['/home/bitacora/actividades-aprendizaje'] },
                     { label: 'Cómo Evaluaré', icon: 'pi pi-fw pi-trophy', routerLink: ['/home/bitacora/como-evaluare'] },
