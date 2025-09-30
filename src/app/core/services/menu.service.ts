@@ -39,7 +39,7 @@ export class MenuService {
       catchError((error: HttpErrorResponse) => {
         let customError: ApiError = {
           status: error.status,
-          error: error.statusText || 'Error desconocido',
+          error: error.error?.error || 'Error desconocido',
           message: error.error?.message || error.message,
           timestamp: new Date().toISOString()
         };
