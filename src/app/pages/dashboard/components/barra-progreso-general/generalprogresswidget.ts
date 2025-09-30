@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { ProgressBar } from 'primeng/progressbar';
 
 @Component({
-  selector: 'app-generalprogresswidget',
-  imports: [],
+  selector: 'app-generalprogress-widget',
   templateUrl: './generalprogresswidget.html',
-  styleUrl: './generalprogresswidget.scss'
+  imports: [ProgressBar]
+
 })
 export class Generalprogresswidget {
 

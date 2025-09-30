@@ -5,11 +5,12 @@ import { RecentSalesWidget } from './components/recentsaleswidget';
 import { BestSellingWidget } from './components/bestsellingwidget';
 import { TimelineWidget} from './components/linea-tiempo/timelinewidget';
 import { RevenueStreamWidget } from './components/revenuestreamwidget';
-import { Access } from "../auth/access";
+import { Generalprogresswidget } from './components/barra-progreso-general/generalprogresswidget';
+
 
 @Component({
     selector: 'app-dashboard',
-    imports: [StatsWidget, RecentSalesWidget, BestSellingWidget, RevenueStreamWidget, NotificationsWidget, TimelineWidget, Access],
+    imports: [StatsWidget, RecentSalesWidget, BestSellingWidget, RevenueStreamWidget, NotificationsWidget, TimelineWidget, Generalprogresswidget],
     templateUrl: 'dashboard.html'
 
 })
