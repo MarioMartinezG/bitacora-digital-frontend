@@ -1,0 +1,10 @@
+<div class="card flex flex-col gap-4">
+    <p-timeline [value]="schedule" layout="horizontal" align="top">
+        <ng-template #opposite let-module>
+            {{ module.date }}
+        </ng-template>
+        <ng-template #content let-module>
+            {{ module.moment}}
+        </ng-template>
+    </p-timeline>
+</div>
