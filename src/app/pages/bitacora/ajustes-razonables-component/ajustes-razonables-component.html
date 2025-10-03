@@ -1,1 +1,54 @@
-<p>ajustes-razonables-component works!</p>
+<app-loading></app-loading>
+<p-card>
+    <form [formGroup]="ajustesForm">
+        <div formArrayName="ajustes">
+            <p-table [value]="ajustesData" [scrollable]="true" scrollHeight="480px" responsiveLayout="scroll">
+
+                <ng-template pTemplate="colgroup">
+                    <colgroup>
+                        <col style="width:200px" />
+                        <col style="width:500px" />
+                        <col style="width:150px" />
+                        <col style="width:400px" />
+                    </colgroup>
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Desde</th>
+                        <th>Ajustes en</th>
+                        <th>Si/No</th>
+                        <th>¿Cómo hacerlo? ¿Qué necesitas para hacerlo?</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-row let-i="rowIndex">
+                    <!-- i es el índice dentro de ajustesData y coincide con el FormArray -->
+                    <tr [formGroupName]="i">
+                        <!-- mostramos la celda 'Desde' SOLO si es la primera fila del grupo -->
+                        @if(isFirstOfGroup(i, row.desde)) {
+                            <td [attr.rowspan]="groupCountMap[row.desde]" class="font-bold align-center">
+                            {{ row.desde }}
+                            </td>
+                        }
+
+                        <!-- Ajuste -->
+                        <td class="align-top">{{ row.ajuste }}</td>
+
+                        <!-- Dropdown -->
+                        <td class="align-top">
+                            <p-select [options]="opcionesSiNo" formControlName="siNo" placeholder="Seleccione">
+                            </p-select>
+                        </td>
+
+                        <!-- Textarea -->
+                        <td>
+                            <textarea pInputTextarea formControlName="comoHacerlo" rows="2" class="w-full"></textarea>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <button pButton type="button" label="Guardar" (click)="guardar()"></button>
+    </form>
+</p-card>
