@@ -1,1 +1,191 @@
-<p>factores-component works!</p>
+<app-loading></app-loading>
+<p-fluid>
+    <p-card>
+        <h4>Responda las siguientes preguntas:</h4>
+        <p-accordion [value]="[]" [multiple]="true">
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <p-accordion-panel value="0">
+                    <p-accordion-header>
+                        <div class="flex items-center justify-between w-full">
+                            <span>a. Contexto Específico de la situación de Enseñanza/Aprendizaje.</span>
+                            <p-tag severity="success" value="Completado" class="mr-2" />
+                        </div>
+                    </p-accordion-header>
+                    <p-accordion-content>
+                        <br>
+                        <div formGroupName="panel1" class="flex flex-col gap-6">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex flex-wrap gap-2 w-full">
+                                    <label for="pregunta_1">1. ¿El curso hace parte de un programa de pregrado, o
+                                        posgrado?</label>
+                                    <p-select id="pregunta_1" formControlName="pregunta1" [options]="pregunta1Options"
+                                        optionLabel="name" placeholder="Seleccione una opción"
+                                        class="w-full"></p-select>
+                                </div>
+                                <div class="flex flex-wrap gap-2 w-full">
+                                    <label for="pregunta_2">2. ¿Tu curso es de inicio, mitad o final de
+                                        programa?</label>
+                                    <p-select id="pregunta_2" formControlName="pregunta2" [options]="pregunta2Options"
+                                        optionLabel="name" placeholder="Seleccione una opción"
+                                        class="w-full"></p-select>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex flex-wrap gap-2 w-full">
+                                    <label for="pregunta_3">3. ¿Cuántos estudiantes hay en tu aula?</label>
+                                    <p-inputnumber formControlName="pregunta3" mode="decimal" inputId="pregunta3"
+                                        [min]="0" [max]="100" />
+                                </div>
+                                <div class="flex flex-wrap gap-2 w-full">
+                                    <label for="pregunta_4">4. ¿El curso es presencial, virtual, híbrido?</label>
+                                    <p-select id="pregunta_4" formControlName="pregunta4" [options]="pregunta4Options"
+                                        optionLabel="name" placeholder="Seleccione una opción"
+                                        class="w-full"></p-select>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex flex-wrap gap-2 w-full">
+                                    <label for="pregunta_5">5. ¿Este tema es principalmente teórico, práctico o una
+                                        combinación de
+                                        ambos?</label>
+                                    <p-select id="pregunta_5" formControlName="pregunta5" [options]="pregunta5Options"
+                                        optionLabel="name" placeholder="Seleccione una opción"
+                                        class="w-full"></p-select>
+                                </div>
+                                <div class="flex flex-wrap gap-2 w-full">
+                                    <label for="pregunta_6">6. ¿Tu curso es de fundamentación, disciplinar, de
+                                        profundización,
+                                        electivo?</label>
+                                    <p-select id="pregunta_6" formControlName="pregunta6" [options]="pregunta6Options"
+                                        optionLabel="name" placeholder="Seleccione una opción"
+                                        class="w-full"></p-select>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_7">7. ¿Tu curso requiere actualización permanente, o es una
+                                    temática
+                                    estable
+                                    que cambia poco?</label>
+                                <p-select id="pregunta_7" formControlName="pregunta7" [options]="pregunta7Options"
+                                    optionLabel="name" placeholder="Seleccione una opción" class="w-full"></p-select>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_8">8. ¿Tu curso tiene prerrequisitos o correquisitos?</label>
+                                <p-select id="pregunta_8" formControlName="pregunta8" [options]="pregunta8Options"
+                                    optionLabel="name" placeholder="Seleccione una opción" class="w-full"></p-select>
+                                <label>¿Cuáles son?</label>
+                                <textarea pTextarea formControlName="pregunta8" id="pregunta_8" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_9">9. ¿Tu curso es prerrequisito de otro?</label>
+                                <p-select id="pregunta_9" formControlName="pregunta9" [options]="YesNoOptions"
+                                    optionValue="code" optionLabel="name" placeholder="Seleccione una opción"
+                                    class="w-full"></p-select>
+                                @if (form.get('panel1.pregunta9')?.value === 'si'){
+                                    <label>¿Cuál</label>
+                                    <textarea pTextarea formControlName="detallePregunta9" id="pregunta_9" rows="2"
+                                        class="w-full"></textarea>
+                                }
+                            </div>
+                        </div>
+                    </p-accordion-content>
+                </p-accordion-panel>
+
+                <p-accordion-panel value="1">
+                    <p-accordion-header>
+                        <div class="flex items-center justify-between w-full">
+                            <span>b. Características de los estudiantes</span>
+                            <p-tag severity="warn" value="En desarrollo" class="mr-2" />
+                        </div>
+                    </p-accordion-header>
+
+                    <p-accordion-content>
+                        <br>
+                        <div formGroupName="panel2" class="flex flex-col gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_10">10. ¿Cuáles son las características biopsicosociales,
+                                    culturales,
+                                    académicas y económicas de tus estudiantes?</label>
+                                <textarea pTextarea formControlName="pregunta10" id="pregunta_10" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_11">11. ¿Qué conocimiento previo, experiencias y predisposiciones
+                                    iniciales
+                                    suelen tener los estudiantes sobre el tema?</label>
+                                <textarea pTextarea formControlName="pregunta11" id="pregunta_11" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_12">12. ¿Cuáles son los estilos preferidos de aprendizaje de tus
+                                    estudiantes?</label>
+                                <textarea pTextarea formControlName="pregunta12" id="pregunta_12" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_13">13. ¿Conoces las características de diversidad de los
+                                    estudiantes
+                                    que
+                                    integrarán tu curso?</label>
+                                <textarea pTextarea formControlName="pregunta13" id="pregunta_13" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+                        </div>
+                    </p-accordion-content>
+                </p-accordion-panel>
+
+                <p-accordion-panel value="2">
+                    <p-accordion-header>
+                        <div class="flex items-center justify-between w-full">
+                            <span>c. Tus características como docente</span>
+                            <p-tag severity="danger" value="Sin avances" class="mr-2" />
+                        </div>
+                    </p-accordion-header>
+
+                    <p-accordion-content>
+                        <br>
+                        <div formGroupName="panel3" class="flex flex-col gap-6">
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_14">14. ¿Qué experiencia docente tienes en la enseñanza de este
+                                    curso o
+                                    de
+                                    temas relacionados?</label>
+                                <textarea pTextarea formControlName="pregunta14" id="pregunta_14" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_15">15. ¿Qué te motiva a enseñar este tema en particular?</label>
+                                <textarea pTextarea formControlName="pregunta15" id="pregunta_15" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_16">16. ¿Qué resultados has obtenido en la evaluación de este curso
+                                    anteriormente?</label>
+                                <textarea pTextarea formControlName="pregunta16" id="pregunta_16" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="pregunta_17">17. ¿Cómo describes tu estilo de enseñanza?</label>
+                                <textarea pTextarea formControlName="pregunta17" id="pregunta_17" rows="2"
+                                    class="w-full"></textarea>
+                            </div>
+                        </div>
+                    </p-accordion-content>
+                </p-accordion-panel>
+                <button pButton type="submit" label="Guardar" [disabled]="form.invalid" class="mt-4"></button>
+            </form>
+        </p-accordion>
+    </p-card>
+</p-fluid>
