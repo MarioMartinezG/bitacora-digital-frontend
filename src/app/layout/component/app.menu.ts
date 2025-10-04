@@ -6,7 +6,7 @@ import { MenuItem } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
 import { AppMenuitem } from './app.menuitem';
-import { MenuService, ToastService } from '../../core/services';
+import { LoginService, MenuService, ToastService } from '../../core/services';
 import { ApiError } from '../../core/models';
 
 @Component({
@@ -24,11 +24,19 @@ import { ApiError } from '../../core/models';
 export class AppMenu {
     menu: MenuItem[] = [];
 
-    constructor(private menuService: MenuService, private toastService: ToastService) { }
+    constructor(
+        private menuService: MenuService, 
+        private toastService: ToastService,
+        private loginService: LoginService
+    ) { }
 
     ngOnInit() {
 
-        this.menuService.getMenuByRole(1).subscribe({
+        const userRole:number = this.loginService.getUser().role;
+
+        console.log('UserRole', userRole);
+
+        this.menuService.getMenuByRole(userRole).subscribe({
             next: (menu) => {
                 this.menu = menu;
             },

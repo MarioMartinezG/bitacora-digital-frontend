@@ -9,10 +9,10 @@ export class LoginService {
   private isLoggedIn = false;
 
   // TODO - Eliminar mock cuando se implemente el back
-  private mockUsers: { [key: string]: { password: string; role: string } } = {
-    'daniela.murcia': { password: '123456', role: 'estudiante' },
-    'guiovanna.sabogal': { password: '123456', role: 'tutor' },
-    'carmen.vargas': { password: '123456', role: 'estudiante' }
+  private mockUsers: { [key: string]: { password: string; role: number } } = {
+    'daniela.murcia': { password: '123456', role: 1 },
+    'guiovanna.sabogal': { password: '123456', role: 2 },
+    'carmen.vargas': { password: '123456', role: 1 }
   }
 
   login(username: string, password: string): Observable<AuthSuccessResponse> {

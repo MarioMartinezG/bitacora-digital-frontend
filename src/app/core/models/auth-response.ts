@@ -6,7 +6,7 @@ export interface AuthSuccessResponse {
   user: {
     id: string;
     username: string;
-    role: string;
+    role: number;
   };
 }
 
