@@ -30,13 +30,8 @@ export class AppMenu {
         private loginService: LoginService
     ) { }
 
-    ngOnInit() {
-
-        const userRole:number = this.loginService.getUser().role;
-
-        console.log('UserRole', userRole);
-
-        this.menuService.getMenuByRole(userRole).subscribe({
+    ngOnInit() {    
+        this.menuService.getMenuByRole(1).subscribe({
             next: (menu) => {
                 this.menu = menu;
             },

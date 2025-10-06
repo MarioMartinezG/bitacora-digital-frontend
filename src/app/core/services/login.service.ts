@@ -1,77 +1,85 @@
 import { Injectable } from '@angular/core';
-import { delay, Observable, of, switchMap, throwError, timer } from 'rxjs';
-import { AuthSuccessResponse, AuthErrorResponse } from '../models';
+import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { AuthSuccessResponse, LoginRequest } from '../models';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BaseHttpService } from './base-http.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class LoginService {
-  private isLoggedIn = false;
+export class LoginService extends BaseHttpService {
+  private tokenKey = 'auth_token';
+  private refreshTokenKey = 'refresh_token';
+  private userKey = 'user_data';
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
+  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  // TODO - Eliminar mock cuando se implemente el back
-  private mockUsers: { [key: string]: { password: string; role: number } } = {
-    'daniela.murcia': { password: '123456', role: 1 },
-    'guiovanna.sabogal': { password: '123456', role: 2 },
-    'carmen.vargas': { password: '123456', role: 1 }
+  constructor(http: HttpClient) {
+    super(http);
   }
 
-  login(username: string, password: string): Observable<AuthSuccessResponse> {
-    // TODO - Implementar servicio de backend y retirar lógica del mock
-    // Para el mock, se busca el usuario dentro de los generados
-    const user = this.mockUsers[username];
+  login(loginData: LoginRequest): Observable<AuthSuccessResponse> {
+    return this.post<AuthSuccessResponse>(`/api/auth/login`, loginData)
+      .pipe(
+        tap(response => {
+          this.storeAuthData(response);
+          this.isAuthenticatedSubject.next(true);
+        })
+      );
+  }
 
-    if (user && user.password === password) {
-      this.isLoggedIn = true;
+  register(registerData: any): Observable<AuthSuccessResponse> {
+    return this.post<AuthSuccessResponse>(`/api/auth/register`, registerData)
+      .pipe(
+        tap(response => {
+          this.storeAuthData(response);
+          this.isAuthenticatedSubject.next(true);
+        })
+      );
+  }
 
-      // Se simula el objeto de respuesta exitoso del backend
-      const response: AuthSuccessResponse = {
-        message: 'Login successful',
-        access_token: 'fake-jwt-access-token-' + Math.random().toString(36).substring(2),
-        refresh_token: 'fake-jwt-refresh-token-' + Math.random().toString(36).substring(2),
-        expires_in: 3600,
-        user: {
-          id: 'user-' + username,
-          username,
-          role: user.role
-        }
-      };
+  refreshToken(): Observable<AuthSuccessResponse> {
+    const refreshToken = this.getRefreshToken();
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${refreshToken}`
+    });
 
-      localStorage.setItem('access_token', response.access_token);
-      localStorage.setItem('refresh_token', response.refresh_token);
-      localStorage.setItem('expires_in', response.expires_in.toString());
-      localStorage.setItem('user', JSON.stringify(response.user));
-
-      // Se emula el envio de respuesta del back con delay de 1 segundo
-      return of(response).pipe(delay(2000));
-
-    }
-
-    // Se simula el objeto de respuesta de error 401 del backend
-    const error: AuthErrorResponse = {
-      message: 'Credenciales inválidas',
-      error_code: 'INVALID_CREDENTIALS'
-    };
-    // Simulación de error con retraso
-    return timer(1000).pipe(
-      switchMap(() => throwError(() => error))
+    return this.handleRequest<AuthSuccessResponse>(
+      this.http.post<AuthSuccessResponse>(`/api/auth/refresh`, {}, { headers })
+    ).pipe(
+      tap(response => {
+        this.storeToken(response.access_token);
+      })
     );
   }
 
   logout(): void {
-    this.isLoggedIn = false;
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('expires_in');
-    localStorage.removeItem('user');
+    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+    localStorage.removeItem(this.userKey);
+    this.isAuthenticatedSubject.next(false);
   }
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+  private storeAuthData(response: AuthSuccessResponse): void {
+    localStorage.setItem(this.tokenKey, response.access_token);
+    localStorage.setItem(this.refreshTokenKey, response.refresh_token);
+    localStorage.setItem(this.userKey, JSON.stringify(response.user));
   }
 
-  getUser(): any {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  private storeToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
+  }
+
+  private getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
+  }
+
+  private hasToken(): boolean {
+    return !!this.getToken();
   }
 
 }

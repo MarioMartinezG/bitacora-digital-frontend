@@ -4,9 +4,11 @@ export interface AuthSuccessResponse {
   refresh_token: string;
   expires_in: number; // segundos
   user: {
-    id: string;
+    id: number;
     username: string;
     role: number;
+    nombre: string;
+    correo: string;
   };
 }
 

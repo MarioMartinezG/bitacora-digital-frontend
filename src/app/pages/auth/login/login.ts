@@ -15,6 +15,7 @@ import { LoadingComponent } from '../../../utils/loading/loading';
 
 // Servicios
 import { LoginService, LoadingService, ToastService } from '../../../core/services';
+import { LoginRequest } from '../../../core/models';
 
 
 
@@ -54,19 +55,22 @@ export class LoginComponent {
   login(): void {
     if (this.loginForm.valid) {
       this.loadingService.show();
-      const { username, password } = this.loginForm.value;
+      const loginData: LoginRequest = {
+        usuario: this.loginForm.value.username,
+        contrasena: this.loginForm.value.password
+      }
 
-      this.loginService.login(username, password).subscribe({
+      this.loginService.login(loginData).subscribe({
         next: (response) => {
           this.loadingService.hide();
-          // TODO - Obtener rol del servicio y redirigir de acuerdo al rol
+
           console.log('Autenticado', response);
           this.router.navigate(['home']);
         },
         error: (err) => {
           this.loadingService.hide();
           this.toastService.showError('Error de autenticación', err.message);
-          console.error('Error en login:', err.message, 'Código:', err.error_code);
+          console.error('Error en login:', err.message, 'Código:', err.error);
         }
       });
     }
