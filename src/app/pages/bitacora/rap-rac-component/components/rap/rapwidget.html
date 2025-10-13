@@ -1,0 +1,33 @@
+<!-- Pregunta principal -->
+<div class="mb-4">
+    <label for="rapPregunta" class="block font-semibold text-lg mb-2">
+        ¿Cuáles son los resultados de aprendizaje del Programa?
+    </label>
+    <p class="text-color-secondary mb-3">
+        Agrega los resultados uno por uno.
+    </p>
+</div>
+
+<!-- Campo de entrada + botón -->
+<div class="flex align-items-center gap-3 mb-4">
+    <input id="rapInput" type="text" pInputText [(ngModel)]="nuevoResultado" placeholder="Escribe un resultado..."
+        class="w-full" />
+    <button pButton label="Agregar" icon="pi pi-plus" (click)="agregarResultado()" [disabled]="!nuevoResultado?.trim()"
+        class="p-button-primary"></button>
+</div>
+
+<!-- Lista de resultados -->
+<div *ngIf="resultados.length; else sinResultados" class="flex flex-col gap-2 mt-2">
+    <div *ngFor="let resultado of resultados"
+        class="flex items-center justify-between p-2 border-round bg-gray-50 shadow-sm">
+        <span class="text-sm">{{ resultado }}</span>
+        <!-- Boton de eliminar-->
+        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" pTooltip="Eliminar"
+            tooltipPosition="left" (click)="eliminarResultado(resultado)"></button>
+    </div>
+</div>
+
+<!-- Estado vacío -->
+<ng-template #sinResultados>
+    <p-message severity="info" text="Aún no has agregado resultados."></p-message>
+</ng-template>
