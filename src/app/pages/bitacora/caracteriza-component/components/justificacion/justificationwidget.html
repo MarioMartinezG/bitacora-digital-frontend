@@ -1,0 +1,40 @@
+<p-card class="w-full">
+    <div class="space-y-6">
+        <!-- Pregunta 1 -->
+        <div>
+            <label for="ocupacion" class="block font-semibold text-lg mb-2">
+                ¿De qué se ocupa la asignatura?
+            </label>
+            <textarea id="ocupacion" pTextarea [(ngModel)]="respuesta1" placeholder="Escribe tu respuesta..."
+                [autoResize]="true" class="w-full" (input)="validarTotalCaracteres()"></textarea>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div>
+            <label for="importancia" class="block font-semibold text-lg mb-2">
+                Importancia de la asignatura para el perfil profesional
+            </label>
+            <textarea id="importancia" pTextarea [(ngModel)]="respuesta2" placeholder="Escribe tu respuesta..."
+                [autoResize]="true" class="w-full" (input)="validarTotalCaracteres()"></textarea>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div>
+            <label for="biopsicosocial" class="block font-semibold text-lg mb-2">
+                ¿Cómo aplica el modelo Biopsicosocial y Cultural?
+            </label>
+            <textarea id="biopsicosocial" pTextarea [(ngModel)]="respuesta3" placeholder="Escribe tu respuesta..."
+                [autoResize]="true" class="w-full" (input)="validarTotalCaracteres()"></textarea>
+        </div>
+
+        <!-- Contador -->
+        <div class="text-sm text-gray-600 text-right">
+            Caracteres usados: {{ totalCaracteres }}/900
+        </div>
+
+        <!-- Error -->
+        @if (errorCaracteres) {
+        <p-message severity="error" text="No se pueden superar los 900 caracteres."></p-message>
+        }
+    </div>
+</p-card>
