@@ -1,1 +1,34 @@
-<p>rap-rac-component works!</p>
+<div class="flex mt-8">
+    <p-card header="RAP y RAC" class="w-full">
+        <p-accordion [value]="['0']" [multiple]="true">
+            <!-- Panel RAP -->
+            <p-accordion-panel value="0">
+                <p-accordion-header>
+                    <div class="flex items-center justify-between w-full">
+                        <span>Resultados de aprendizaje del Programa (RAP)</span>
+                        <p-tag severity="success" value="Completado" class="mr-2"></p-tag>
+                    </div>
+                </p-accordion-header>
+                <p-accordion-content>
+                    <p class="m-0">
+                        <app-rapwidget></app-rapwidget>
+                    </p>
+                </p-accordion-content>
+            </p-accordion-panel>
+
+            <!-- Panel RAC -->
+            <p-accordion-panel value="1">
+                <p-accordion-header>
+                    <div class="flex items-center justify-between w-full">
+                        <span>Resultados de aprendizaje del curso (RAC)</span>
+                        <p-tag severity="warn" value="En desarrollo" class="mr-2"></p-tag>
+                    </div>
+                </p-accordion-header>
+                <p-accordion-content>
+                    <p class="m-0">
+                        <app-racwidget></app-racwidget>
+                    </p>
+                </p-accordion-content>
+            </p-accordion-panel>
+        </p-accordion>
+    </p-card>
