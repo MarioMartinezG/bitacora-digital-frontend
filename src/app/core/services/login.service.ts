@@ -14,10 +14,6 @@ export class LoginService extends BaseHttpService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(http: HttpClient) {
-    super(http);
-  }
-
   login(loginData: LoginRequest): Observable<AuthSuccessResponse> {
     return this.post<AuthSuccessResponse>(`/api/auth/login`, loginData)
       .pipe(
@@ -60,14 +56,24 @@ export class LoginService extends BaseHttpService {
     this.isAuthenticatedSubject.next(false);
   }
 
-  private storeAuthData(response: AuthSuccessResponse): void {
-    localStorage.setItem(this.tokenKey, response.access_token);
-    localStorage.setItem(this.refreshTokenKey, response.refresh_token);
-    localStorage.setItem(this.userKey, JSON.stringify(response.user));
+  getUser(): string | null{
+    return localStorage.getItem(this.userKey);
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
+  }
+
+  getAuthorizationHeader() {
+    return new HttpHeaders({
+      'Authorization': `Bearer ${this.getToken()}`
+    });
+  }
+
+  private storeAuthData(response: AuthSuccessResponse): void {
+    localStorage.setItem(this.tokenKey, response.access_token);
+    localStorage.setItem(this.refreshTokenKey, response.refresh_token);
+    localStorage.setItem(this.userKey, JSON.stringify(response.user));
   }
 
   private storeToken(token: string): void {
