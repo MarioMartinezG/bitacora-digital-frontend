@@ -25,13 +25,13 @@ export class AppMenu {
     menu: MenuItem[] = [];
 
     constructor(
-        private menuService: MenuService, 
+        private menuService: MenuService,
         private toastService: ToastService,
         private loginService: LoginService
     ) { }
 
-    ngOnInit() {    
-        this.menuService.getMenuByRole(1).subscribe({
+    ngOnInit() {
+        this.menuService.getMenuByRole(this.getRoleFromUser()).subscribe({
             next: (menu) => {
                 this.menu = menu;
             },
@@ -39,5 +39,9 @@ export class AppMenu {
                 this.toastService.showError(errorResponse.error, errorResponse.message);
             }
         });
+    }
+
+    private getRoleFromUser() {
+        return JSON.parse(this.loginService.getUser() ?? '').role;
     }
 }

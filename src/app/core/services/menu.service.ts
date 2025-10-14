@@ -12,10 +12,6 @@ import { LoginService } from './login.service';
 })
 export class MenuService extends BaseHttpService {
   loginService: LoginService = inject(LoginService);
-  
-  constructor(http: HttpClient) {
-    super(http);
-  }
 
   getMenuByRole(roleId: number): Observable<MenuItem[]> {
     const token = this.loginService.getToken();
