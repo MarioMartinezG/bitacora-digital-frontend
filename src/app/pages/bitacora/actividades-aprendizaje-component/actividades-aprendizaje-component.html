@@ -1,1 +1,83 @@
-<p>actividades-aprendizaje-component works!</p>
+<p-card class="shadow-sm border-round-lg p-4">
+    <div class="flex items-center gap-3 mb-4">
+        <i class="pi pi-list text-primary text-2xl"></i>
+        <h2 class="m-0 text-xl font-semibold">Actividades de aprendizaje</h2>
+    </div>
+
+    <p class="text-sm text-gray-600 mb-5">
+        Los resultados de aprendizaje se cargan automáticamente desde el módulo RAC.
+        Selecciona la metodología y describe las actividades para cada dimensión.
+    </p>
+
+    <div class="grid">
+
+        <!-- ESPACIO ENTRE CARDS -->
+        <div class="col-12 mb-5" *ngFor="let dim of learningDimensions">
+
+            <p-card class="shadow-sm border-round-lg p-3">
+
+                <!-- TÍTULO + ÍCONO -->
+                <div class="flex justify-between items-center mb-3">
+
+                    <!-- IZQUIERDA: ÍCONO + TÍTULO -->
+                    <div class="flex items-center gap-3">
+                        <i class="pi" [ngClass]="{
+                'pi-bolt text-primary': dim.dimension === 'Compromiso o valoración',
+                'pi-users text-green-500': dim.dimension === 'Dimensiones humanas del aprendizaje',
+                'pi-book text-orange-500': dim.dimension === 'Conocimiento Fundamental',
+                'pi-cog text-cyan-600': dim.dimension === 'Aplicación del aprendizaje',
+                'pi-link text-indigo-500': dim.dimension === 'Integración',
+                'pi-compass text-purple-500': dim.dimension === 'Aprender a aprender'
+            }" style="font-size: 1.5rem">
+                        </i>
+
+                        <h3 class="m-0 text-lg font-semibold">
+                            {{ dim.dimension }}
+                        </h3>
+                    </div>
+
+                    <!-- DERECHA: TAG -->
+                    <p-tag severity="success" value="Completado" class="mr-2">
+                    </p-tag>
+
+                </div>
+
+                <!-- GRID INTERNO -->
+                <div class="grid grid-cols-3 gap-4">
+
+                    <!-- LABELS -->
+                    <label class="font-medium text-center">Resultado de aprendizaje</label>
+                    <label class="font-medium text-center">Metodología</label>
+                    <label class="font-medium text-center">Descripción de las actividades</label>
+
+                    <!-- RESULTADO -->
+                    <div class="text-sm text-gray-700">
+                        {{ dim.resultado || 'Resultado no definido' }}
+                    </div>
+
+                    <!-- METODOLOGÍA -->
+                    <div>
+                        <p-select [options]="metodologias" optionLabel="label" optionValue="value"
+                            placeholder="Seleccione una metodología" [(ngModel)]="dim.metodologia" class="w-full">
+                        </p-select>
+                    </div>
+
+                    <!-- DESCRIPCIÓN -->
+                    <div>
+                        <textarea pTextarea [(ngModel)]="dim.descripcion" [autoResize]="true" rows="2" class="w-full"
+                            placeholder="Describa las actividades...">
+                        </textarea>
+                    </div>
+
+                </div>
+
+            </p-card>
+        </div>
+
+    </div>
+
+    <div class="flex justify-end mt-6">
+        <button pButton label="Guardar actividades" icon="pi pi-save" class="p-button-primary" (click)="guardarDatos()">
+        </button>
+    </div>
+</p-card>
