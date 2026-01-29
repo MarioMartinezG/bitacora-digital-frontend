@@ -22,4 +22,8 @@ export class AppConfigService {
   get apiUrl(): string {
     return this.config?.apiUrl;
   }
+
+  get wsUrl(): string {
+    return this.config?.wsUrl || 'http://localhost:8080';
+  }
 }

@@ -1,68 +1,114 @@
-<div class="card">
-    <div class="flex items-center justify-between mb-6">
-        <div class="font-semibold text-xl">Notificaciones</div>
+<div class="card h-full">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <span class="font-semibold text-xl">Notificaciones</span>
+            @if (conteoNoLeidas() > 0) {
+                <p-badge [value]="conteoNoLeidas().toString()" severity="danger" />
+            }
+        </div>
+        <div class="flex items-center gap-1">
+            <p-button
+                icon="pi pi-refresh"
+                [rounded]="true"
+                [text]="true"
+                severity="secondary"
+                pTooltip="Actualizar"
+                tooltipPosition="top"
+                (click)="onRefrescar()"
+                [loading]="cargando()"
+            />
+            <p-button
+                icon="pi pi-external-link"
+                [rounded]="true"
+                [text]="true"
+                severity="secondary"
+                pTooltip="Ver todas"
+                tooltipPosition="top"
+                (click)="onVerTodas()"
+            />
+        </div>
     </div>
 
-    <span class="block text-muted-color font-medium mb-4">HOY</span>
-    <ul class="p-0 mx-0 mt-0 mb-6 list-none">
-        <li class="flex items-center py-2 border-b border-surface">
-            <div
-                class="w-12 h-12 flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-full mr-4 shrink-0">
-                <i class="pi pi-question text-xl! text-blue-500"></i>
-            </div>
-            <span class="text-surface-900 dark:text-surface-0 leading-normal">Tutor asignado
-                <span class="text-surface-700 dark:text-surface-100">Notificación 1</span>
-            </span>
-        </li>
-        <li class="flex items-center py-2">
-            <div
-                class="w-12 h-12 flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-full mr-4 shrink-0">
-                <i class="pi pi-download text-xl! text-orange-500"></i>
-            </div>
-            <span class="text-surface-700 dark:text-surface-100 leading-normal">Tutor asignado <span
-                    class="text-primary font-bold"></span> Notificación 2</span>
-        </li>
-    </ul>
+    <!-- Resumen de contadores -->
+    <div class="grid grid-cols-4 gap-2 mb-4">
+        <div class="flex flex-col items-center p-2 rounded-lg bg-red-50 dark:bg-red-400/10">
+            <span class="text-red-500 font-bold text-lg">{{ contadorCriticas() }}</span>
+            <span class="text-xs text-muted-color">Criticas</span>
+        </div>
+        <div class="flex flex-col items-center p-2 rounded-lg bg-orange-50 dark:bg-orange-400/10">
+            <span class="text-orange-500 font-bold text-lg">{{ contadorAlertas() }}</span>
+            <span class="text-xs text-muted-color">Alertas</span>
+        </div>
+        <div class="flex flex-col items-center p-2 rounded-lg bg-blue-50 dark:bg-blue-400/10">
+            <span class="text-blue-500 font-bold text-lg">{{ contadorInfo() }}</span>
+            <span class="text-xs text-muted-color">Info</span>
+        </div>
+        <div class="flex flex-col items-center p-2 rounded-lg bg-green-50 dark:bg-green-400/10">
+            <span class="text-green-500 font-bold text-lg">{{ contadorSuccess() }}</span>
+            <span class="text-xs text-muted-color">Exito</span>
+        </div>
+    </div>
 
-    <span class="block text-muted-color font-medium mb-4">AYER</span>
-    <ul class="p-0 m-0 list-none mb-6">
-        <li class="flex items-center py-2 border-b border-surface">
-            <div
-                class="w-12 h-12 flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-full mr-4 shrink-0">
-                <i class="pi pi-question text-xl! text-blue-500"></i>
+    <p-divider />
+
+    <!-- Lista de notificaciones -->
+    @if (cargando()) {
+        <!-- Skeleton loader -->
+        <div class="notification-widget-list">
+            @for (i of skeletonItems; track i) {
+                <div class="flex items-center gap-3 py-2">
+                    <p-skeleton shape="circle" size="2.5rem" />
+                    <div class="flex-1">
+                        <p-skeleton width="70%" height="0.875rem" styleClass="mb-1" />
+                        <p-skeleton width="40%" height="0.75rem" />
+                    </div>
+                </div>
+            }
+        </div>
+    } @else if (notificacionesRecientes.length === 0) {
+        <!-- Estado vacio -->
+        <div class="flex flex-col items-center justify-center py-8">
+            <i class="pi pi-inbox text-4xl text-muted-color mb-3"></i>
+            <p class="text-muted-color m-0">No tienes notificaciones</p>
+        </div>
+    } @else {
+        <!-- Lista de notificaciones recientes -->
+        <div class="notification-widget-list">
+            @for (notificacion of notificacionesRecientes; track notificacion.id) {
+                <div
+                    class="notification-widget-item"
+                    [class.unread]="!notificacion.leida"
+                    pRipple
+                    (click)="onClickNotificacion(notificacion)"
+                >
+                    <div class="notification-widget-icon" [ngClass]="getIconBgClass(notificacion.prioridad)">
+                        <i [class]="'pi ' + getIconClass(notificacion.tipo)"></i>
+                    </div>
+                    <div class="notification-widget-content">
+                        <div class="notification-widget-title">{{ notificacion.titulo }}</div>
+                        <div class="notification-widget-message">{{ notificacion.mensaje }}</div>
+                    </div>
+                    <div class="notification-widget-time">
+                        {{ calcularTiempoRelativo(notificacion.fechaCreacion) }}
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Footer con enlace a ver todas -->
+        @if (notificaciones().length > maxItems) {
+            <p-divider />
+            <div class="flex justify-center">
+                <p-button
+                    label="Ver todas las notificaciones"
+                    [text]="true"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    size="small"
+                    (click)="onVerTodas()"
+                />
             </div>
-            <span class="text-surface-900 dark:text-surface-0 leading-normal">Tutor asignado
-                <span class="text-surface-700 dark:text-surface-100">Notificación 3 <span
-                        class="text-primary font-bold"></span></span>
-            </span>
-        </li>
-        <li class="flex items-center py-2 border-b border-surface">
-            <div
-                class="w-12 h-12 flex items-center justify-center bg-pink-100 dark:bg-pink-400/10 rounded-full mr-4 shrink-0">
-                <i class="pi pi-question text-xl! text-pink-500"></i>
-            </div>
-            <span class="text-surface-900 dark:text-surface-0 leading-normal">Tutor asignado
-                <span class="text-surface-700 dark:text-surface-100">Notificación 4</span>
-            </span>
-        </li>
-    </ul>
-    <span class="block text-muted-color font-medium mb-4">SEMANA PASADA</span>
-    <ul class="p-0 m-0 list-none">
-        <li class="flex items-center py-2 border-b border-surface">
-            <div
-                class="w-12 h-12 flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-full mr-4 shrink-0">
-                <i class="pi pi-arrow-up text-xl! text-green-500"></i>
-            </div>
-            <span class="text-surface-900 dark:text-surface-0 leading-normal">Tutor asignado <span
-                    class="text-primary font-bold"></span>.</span>
-        </li>
-        <li class="flex items-center py-2 border-b border-surface">
-            <div
-                class="w-12 h-12 flex items-center justify-center bg-purple-100 dark:bg-purple-400/10 rounded-full mr-4 shrink-0">
-                <i class="pi pi-heart text-xl! text-purple-500"></i>
-            </div>
-            <span class="text-surface-900 dark:text-surface-0 leading-normal"><span
-                    class="text-primary font-bold"></span> Tutor asignado</span>
-        </li>
-    </ul>
+        }
+    }
 </div>

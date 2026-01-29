@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
+import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { AppConfigurator } from './app.configurator';
+import { NotificationPanel } from './notification-panel/notification-panel';
 import { LayoutService } from '../service/layout.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+    imports: [RouterModule, CommonModule, StyleClassModule, OverlayBadgeModule, AppConfigurator, NotificationPanel],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -52,10 +55,24 @@ import { LayoutService } from '../service/layout.service';
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button>
+                    <div class="relative">
+                        <button
+                            type="button"
+                            class="layout-topbar-action"
+                            pStyleClass="@next"
+                            enterFromClass="hidden"
+                            enterActiveClass="animate-scalein"
+                            leaveToClass="hidden"
+                            leaveActiveClass="animate-fadeout"
+                            [hideOnOutsideClick]="true"
+                        >
+                            <p-overlaybadge [value]="conteoNoLeidas() > 0 ? conteoNoLeidas().toString() : null" [severity]="tieneCriticas() ? 'danger' : 'info'">
+                                <i class="pi pi-bell"></i>
+                            </p-overlaybadge>
+                            <span>Notificaciones</span>
+                        </button>
+                        <app-notification-panel (verTodas)="onVerTodasNotificaciones()" />
+                    </div>
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
@@ -68,9 +85,19 @@ import { LayoutService } from '../service/layout.service';
 export class AppTopbar {
     items!: MenuItem[];
 
-    constructor(public layoutService: LayoutService) {}
+    layoutService = inject(LayoutService);
+    private notificationService = inject(NotificationService);
+    private router = inject(Router);
+
+    // Signals del servicio de notificaciones
+    conteoNoLeidas = this.notificationService.conteoNoLeidas;
+    tieneCriticas = this.notificationService.tieneCriticas;
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
+    }
+
+    onVerTodasNotificaciones() {
+        this.router.navigate(['/home/notificaciones']);
     }
 }

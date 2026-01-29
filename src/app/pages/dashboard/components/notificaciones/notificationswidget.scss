@@ -1,0 +1,70 @@
+.notification-widget-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.notification-widget-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: var(--surface-hover);
+    }
+
+    &.unread {
+        background-color: var(--primary-50);
+
+        :host-context(.app-dark) & {
+            background-color: color-mix(in srgb, var(--primary-400), transparent 90%);
+        }
+    }
+}
+
+.notification-widget-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+        font-size: 1rem;
+    }
+}
+
+.notification-widget-content {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.notification-widget-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-widget-message {
+    font-size: 0.75rem;
+    color: var(--text-secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-widget-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary-color);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
