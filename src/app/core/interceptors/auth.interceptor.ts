@@ -3,15 +3,24 @@ import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { LoginService } from './../services/login.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
     private isRefreshing = false;
     private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
-    constructor(private authService: LoginService) { }
+    constructor(
+        private authService: LoginService,
+        private router: Router
+    ) { }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        // No agregar token a rutas de autenticación
+        if (this.isAuthUrl(req.url)) {
+            return next.handle(req);
+        }
+
         const token = this.authService.getToken();
 
         let authReq = req;
@@ -29,6 +38,11 @@ export class AuthInterceptor implements HttpInterceptor {
         );
     }
 
+    private isAuthUrl(url: string): boolean {
+        const authUrls = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
+        return authUrls.some(authUrl => url.includes(authUrl));
+    }
+
     private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         if (!this.isRefreshing) {
             this.isRefreshing = true;
@@ -42,7 +56,8 @@ export class AuthInterceptor implements HttpInterceptor {
                 }),
                 catchError((error) => {
                     this.isRefreshing = false;
-                    this.authService.logout();
+                    this.authService.clearAuthData();
+                    this.router.navigate(['/auth/login']);
                     return throwError(() => error);
                 })
             );

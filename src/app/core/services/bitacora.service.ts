@@ -5,64 +5,55 @@ import { BaseHttpService } from './base-http.service';
 import { LoginService } from './login.service';
 import { EstadoSeccion, Respuesta, RespuestaRequest } from '../models';
 import { Observable } from 'rxjs';
-import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BitacoraService extends BaseHttpService {
-  loginService = inject(LoginService);
-  headers: HttpHeaders = this.loginService.getAuthorizationHeader();
+  private loginService = inject(LoginService);
 
   // Guardar respuestas en lote
   guardarRespuestasEnLote(respuestas: RespuestaRequest[]): Observable<Respuesta[]> {
-    const headers = this.loginService.getAuthorizationHeader();
-    return this.post<Respuesta[]>(`/api/respuestas/lote`, respuestas, { headers });
+    return this.post<Respuesta[]>(`/api/respuestas/lote`, respuestas);
   }
 
   // Guardar una sola respuesta
   guardarRespuesta(respuesta: RespuestaRequest): Observable<Respuesta> {
-    const headers = this.loginService.getAuthorizationHeader();
-    return this.post<Respuesta>(`/api/respuestas`, respuesta, { headers });
+    return this.post<Respuesta>(`/api/respuestas`, respuesta);
   }
 
   // Obtener respuestas de un usuario para un módulo específico
   obtenerRespuestasPorModulo(moduloId: number): Observable<Respuesta[]> {
-    const headers = this.loginService.getAuthorizationHeader();
     const usuarioId = this.obtenerUsuarioId();
-    return this.get<Respuesta[]>(`/api/respuestas/usuario/${usuarioId}/modulo/${moduloId}`, { headers });
+    return this.get<Respuesta[]>(`/api/respuestas/usuario/${usuarioId}/modulo/${moduloId}`);
   }
 
   // Obtener respuestas de un usuario para una sección específica
   obtenerRespuestasPorSeccion(seccionId: number): Observable<Respuesta[]> {
-    const headers = this.loginService.getAuthorizationHeader();
     const usuarioId = this.obtenerUsuarioId();
-    return this.get<Respuesta[]>(`/api/respuestas/usuario/${usuarioId}/seccion/${seccionId}`, { headers });
+    return this.get<Respuesta[]>(`/api/respuestas/usuario/${usuarioId}/seccion/${seccionId}`);
   }
 
   // Actualizar estado de una sección (semáforo)
   actualizarEstadoSeccion(estadoSeccion: EstadoSeccion): Observable<EstadoSeccion> {
-    const headers = this.loginService.getAuthorizationHeader();
-    return this.post<EstadoSeccion>(`/api/estado-secciones`, estadoSeccion, { headers });
+    return this.post<EstadoSeccion>(`/api/estado-secciones`, estadoSeccion);
   }
 
   // Obtener estados de sección para un módulo
   obtenerEstadosSeccion(moduloId: number): Observable<EstadoSeccion[]> {
-    const headers = this.loginService.getAuthorizationHeader();
     const usuarioId = this.obtenerUsuarioId();
-    return this.get<EstadoSeccion[]>(`/api/estado-secciones/usuario/${usuarioId}/modulo/${moduloId}`, { headers });
+    return this.get<EstadoSeccion[]>(`/api/estado-secciones/usuario/${usuarioId}/modulo/${moduloId}`);
   }
 
   // Obtener progreso general del usuario
   obtenerProgresoUsuario(): Observable<any> {
-    const headers = this.loginService.getAuthorizationHeader();
     const usuarioId = this.obtenerUsuarioId();
-    return this.get<any>(`/api/progreso-curso/usuario/${usuarioId}`, { headers });
+    return this.get<any>(`/api/progreso-curso/usuario/${usuarioId}`);
   }
 
   // Métodos auxiliares
-  obtenerUsuarioId(): number {
-    const usuario = JSON.parse(this.loginService.getUser() ?? '');
+  private obtenerUsuarioId(): number {
+    const usuario = JSON.parse(this.loginService.getUser() ?? '{}');
     return usuario.id;
   }
 
