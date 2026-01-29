@@ -59,10 +59,6 @@ export class NotificationService extends BaseHttpService {
         super(http);
     }
 
-    private get headers() {
-        return this.loginService.getAuthorizationHeader();
-    }
-
     private get usuarioId(): number {
         const user = JSON.parse(this.loginService.getUser() ?? '{}');
         return user.id;
@@ -71,9 +67,8 @@ export class NotificationService extends BaseHttpService {
     // GET /api/notificaciones/usuario/{usuarioId}
     cargarNotificaciones(): Observable<Notificacion[]> {
         this._cargando.set(true);
-        const headers = this.headers;
 
-        return this.get<Notificacion[]>(`/api/notificaciones/usuario/${this.usuarioId}`, { headers }).pipe(
+        return this.get<Notificacion[]>(`/api/notificaciones/usuario/${this.usuarioId}`).pipe(
             tap({
                 next: (notificaciones) => {
                     this._notificaciones.set(notificaciones);
@@ -86,9 +81,7 @@ export class NotificationService extends BaseHttpService {
 
     // GET /api/notificaciones/usuario/{usuarioId}/no-leidas
     cargarNoLeidas(): Observable<Notificacion[]> {
-        const headers = this.headers;
-
-        return this.get<Notificacion[]>(`/api/notificaciones/usuario/${this.usuarioId}/no-leidas`, { headers }).pipe(
+        return this.get<Notificacion[]>(`/api/notificaciones/usuario/${this.usuarioId}/no-leidas`).pipe(
             tap((notificaciones) => {
                 const actuales = this._notificaciones();
                 const idsNoLeidas = new Set(notificaciones.map((n) => n.id));
@@ -100,30 +93,22 @@ export class NotificationService extends BaseHttpService {
 
     // GET /api/notificaciones/usuario/{usuarioId}/resumen
     cargarResumen(): Observable<ResumenNotificaciones> {
-        const headers = this.headers;
-
-        return this.get<ResumenNotificaciones>(`/api/notificaciones/usuario/${this.usuarioId}/resumen`, { headers }).pipe(tap((resumen) => this._resumen.set(resumen)));
+        return this.get<ResumenNotificaciones>(`/api/notificaciones/usuario/${this.usuarioId}/resumen`).pipe(tap((resumen) => this._resumen.set(resumen)));
     }
 
     // GET /api/notificaciones/usuario/{usuarioId}/tipo/{tipo}
     cargarPorTipo(tipo: string): Observable<Notificacion[]> {
-        const headers = this.headers;
-
-        return this.get<Notificacion[]>(`/api/notificaciones/usuario/${this.usuarioId}/tipo/${tipo}`, { headers });
+        return this.get<Notificacion[]>(`/api/notificaciones/usuario/${this.usuarioId}/tipo/${tipo}`);
     }
 
     // GET /api/notificaciones/{id}
     obtenerPorId(notificacionId: number): Observable<Notificacion> {
-        const headers = this.headers;
-
-        return this.get<Notificacion>(`/api/notificaciones/${notificacionId}`, { headers });
+        return this.get<Notificacion>(`/api/notificaciones/${notificacionId}`);
     }
 
     // PUT /api/notificaciones/{id}/leer
     marcarComoLeida(notificacionId: number): Observable<Notificacion> {
-        const headers = this.headers;
-
-        return this.put<Notificacion>(`/api/notificaciones/${notificacionId}/leer`, {}, { headers }).pipe(
+        return this.put<Notificacion>(`/api/notificaciones/${notificacionId}/leer`, {}).pipe(
             tap(() => {
                 this._notificaciones.update((lista) => lista.map((n) => (n.id === notificacionId ? { ...n, leida: true } : n)));
                 this._resumen.update((r) =>
@@ -140,9 +125,7 @@ export class NotificationService extends BaseHttpService {
 
     // PUT /api/notificaciones/usuario/{usuarioId}/leer-todas
     marcarTodasComoLeidas(): Observable<void> {
-        const headers = this.headers;
-
-        return this.put<void>(`/api/notificaciones/usuario/${this.usuarioId}/leer-todas`, {}, { headers }).pipe(
+        return this.put<void>(`/api/notificaciones/usuario/${this.usuarioId}/leer-todas`, {}).pipe(
             tap(() => {
                 this._notificaciones.update((lista) => lista.map((n) => ({ ...n, leida: true })));
                 this._resumen.update((r) => (r ? { ...r, totalNoLeidas: 0 } : null));
@@ -152,9 +135,7 @@ export class NotificationService extends BaseHttpService {
 
     // DELETE /api/notificaciones/{id}
     eliminarNotificacion(notificacionId: number): Observable<void> {
-        const headers = this.headers;
-
-        return this.delete<void>(`/api/notificaciones/${notificacionId}`, { headers }).pipe(
+        return this.delete<void>(`/api/notificaciones/${notificacionId}`).pipe(
             tap(() => {
                 const eliminada = this._notificaciones().find((n) => n.id === notificacionId);
                 this._notificaciones.update((lista) => lista.filter((n) => n.id !== notificacionId));

@@ -1,25 +1,18 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 import { MenuItem } from 'primeng/api';
 import { Observable } from 'rxjs';
 import { BaseHttpService } from './base-http.service';
-import { LoginService } from './login.service';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class MenuService extends BaseHttpService {
-  loginService: LoginService = inject(LoginService);
 
   getMenuByRole(roleId: number): Observable<MenuItem[]> {
-    const token = this.loginService.getToken();
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.get<MenuItem[]>(`/api/menu/${roleId}`, { headers });
+    return this.get<MenuItem[]>(`/api/menu/${roleId}`);
   }
 
   getMyMenu(): Observable<MenuItem[]> {

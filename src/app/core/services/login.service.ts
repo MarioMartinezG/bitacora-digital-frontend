@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
-import { AuthSuccessResponse, LoginRequest } from '../models';
+import { Observable, BehaviorSubject, tap, finalize } from 'rxjs';
+import { AuthSuccessResponse, LoginRequest, LogoutResponse } from '../models';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BaseHttpService } from './base-http.service';
 
@@ -44,12 +44,20 @@ export class LoginService extends BaseHttpService {
       this.http.post<AuthSuccessResponse>(`/api/auth/refresh`, {}, { headers })
     ).pipe(
       tap(response => {
-        this.storeToken(response.access_token);
+        this.storeAuthData(response);
       })
     );
   }
 
-  logout(): void {
+  logout(): Observable<LogoutResponse> {
+    return this.post<LogoutResponse>(`/api/auth/logout`, {}).pipe(
+      finalize(() => {
+        this.clearAuthData();
+      })
+    );
+  }
+
+  clearAuthData(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.refreshTokenKey);
     localStorage.removeItem(this.userKey);
@@ -64,20 +72,10 @@ export class LoginService extends BaseHttpService {
     return localStorage.getItem(this.tokenKey);
   }
 
-  getAuthorizationHeader() {
-    return new HttpHeaders({
-      'Authorization': `Bearer ${this.getToken()}`
-    });
-  }
-
   private storeAuthData(response: AuthSuccessResponse): void {
     localStorage.setItem(this.tokenKey, response.access_token);
     localStorage.setItem(this.refreshTokenKey, response.refresh_token);
     localStorage.setItem(this.userKey, JSON.stringify(response.user));
-  }
-
-  private storeToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
   }
 
   private getRefreshToken(): string | null {

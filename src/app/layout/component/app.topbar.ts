@@ -6,13 +6,14 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { AppConfigurator } from './app.configurator';
 import { NotificationPanel } from './notification-panel/notification-panel';
+import { UserMenu } from './user-menu/user-menu';
 import { LayoutService } from '../service/layout.service';
 import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, OverlayBadgeModule, AppConfigurator, NotificationPanel],
+    imports: [RouterModule, CommonModule, StyleClassModule, OverlayBadgeModule, AppConfigurator, NotificationPanel, UserMenu],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
@@ -73,10 +74,22 @@ import { NotificationService } from '../../core/services/notification.service';
                         </button>
                         <app-notification-panel (verTodas)="onVerTodasNotificaciones()" />
                     </div>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
-                    </button>
+                    <div class="relative">
+                        <button
+                            type="button"
+                            class="layout-topbar-action"
+                            pStyleClass="@next"
+                            enterFromClass="hidden"
+                            enterActiveClass="animate-scalein"
+                            leaveToClass="hidden"
+                            leaveActiveClass="animate-fadeout"
+                            [hideOnOutsideClick]="true"
+                        >
+                            <i class="pi pi-user"></i>
+                            <span>Perfil</span>
+                        </button>
+                        <app-user-menu />
+                    </div>
                 </div>
             </div>
         </div>

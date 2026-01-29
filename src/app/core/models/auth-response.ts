@@ -16,3 +16,8 @@ export interface AuthErrorResponse {
   message: string;
   error_code: string;
 }
+
+export interface LogoutResponse {
+  message: string;
+  timestamp: string;
+}
