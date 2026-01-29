@@ -1,0 +1,195 @@
+<p-confirmDialog />
+
+<div class="card">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+            <i class="pi pi-bell text-3xl text-primary"></i>
+            <div>
+                <p class="text-muted-color m-0 mt-1">
+                    @if (conteoNoLeidas() > 0) {
+                        {{ conteoNoLeidas() }} sin leer de {{ notificaciones().length }} total
+                    } @else {
+                        {{ notificaciones().length }} notificaciones
+                    }
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            @if (conteoNoLeidas() > 0) {
+                <p-button
+                    label="Marcar todas como leidas"
+                    icon="pi pi-check-circle"
+                    [outlined]="true"
+                    severity="secondary"
+                    (click)="onMarcarTodasLeidas()"
+                />
+            }
+            <p-button
+                icon="pi pi-refresh"
+                [rounded]="true"
+                [outlined]="true"
+                severity="secondary"
+                pTooltip="Actualizar"
+                tooltipPosition="top"
+                (click)="onRefrescar()"
+                [loading]="cargando()"
+            />
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="flex flex-col md:flex-row gap-4 mb-6">
+        <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-muted-color">Tipo</label>
+            <p-select
+                [options]="opcionesTipo"
+                [(ngModel)]="filtroTipo"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Todos los tipos"
+                [style]="{ width: '220px' }"
+                (onChange)="onCambioFiltro()"
+            />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-muted-color">Estado</label>
+            <p-select
+                [options]="opcionesEstado"
+                [(ngModel)]="filtroEstado"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Todas"
+                [style]="{ width: '180px' }"
+                (onChange)="onCambioFiltro()"
+            />
+        </div>
+    </div>
+
+    <p-divider />
+
+    <!-- Lista de notificaciones -->
+    @if (cargando()) {
+        <!-- Skeleton loader -->
+        <div class="notification-list">
+            @for (i of skeletonItems; track i) {
+                <div class="notification-item-skeleton">
+                    <p-skeleton shape="circle" size="3rem" />
+                    <div class="flex-1">
+                        <p-skeleton width="40%" height="1.25rem" styleClass="mb-2" />
+                        <p-skeleton width="80%" height="1rem" styleClass="mb-2" />
+                        <p-skeleton width="30%" height="0.875rem" />
+                    </div>
+                </div>
+            }
+        </div>
+    } @else if (notificacionesFiltradas().length === 0) {
+        <!-- Estado vacio -->
+        <div class="empty-state">
+            <i class="pi pi-inbox text-6xl text-muted-color mb-4"></i>
+            <h3 class="text-xl font-semibold m-0 mb-2">No hay notificaciones</h3>
+            <p class="text-muted-color m-0">
+                @if (filtroTipo() || filtroEstado()) {
+                    No se encontraron notificaciones con los filtros seleccionados
+                } @else {
+                    Cuando recibas notificaciones, apareceran aqui
+                }
+            </p>
+        </div>
+    } @else {
+        <!-- Lista de notificaciones -->
+        <div class="notification-list">
+            @for (notificacion of notificacionesPaginadas(); track notificacion.id) {
+                <div
+                    class="notification-item"
+                    [class.unread]="!notificacion.leida"
+                    pRipple
+                    (click)="onClickNotificacion(notificacion)"
+                >
+                    <!-- Icono -->
+                    <div class="notification-icon" [ngClass]="getIconBgClass(notificacion.prioridad)">
+                        <i [class]="'pi ' + getIconClass(notificacion.tipo) + ' text-xl'"></i>
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <span class="notification-title">{{ notificacion.titulo }}</span>
+                            <div class="flex items-center gap-2">
+                                <p-tag
+                                    [value]="getTipoLabel(notificacion.tipo)"
+                                    [severity]="getPrioridadSeverity(notificacion.prioridad)"
+                                    [rounded]="true"
+                                />
+                                @if (!notificacion.leida) {
+                                    <span class="unread-indicator"></span>
+                                }
+                            </div>
+                        </div>
+                        <p class="notification-message">{{ notificacion.mensaje }}</p>
+                        <div class="notification-meta">
+                            <span class="notification-time">
+                                <i class="pi pi-clock mr-1"></i>
+                                {{ formatearFecha(notificacion.fechaCreacion) }}
+                            </span>
+                        </div>
+
+                        <!-- Datos adicionales si existen -->
+                        @if (getDatosAdicionalesFormateados(notificacion); as datos) {
+                            @if (datos.length > 0) {
+                                <div class="notification-extra mt-3 p-3 bg-surface-100 dark:bg-surface-800 rounded-lg">
+                                    <span class="text-sm font-medium text-muted-color">Informacion adicional:</span>
+                                    <div class="mt-2 text-sm grid gap-1">
+                                        @for (dato of datos; track dato.label) {
+                                            <div class="flex gap-2">
+                                                <span class="font-medium text-surface-600 dark:text-surface-400">{{ dato.label }}:</span>
+                                                <span>{{ dato.valor }}</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="notification-actions">
+                        @if (!notificacion.leida) {
+                            <p-button
+                                icon="pi pi-check"
+                                [rounded]="true"
+                                [text]="true"
+                                severity="success"
+                                pTooltip="Marcar como leida"
+                                tooltipPosition="left"
+                                (click)="onMarcarLeida($event, notificacion)"
+                            />
+                        }
+                        <p-button
+                            icon="pi pi-trash"
+                            [rounded]="true"
+                            [text]="true"
+                            severity="danger"
+                            pTooltip="Eliminar"
+                            tooltipPosition="left"
+                            (click)="onEliminar($event, notificacion)"
+                        />
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Paginador -->
+        @if (totalFiltrados() > itemsPorPagina()) {
+            <p-divider />
+            <p-paginator
+                [rows]="itemsPorPagina()"
+                [totalRecords]="totalFiltrados()"
+                [rowsPerPageOptions]="[10, 20, 50]"
+                [first]="paginaActual() * itemsPorPagina()"
+                (onPageChange)="onCambiarPagina($event)"
+            />
+        }
+    }
+</div>

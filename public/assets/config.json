@@ -1,3 +1,4 @@
 {
-  "apiUrl": "/api"
+  "apiUrl": "/api",
+  "wsUrl": "http://localhost:8080"
 }

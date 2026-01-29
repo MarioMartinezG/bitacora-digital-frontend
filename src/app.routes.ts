@@ -10,6 +10,7 @@ import { Dashboard } from './app/pages/dashboard/dashboard';
 import { Documentation } from './app/pages/documentation/documentation';
 import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
+import { Notificaciones } from './app/pages/notificaciones/notificaciones';
 
 export const appRoutes: Routes = [
     {
@@ -23,6 +24,7 @@ export const appRoutes: Routes = [
         children: [
             { path: '', component: Dashboard },
             { path: 'bitacora', loadChildren: () => import('./app/pages/bitacora/bitacora.routes') },
+            { path: 'notificaciones', component: Notificaciones },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ],
