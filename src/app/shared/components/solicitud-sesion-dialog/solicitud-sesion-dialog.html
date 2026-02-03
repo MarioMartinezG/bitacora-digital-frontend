@@ -1,0 +1,105 @@
+<p-dialog
+    [(visible)]="visible"
+    [modal]="true"
+    [closable]="!solicitudEnviando()"
+    [style]="{ width: '450px' }"
+    [header]="dialogHeader"
+>
+    @if (!solicitudExitosa()) {
+        <!-- Formulario de solicitud -->
+        <div class="flex flex-col gap-4">
+            <p class="text-sm text-surface-600 dark:text-surface-400">
+                Solicita una sesion con tu tutor asignado. Describe brevemente el motivo de tu consulta.
+            </p>
+
+            <!-- Mensaje de error -->
+            @if (solicitudError()) {
+                <p-message
+                    severity="error"
+                    [text]="solicitudError()!"
+                    styleClass="w-full"
+                    [closable]="true"
+                    (onClose)="limpiarError()"
+                ></p-message>
+            }
+
+            <div class="flex flex-col gap-2">
+                <label for="motivo" class="text-sm font-medium">Motivo de la consulta</label>
+                <textarea
+                    id="motivo"
+                    pTextarea
+                    [(ngModel)]="solicitudMotivo"
+                    (input)="limpiarError()"
+                    [rows]="4"
+                    [disabled]="solicitudEnviando()"
+                    placeholder="Ej: Tengo dudas sobre los ajustes razonables para mi asignatura..."
+                    class="w-full"
+                ></textarea>
+            </div>
+            <div class="flex justify-end gap-2 mt-2">
+                <p-button
+                    label="Cancelar"
+                    [text]="true"
+                    severity="secondary"
+                    (onClick)="cerrarDialog()"
+                    [disabled]="solicitudEnviando()"
+                ></p-button>
+                <p-button
+                    label="Enviar solicitud"
+                    icon="pi pi-send"
+                    (onClick)="enviarSolicitud()"
+                    [disabled]="!solicitudMotivo.trim() || solicitudEnviando()"
+                    [loading]="solicitudEnviando()"
+                ></p-button>
+            </div>
+        </div>
+    } @else {
+        <!-- Vista de exito -->
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <i class="pi pi-check-circle text-2xl text-green-500"></i>
+                <p class="text-sm text-green-700 dark:text-green-400">
+                    Tu solicitud ha sido enviada correctamente
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-1">
+                    <span class="text-xs text-surface-500 uppercase">Tutor asignado</span>
+                    <span class="font-medium">{{ solicitudExitosa()!.nombreTutor }}</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-xs text-surface-500 uppercase">Correo del tutor</span>
+                    <a
+                        [href]="'mailto:' + solicitudExitosa()!.correoTutor"
+                        class="text-primary hover:underline"
+                    >
+                        {{ solicitudExitosa()!.correoTutor }}
+                    </a>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-xs text-surface-500 uppercase">Fecha de solicitud</span>
+                    <span>{{ formatearFecha(solicitudExitosa()!.fechaSolicitud) }}</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-xs text-surface-500 uppercase">Estado</span>
+                    <span class="inline-flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                        Pendiente
+                    </span>
+                </div>
+            </div>
+
+            <p class="text-sm text-surface-500 dark:text-surface-400 mt-2">
+                Tu tutor recibira una notificacion y se pondra en contacto contigo pronto.
+            </p>
+
+            <div class="flex justify-end mt-2">
+                <p-button
+                    label="Entendido"
+                    (onClick)="cerrarDialog()"
+                ></p-button>
+            </div>
+        </div>
+    }
+</p-dialog>

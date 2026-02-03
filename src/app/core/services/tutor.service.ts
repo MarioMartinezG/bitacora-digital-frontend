@@ -186,6 +186,20 @@ export class TutorService extends BaseHttpService {
         return this.post<SolicitudSesionResponse>('/api/solicitudes-sesion', request);
     }
 
+    // GET /api/solicitudes-sesion/estudiante/{estudianteId}
+    obtenerSolicitudesSesion(): Observable<SolicitudSesionResponse[]> {
+        return this.get<SolicitudSesionResponse[]>(
+            `/api/solicitudes-sesion/estudiante/${this.userData.id}`
+        );
+    }
+
+    // DELETE /api/solicitudes-sesion/{idSesion}/estudiante/{estudianteId}
+    eliminarSolicitudSesion(idSesion: number): Observable<void> {
+        return this.delete<void>(
+            `/api/solicitudes-sesion/${idSesion}/estudiante/${this.userData.id}`
+        );
+    }
+
     // Actualizar contexto (módulo/curso)
     setContext(context: Partial<TutorContext>): void {
         this._context.update(current => ({

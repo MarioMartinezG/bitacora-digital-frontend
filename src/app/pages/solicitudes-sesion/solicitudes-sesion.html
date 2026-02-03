@@ -1,0 +1,179 @@
+<p-confirmDialog />
+
+<div class="card">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+            <i class="pi pi-calendar text-3xl text-primary"></i>
+            <div>
+                <h2 class="text-xl font-semibold m-0">Mis Solicitudes de Sesion</h2>
+                <p class="text-muted-color m-0 mt-1">
+                    Historial de solicitudes de ayuda con tu tutor asignado
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <p-button
+                label="Nueva solicitud"
+                icon="pi pi-plus"
+                (click)="showSolicitudDialog.set(true)"
+            />
+            <p-button
+                icon="pi pi-refresh"
+                [rounded]="true"
+                [outlined]="true"
+                severity="secondary"
+                pTooltip="Actualizar"
+                tooltipPosition="top"
+                (click)="cargarSolicitudes()"
+                [loading]="cargando()"
+            />
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="mb-6">
+        <p-selectButton
+            [options]="opcionesFiltro"
+            [(ngModel)]="filtroEstado"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="onCambioFiltro()"
+        />
+    </div>
+
+    <p-divider />
+
+    <!-- Lista de solicitudes -->
+    @if (cargando()) {
+        <!-- Skeleton loader -->
+        <div class="solicitudes-list">
+            @for (i of skeletonItems; track i) {
+                <div class="solicitud-skeleton">
+                    <div class="flex justify-between items-start mb-3">
+                        <p-skeleton width="150px" height="1.5rem" />
+                        <p-skeleton width="100px" height="1.5rem" [borderRadius]="'16px'" />
+                    </div>
+                    <p-skeleton width="100%" height="1rem" styleClass="mb-2" />
+                    <p-skeleton width="80%" height="1rem" styleClass="mb-2" />
+                    <p-skeleton width="60%" height="1rem" />
+                </div>
+            }
+        </div>
+    } @else if (solicitudesFiltradas().length === 0) {
+        <!-- Estado vacio -->
+        <div class="empty-state">
+            <i class="pi pi-inbox text-6xl text-muted-color mb-4"></i>
+            <h3 class="text-xl font-semibold m-0 mb-2">No hay solicitudes</h3>
+            <p class="text-muted-color m-0">
+                @if (filtroEstado()) {
+                    No se encontraron solicitudes con el estado seleccionado
+                } @else {
+                    Cuando solicites ayuda de tu tutor, las solicitudes apareceran aqui
+                }
+            </p>
+        </div>
+    } @else {
+        <!-- Lista de solicitudes -->
+        <div class="solicitudes-list">
+            @for (solicitud of solicitudesPaginadas(); track solicitud.id) {
+                <div class="solicitud-card">
+                    <!-- Header de la card -->
+                    <div class="solicitud-header">
+                        <span class="solicitud-id">Solicitud #{{ solicitud.id }}</span>
+                        <p-tag
+                            [value]="getEstadoLabel(solicitud.estado)"
+                            [severity]="getSeverity(solicitud.estado)"
+                            [rounded]="true"
+                        />
+                    </div>
+
+                    <p-divider />
+
+                    <!-- Contenido -->
+                    <div class="solicitud-content">
+                        <!-- Fecha de solicitud -->
+                        <div class="solicitud-field">
+                            <i class="pi pi-calendar text-muted-color"></i>
+                            <span class="field-label">Solicitada:</span>
+                            <span>{{ formatearFecha(solicitud.fechaSolicitud) }}</span>
+                        </div>
+
+                        <!-- Fecha de respuesta (si existe) -->
+                        @if (solicitud.fechaRespuesta) {
+                            <div class="solicitud-field">
+                                <i class="pi pi-calendar-plus text-muted-color"></i>
+                                <span class="field-label">Respondida:</span>
+                                <span>{{ formatearFecha(solicitud.fechaRespuesta) }}</span>
+                            </div>
+                        }
+
+                        <!-- Tutor -->
+                        <div class="solicitud-field">
+                            <i class="pi pi-user text-muted-color"></i>
+                            <span class="field-label">Tutor:</span>
+                            <span>{{ solicitud.nombreTutor }}</span>
+                            <a
+                                [href]="'mailto:' + solicitud.correoTutor"
+                                class="text-primary hover:underline ml-1"
+                                pTooltip="Enviar correo"
+                                tooltipPosition="top"
+                            >
+                                ({{ solicitud.correoTutor }})
+                            </a>
+                        </div>
+
+                        <!-- Motivo -->
+                        <div class="solicitud-field solicitud-field--block">
+                            <i class="pi pi-comment text-muted-color"></i>
+                            <span class="field-label">Motivo:</span>
+                            <span class="motivo-text">{{ solicitud.motivo }}</span>
+                        </div>
+
+                        <!-- Notas del tutor (si existen) -->
+                        @if (solicitud.notasTutor) {
+                            <div class="solicitud-field solicitud-field--block notas-tutor">
+                                <i class="pi pi-file-edit text-muted-color"></i>
+                                <span class="field-label">Respuesta del tutor:</span>
+                                <span class="notas-text">{{ solicitud.notasTutor }}</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Acciones (solo para PENDIENTES) -->
+                    @if (solicitud.estado === 'PENDIENTE') {
+                        <div class="solicitud-actions">
+                            <p-button
+                                label="Eliminar"
+                                icon="pi pi-trash"
+                                severity="danger"
+                                [outlined]="true"
+                                size="small"
+                                (click)="confirmarEliminar(solicitud)"
+                            />
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Paginador -->
+        @if (totalFiltrados() > itemsPorPagina()) {
+            <p-divider />
+            <p-paginator
+                [rows]="itemsPorPagina()"
+                [totalRecords]="totalFiltrados()"
+                [rowsPerPageOptions]="[10, 20, 50]"
+                [first]="paginaActual() * itemsPorPagina()"
+                (onPageChange)="onCambiarPagina($event)"
+            />
+        }
+    }
+</div>
+
+<!-- Dialogo para nueva solicitud de sesion -->
+<app-solicitud-sesion-dialog
+    [(visible)]="showSolicitudDialog"
+    (solicitudCreada)="onSolicitudCreada($event)"
+/>
