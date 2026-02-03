@@ -5,3 +5,4 @@ export { MenuService } from './menu.service';
 export { BitacoraService } from './bitacora.service';
 export { NotificationService } from './notification.service';
 export { WebSocketService } from './websocket.service';
+export { TutorService } from './tutor.service';

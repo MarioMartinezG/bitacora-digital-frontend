@@ -5,13 +5,14 @@ import { filter, Subscription } from 'rxjs';
 import { AppTopbar } from './app.topbar';
 import { AppSidebar } from './app.sidebar';
 import { AppFooter } from './app.footer';
+import { TutorWidget } from './tutor-widget/tutor-widget';
 import { LayoutService } from '../service/layout.service';
 import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter],
+    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter, TutorWidget],
     template: `<div class="layout-wrapper" [ngClass]="containerClass">
         <app-topbar></app-topbar>
         <app-sidebar></app-sidebar>
@@ -22,6 +23,7 @@ import { NotificationService } from '../../core/services/notification.service';
             <app-footer></app-footer>
         </div>
         <div class="layout-mask animate-fadein"></div>
+        <app-tutor-widget></app-tutor-widget>
     </div> `
 })
 export class AppLayout implements OnInit, OnDestroy {

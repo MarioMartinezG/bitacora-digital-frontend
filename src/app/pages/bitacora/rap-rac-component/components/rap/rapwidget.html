@@ -12,7 +12,7 @@
 <div class="flex align-items-center gap-3 mb-4">
     <input id="rapInput" type="text" pInputText [(ngModel)]="nuevoResultado" placeholder="Escribe un resultado..."
         class="w-full" />
-    <button pButton label="Agregar" icon="pi pi-plus" (click)="agregarResultado()" [disabled]="!nuevoResultado?.trim()"
+    <button pButton label="Agregar" icon="pi pi-plus" (click)="agregarResultado()" [disabled]="!nuevoResultado.trim()"
         class="p-button-primary"></button>
 </div>
 
