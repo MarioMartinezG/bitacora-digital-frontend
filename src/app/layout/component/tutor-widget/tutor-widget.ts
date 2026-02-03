@@ -4,16 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
 import { PopoverModule } from 'primeng/popover';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { DialogModule } from 'primeng/dialog';
-import { MessageModule } from 'primeng/message';
 import { TutorService } from '../../../core/services/tutor.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { TutorMessage, SolicitudSesionResponse } from '../../../core/models/tutor.model';
+import { TutorMessage } from '../../../core/models/tutor.model';
+import { SolicitudSesionDialog } from '../../../shared/components/solicitud-sesion-dialog/solicitud-sesion-dialog';
 
 @Component({
     selector: 'app-tutor-widget',
@@ -24,13 +22,11 @@ import { TutorMessage, SolicitudSesionResponse } from '../../../core/models/tuto
         ButtonModule,
         DrawerModule,
         InputTextModule,
-        TextareaModule,
         TooltipModule,
         DividerModule,
         PopoverModule,
         ProgressBarModule,
-        DialogModule,
-        MessageModule
+        SolicitudSesionDialog
     ],
     templateUrl: './tutor-widget.html',
     styleUrl: './tutor-widget.scss'
@@ -49,10 +45,6 @@ export class TutorWidget implements OnInit, AfterViewChecked {
 
     // Estado del diálogo de solicitud de sesión
     showSolicitudDialog = signal(false);
-    solicitudMotivo = '';
-    solicitudEnviando = signal(false);
-    solicitudExitosa = signal<SolicitudSesionResponse | null>(null);
-    solicitudError = signal<string | null>(null);
 
     // Signals del servicio
     messages = this.tutorService.messages;
@@ -135,55 +127,6 @@ export class TutorWidget implements OnInit, AfterViewChecked {
 
     trackByMessageId(index: number, message: TutorMessage): string {
         return message.id;
-    }
-
-    // Métodos para solicitud de sesión con tutor humano
-    abrirSolicitudDialog(): void {
-        this.solicitudMotivo = '';
-        this.solicitudExitosa.set(null);
-        this.solicitudError.set(null);
-        this.showSolicitudDialog.set(true);
-    }
-
-    cerrarSolicitudDialog(): void {
-        this.showSolicitudDialog.set(false);
-        this.solicitudMotivo = '';
-        this.solicitudExitosa.set(null);
-        this.solicitudError.set(null);
-    }
-
-    limpiarErrorSolicitud(): void {
-        this.solicitudError.set(null);
-    }
-
-    enviarSolicitudSesion(): void {
-        if (!this.solicitudMotivo.trim() || this.solicitudEnviando()) {
-            return;
-        }
-
-        this.solicitudEnviando.set(true);
-
-        this.tutorService.solicitarSesionTutor(this.solicitudMotivo.trim()).subscribe({
-            next: (response) => {
-                this.solicitudExitosa.set(response);
-                this.solicitudEnviando.set(false);
-                this.toastService.showSuccess(
-                    'Solicitud enviada',
-                    `Tu tutor ${response.nombreTutor} ha sido notificado`
-                );
-            },
-            error: (error) => {
-                this.solicitudEnviando.set(false);
-                this.solicitudError.set(error.message || 'No se pudo enviar la solicitud');
-            }
-        });
-    }
-
-    formatearFecha(fecha: string): string {
-        return new Date(fecha).toLocaleString('es-CO', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-        });
     }
 
     private scrollToBottom(): void {
