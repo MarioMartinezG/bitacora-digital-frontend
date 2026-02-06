@@ -1,18 +1,52 @@
-<div class="flex mt-8">
-    <p-card header="RAP y RAC" class="w-full">
-        <p-accordion [value]="['0']" [multiple]="true">
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <p-card>
+        <!-- Header sticky con titulo e indicador de guardado -->
+        <div class="sticky-header">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h4 class="m-0">RAP y RAC</h4>
+                    <p-tag
+                        [severity]="getSeverity(progress().estado)"
+                        [value]="getLabel(progress().estado) + ' (' + progress().totalPercentage + '%)'">
+                    </p-tag>
+                </div>
+                <div class="flex items-center gap-3">
+                    <app-save-status-indicator
+                        [saveState]="saveState"
+                        (onRetry)="retryOnError()">
+                    </app-save-status-indicator>
+                    <p-button
+                        label="Guardar"
+                        icon="pi pi-save"
+                        (onClick)="saveManually()"
+                        [disabled]="!saveState.isDirty"
+                        size="small">
+                    </p-button>
+                </div>
+            </div>
+        </div>
+
+        <p-accordion [value]="['0', '1']" [multiple]="true">
             <!-- Panel RAP -->
             <p-accordion-panel value="0">
                 <p-accordion-header>
                     <div class="flex items-center justify-between w-full">
                         <span>Resultados de aprendizaje del Programa (RAP)</span>
-                        <p-tag severity="success" value="Completado" class="mr-2"></p-tag>
+                        <p-tag
+                            [severity]="getSeverity(getSectionProgress('rap')?.estado || 'sin_avances')"
+                            [value]="getLabel(getSectionProgress('rap')?.estado || 'sin_avances')"
+                            class="mr-2">
+                        </p-tag>
                     </div>
                 </p-accordion-header>
                 <p-accordion-content>
-                    <p class="m-0">
-                        <app-rapwidget></app-rapwidget>
-                    </p>
+                    <app-rapwidget
+                        [resultados]="getResultadosRap()"
+                        (onAgregar)="agregarResultadoRap($event)"
+                        (onEliminar)="eliminarResultadoRap($event)">
+                    </app-rapwidget>
                 </p-accordion-content>
             </p-accordion-panel>
 
@@ -21,14 +55,17 @@
                 <p-accordion-header>
                     <div class="flex items-center justify-between w-full">
                         <span>Resultados de aprendizaje del curso (RAC)</span>
-                        <p-tag severity="warn" value="En desarrollo" class="mr-2"></p-tag>
+                        <p-tag
+                            [severity]="getSeverity(getSectionProgress('rac')?.estado || 'sin_avances')"
+                            [value]="getLabel(getSectionProgress('rac')?.estado || 'sin_avances')"
+                            class="mr-2">
+                        </p-tag>
                     </div>
                 </p-accordion-header>
                 <p-accordion-content>
-                    <p class="m-0">
-                        <app-racwidget></app-racwidget>
-                    </p>
+                    <app-racwidget [formGroup]="racFormGroup"></app-racwidget>
                 </p-accordion-content>
             </p-accordion-panel>
         </p-accordion>
     </p-card>
+}

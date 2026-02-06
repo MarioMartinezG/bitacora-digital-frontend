@@ -1,242 +1,249 @@
-<div class="grid grid-cols-12 gap-4 mb-5">
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <p-fluid>
+        <!-- Summary cards -->
+        <div class="grid grid-cols-12 gap-4 mb-5">
 
-    <!-- TARJETA 1: Resumen de horas -->
-    <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
-        <p-card styleClass="h-full">
-            <!-- Header: título izquierda, icono derecha -->
-            <div class="flex items-center justify-between mb-4">
-                <span class="font-semibold text-lg">Distribución de horas</span>
-                <div class="flex items-center justify-center bg-blue-100 rounded-border"
-                    style="width: 2.5rem; height: 2.5rem;">
-                    <i class="pi pi-clock text-blue-500 text-xl"></i>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-12 gap-4">
-                <!-- Tabla de información -->
-                <div class="col-span-12 md:col-span-5">
-                    <table>
-                        <tr class="border-bottom-1 surface-border">
-                            <td class="py-2 pr-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-bookmark text-blue-500"></i>
-                                    <span class="text-color-secondary">Créditos de la asignatura</span>
-                                </div>
-                            </td>
-                            <td class="py-2 font-semibold">{{ creditosAsignatura }}</td>
-                        </tr>
-                        <tr class="border-bottom-1 surface-border">
-                            <td class="py-2 pr-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-clock text-gray-500"></i>
-                                    <span class="text-color-secondary">Horas totales del curso</span>
-                                </div>
-                            </td>
-                            <td class="py-2 font-semibold">{{ horasTotales }}</td>
-                        </tr>
-                        <tr class="border-bottom-1 surface-border">
-                            <td class="py-2 pr-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-check-circle text-green-500"></i>
-                                    <span class="text-color-secondary">Horas asignadas</span>
-                                </div>
-                            </td>
-                            <td class="py-2 font-semibold text-green-500">{{ horasAsignadas }}</td>
-                        </tr>
-                        <tr>
-                            <td class="py-2 pr-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-hourglass text-primary"></i>
-                                    <span class="font-medium">Horas disponibles</span>
-                                </div>
-                            </td>
-                            <td class="py-2 font-bold text-xl text-primary">{{ horasDisponibles }}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Knob -->
-                <div class="col-span-12 md:col-span-7 flex items-center justify-center">
-                    <p-knob [ngModel]="porcentajeHorasAsignadas" [readonly]="true" [min]="0" [max]="100"
-                        valueTemplate="{value}%" [size]="150">
-                    </p-knob>
-                </div>
-            </div>
-        </p-card>
-    </div>
-
-    <!-- TARJETA 2: Distribución por tipo de actividad -->
-    <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
-        <p-card styleClass="h-full">
-            <!-- Header: título izquierda, icono derecha -->
-            <div class="flex items-center justify-between mb-4">
-                <span class="font-semibold text-lg">Distribución por tipo</span>
-                <div class="flex items-center justify-center bg-orange-100 rounded-border"
-                    style="width: 2.5rem; height: 2.5rem;">
-                    <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-12 gap-4">
-                <!-- Tabla de información -->
-                <div class="col-span-12 md:col-span-5">
-                    <table>
-                        <tr class="border-bottom-1 surface-border">
-                            <td class="py-2 pr-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-home text-green-500"></i>
-                                    <span class="text-color-secondary">Trabajo independiente</span>
-                                </div>
-                            </td>
-                            <td class="py-2 font-semibold text-green-500">{{ horasAsync }} hrs</td>
-                        </tr>
-                        <tr class="border-bottom-1 surface-border">
-                            <td class="py-2 pr-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-users text-orange-500"></i>
-                                    <span class="text-color-secondary">Acompañamiento directo</span>
-                                </div>
-                            </td>
-                            <td class="py-2 font-semibold text-orange-500">{{ horasSync }} hrs</td>
-                        </tr>
-                        <tr>
-                            <td class="py-2 pr-3">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-calculator text-primary"></i>
-                                    <span class="font-medium">Total asignado</span>
-                                </div>
-                            </td>
-                            <td class="py-2 font-bold text-xl text-primary">{{ horasAsignadas }} hrs</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Gráfico Doughnut -->
-                <div class="col-span-12 md:col-span-7 flex flex-column items-center justify-center">
-                    <div *ngIf="horasAsignadas > 0">
-                        <p-chart type="doughnut" [data]="chartData" [options]="chartOptions"
-                            width="150" height="150">
-                        </p-chart>
+            <!-- TARJETA 1: Resumen de horas -->
+            <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
+                <p-card styleClass="h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="font-semibold text-lg">Distribución de horas</span>
+                        <div class="flex items-center justify-center bg-blue-100 rounded-border"
+                            style="width: 2.5rem; height: 2.5rem;">
+                            <i class="pi pi-clock text-blue-500 text-xl"></i>
+                        </div>
                     </div>
-                    <div *ngIf="horasAsignadas === 0" class="flex flex-column items-center gap-2 text-color-secondary">
-                        <i class="pi pi-chart-pie text-4xl"></i>
-                        <span class="text-sm">Sin horas asignadas</span>
+
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 md:col-span-5">
+                            <table>
+                                <tr class="border-bottom-1 surface-border">
+                                    <td class="py-2 pr-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-bookmark text-blue-500"></i>
+                                            <span class="text-color-secondary">Créditos de la asignatura</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 font-semibold">{{ creditosAsignatura }}</td>
+                                </tr>
+                                <tr class="border-bottom-1 surface-border">
+                                    <td class="py-2 pr-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-clock text-gray-500"></i>
+                                            <span class="text-color-secondary">Horas totales del curso</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 font-semibold">{{ horasTotales }}</td>
+                                </tr>
+                                <tr class="border-bottom-1 surface-border">
+                                    <td class="py-2 pr-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-check-circle text-green-500"></i>
+                                            <span class="text-color-secondary">Horas asignadas</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 font-semibold text-green-500">{{ horasAsignadas }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 pr-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-hourglass text-primary"></i>
+                                            <span class="font-medium">Horas disponibles</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 font-bold text-xl text-primary">{{ horasDisponibles }}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                            <p-knob [(ngModel)]="porcentajeHorasAsignadas" [readonly]="true" [min]="0" [max]="100"
+                                valueTemplate="{value}%" [size]="150">
+                            </p-knob>
+                        </div>
                     </div>
-                </div>
+                </p-card>
             </div>
-        </p-card>
-    </div>
 
-</div>
+            <!-- TARJETA 2: Distribución por tipo de actividad -->
+            <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
+                <p-card styleClass="h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="font-semibold text-lg">Distribución por tipo</span>
+                        <div class="flex items-center justify-center bg-orange-100 rounded-border"
+                            style="width: 2.5rem; height: 2.5rem;">
+                            <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
+                        </div>
+                    </div>
 
-<p-card class="shadow-sm border-round-lg p-4">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 md:col-span-5">
+                            <table>
+                                <tr class="border-bottom-1 surface-border">
+                                    <td class="py-2 pr-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-home text-green-500"></i>
+                                            <span class="text-color-secondary">Trabajo independiente</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 font-semibold text-green-500">{{ horasAsync }} hrs</td>
+                                </tr>
+                                <tr class="border-bottom-1 surface-border">
+                                    <td class="py-2 pr-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-users text-orange-500"></i>
+                                            <span class="text-color-secondary">Acompañamiento directo</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 font-semibold text-orange-500">{{ horasSync }} hrs</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 pr-3">
+                                        <div class="flex items-center gap-2">
+                                            <i class="pi pi-calculator text-primary"></i>
+                                            <span class="font-medium">Total asignado</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-2 font-bold text-xl text-primary">{{ horasAsignadas }} hrs</td>
+                                </tr>
+                            </table>
+                        </div>
 
-    <!-- ENCABEZADO -->
-    <div class="mb-4 flex items-center gap-3">
-        <i class="pi pi-calendar text-primary text-2xl"></i>
-        <div>
-            <h3 class="m-0 text-lg font-semibold">Secuencia del curso</h3>
-            <p class="m-0 text-sm text-color-secondary">
-                Planee el desarrollo del curso y distribuya las horas de trabajo académico
-            </p>
+                        <div class="col-span-12 md:col-span-7 flex flex-column items-center justify-center">
+                            @if (horasAsignadas > 0) {
+                                <p-chart type="doughnut" [data]="chartData" [options]="chartOptions"
+                                    width="150" height="150">
+                                </p-chart>
+                            } @else {
+                                <div class="flex flex-column items-center gap-2 text-color-secondary">
+                                    <i class="pi pi-chart-pie text-4xl"></i>
+                                    <span class="text-sm">Sin horas asignadas</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
         </div>
-    </div>
 
-    <!-- TABLA -->
-    <p-table [value]="secuenciaCurso" responsiveLayout="scroll" class="p-datatable-sm">
+        <!-- Main table card -->
+        <p-card>
+            <!-- Sticky header -->
+            <div class="sticky-header">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-calendar text-primary text-2xl"></i>
+                        <div>
+                            <h3 class="m-0 text-lg font-semibold">Secuencia del curso</h3>
+                            <p class="m-0 text-sm text-color-secondary">
+                                Planee el desarrollo del curso y distribuya las horas de trabajo académico
+                            </p>
+                        </div>
+                        <p-tag
+                            [severity]="getSeverity(progress().estado)"
+                            [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <app-save-status-indicator
+                            [saveState]="saveState"
+                            (onRetry)="retryOnError()">
+                        </app-save-status-indicator>
+                        <p-button
+                            label="Guardar"
+                            icon="pi pi-save"
+                            (onClick)="saveManually()"
+                            [disabled]="!saveState.isDirty"
+                            size="small">
+                        </p-button>
+                    </div>
+                </div>
+            </div>
 
-        <!-- HEADER -->
-        <ng-template pTemplate="header">
-            <tr>
-                <th class="text-center" style="width: 5rem;">Semana</th>
-                <th style="min-width: 12rem;">Módulos / Temas</th>
-                <th style="min-width: 14rem;">Actividades</th>
-                <th style="min-width: 16rem;">Descripción</th>
-                <th class="text-center" style="width: 10rem;">Tipo</th>
-                <th class="text-center" style="width: 6rem;">Horas</th>
-                <th style="width: 4rem;"></th>
-            </tr>
-        </ng-template>
+            <form [formGroup]="form">
+                <div class="table-responsive">
+                    <table class="w-full" formArrayName="secuenciaCurso">
+                        <thead>
+                            <tr>
+                                <th class="text-center p-2" style="width: 5rem;">Semana</th>
+                                <th class="p-2" style="min-width: 12rem;">Módulos / Temas</th>
+                                <th class="p-2" style="min-width: 14rem;">Actividades</th>
+                                <th class="p-2" style="min-width: 16rem;">Descripción</th>
+                                <th class="text-center p-2" style="width: 10rem;">Tipo</th>
+                                <th class="text-center p-2" style="width: 6rem;">Horas</th>
+                                <th class="p-2" style="width: 4rem;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (fila of secuenciaFormArray.controls; track $index) {
+                                <tr [formGroupName]="$index" class="border-bottom-1 surface-border">
+                                    <!-- Semana -->
+                                    <td class="text-center font-semibold text-primary p-2">
+                                        {{ $index + 1 }}
+                                    </td>
 
-        <!-- BODY -->
-        <ng-template pTemplate="body" let-fila let-rowIndex="rowIndex">
-            <tr>
+                                    <!-- Módulos / Temas -->
+                                    <td class="p-2">
+                                        <textarea pTextarea formControlName="modulo" rows="2"
+                                            placeholder="Módulo, unidad o tema" class="w-full">
+                                        </textarea>
+                                    </td>
 
-                <!-- Semana / Sesión -->
-                <td class="text-center font-semibold text-primary">
-                    {{ rowIndex + 1 }}
-                </td>
+                                    <!-- Actividades -->
+                                    <td class="p-2">
+                                        <p-multiselect [options]="actividadesOpciones" formControlName="actividades"
+                                            placeholder="Seleccionar actividades" class="w-full" display="chip"
+                                            appendTo="body">
+                                        </p-multiselect>
+                                    </td>
 
-                <!-- Módulos / Temas -->
-                <td>
-                    <textarea pInputTextarea [(ngModel)]="fila.modulo" rows="2"
-                        placeholder="Módulo, unidad o tema" class="w-full">
-                    </textarea>
-                </td>
+                                    <!-- Descripción -->
+                                    <td class="p-2">
+                                        <textarea pTextarea formControlName="descripcion" rows="2"
+                                            placeholder="Descripción breve de la actividad" class="w-full">
+                                        </textarea>
+                                    </td>
 
-                <!-- Actividades -->
-                <td>
-                    <p-multiSelect [options]="actividadesOpciones" [(ngModel)]="fila.actividades"
-                        placeholder="Seleccionar actividades" class="w-full" display="chip"
-                        appendTo="body">
-                    </p-multiSelect>
-                </td>
+                                    <!-- Tipo de actividad -->
+                                    <td class="text-center p-2">
+                                        <p-select [options]="tiposActividad" formControlName="tipo"
+                                            placeholder="Seleccionar" class="w-full"
+                                            appendTo="body">
+                                        </p-select>
+                                    </td>
 
-                <!-- Descripción -->
-                <td>
-                    <textarea pInputTextarea [(ngModel)]="fila.descripcion" rows="2"
-                        placeholder="Descripción breve de la actividad" class="w-full">
-                    </textarea>
-                </td>
+                                    <!-- Horas -->
+                                    <td class="text-center p-2">
+                                        <p-inputNumber formControlName="horas" [min]="0" [max]="100"
+                                            class="w-full">
+                                        </p-inputNumber>
+                                    </td>
 
-                <!-- Tipo de actividad -->
-                <td class="text-center">
-                    <p-select [options]="tiposActividad" [(ngModel)]="fila.tipo"
-                        (onChange)="recalcularHoras()" placeholder="Seleccionar" class="w-full"
-                        appendTo="body">
-                        <ng-template pTemplate="selectedItem" let-selected>
-                            <div class="flex items-center gap-2" *ngIf="selected">
-                                <i [class]="selected.value === 'async' ? 'pi pi-home text-green-500' : 'pi pi-users text-orange-500'"></i>
-                                <span>{{ selected.label }}</span>
-                            </div>
-                        </ng-template>
-                        <ng-template pTemplate="item" let-option>
-                            <div class="flex items-center gap-2">
-                                <i [class]="option.value === 'async' ? 'pi pi-home text-green-500' : 'pi pi-users text-orange-500'"></i>
-                                <span>{{ option.label }}</span>
-                            </div>
-                        </ng-template>
-                    </p-select>
-                </td>
+                                    <!-- Eliminar -->
+                                    <td class="text-center p-2">
+                                        <p-button icon="pi pi-trash" severity="danger" [text]="true"
+                                            (onClick)="eliminarFila($index)">
+                                        </p-button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </form>
 
-                <!-- Horas -->
-                <td class="text-center">
-                    <p-inputNumber [(ngModel)]="fila.horas" [min]="0" [max]="100"
-                        (onInput)="recalcularHoras()" class="w-full">
-                    </p-inputNumber>
-                </td>
+            <!-- Actions -->
+            <div class="mt-4 flex justify-between items-center">
+                <p-button icon="pi pi-plus" label="Agregar fila" [outlined]="true"
+                    (onClick)="agregarFila()">
+                </p-button>
 
-                <!-- Acciones -->
-                <td class="text-center">
-                    <button pButton icon="pi pi-trash" class="p-button-text p-button-danger"
-                        (click)="eliminarFila(rowIndex)">
-                    </button>
-                </td>
-
-            </tr>
-        </ng-template>
-
-    </p-table>
-
-    <!-- ACCIONES -->
-    <div class="mt-4 flex justify-content-between items-center">
-        <button pButton icon="pi pi-plus" label="Agregar fila" class="p-button-outlined" (click)="agregarFila()">
-        </button>
-
-
-        <small class="text-color-secondary">
-            Para finalizar la planeación, las horas disponibles deben ser 0.
-        </small>
-    </div>
-
-</p-card>
+                <small class="text-color-secondary">
+                    Para finalizar la planeación, las horas disponibles deben ser 0.
+                </small>
+            </div>
+        </p-card>
+    </p-fluid>
+}

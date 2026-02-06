@@ -1,232 +1,265 @@
-<p-accordion [multiple]="true">
-    <p-accordion-panel value="0">
-        <p-accordion-header>
-            <div class="flex items-center justify-between w-full">
-                <span>Evaluación y Calificación</span>
-                <p-tag severity="warn" value="En desarrollo" class="mr-2"></p-tag>
-            </div>
-        </p-accordion-header>
+<div [formGroup]="dimensionFormGroup">
+    <p-accordion [multiple]="true">
+        <!-- Panel 1: Evaluación y Calificación -->
+        <p-accordion-panel value="0">
+            <p-accordion-header>
+                <div class="flex items-center justify-between w-full">
+                    <span>Evaluación y Calificación</span>
+                    <p-tag
+                        [severity]="getSeverity(getEvaluacionEstado())"
+                        [value]="getLabel(getEvaluacionEstado())"
+                        class="mr-2" />
+                </div>
+            </p-accordion-header>
 
-        <p-accordion-content>
-            <!-- MEDIOS -->
-            <div class="grid grid-cols-12 gap-4 mb-3">
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Medios
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-multiselect [options]="mediosOpciones" [group]="true" [(ngModel)]="data.medios"
-                        placeholder="Seleccione medios" scrollHeight="250px" display="chip" class="w-full">
-                        <ng-template let-group #group>
-                            <div class="flex items-center gap-2 font-semibold text-primary">
-                                <i [class]="group.icon"></i>
-                                <span>{{ group.label }}</span>
-                            </div>
-                        </ng-template>
-                    </p-multiselect>
+            <p-accordion-content>
+                <!-- MEDIOS -->
+                <div class="grid grid-cols-12 gap-4 mb-3">
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Medios
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-multiselect [options]="mediosOpciones" [group]="true" formControlName="medios"
+                            placeholder="Seleccione medios" scrollHeight="250px" display="chip" class="w-full">
+                            <ng-template let-group #group>
+                                <div class="flex items-center gap-2 font-semibold text-primary">
+                                    <i [class]="group.icon"></i>
+                                    <span>{{ group.label }}</span>
+                                </div>
+                            </ng-template>
+                        </p-multiselect>
+                    </div>
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Otro
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-toggleButton formControlName="otroMedio" onLabel="Sí" offLabel="No" class="w-full">
+                        </p-toggleButton>
+                    </div>
                 </div>
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Otro
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-toggleButton [(ngModel)]="data.otroMedio" onLabel="Sí" offLabel="No" class="w-full">
-                    </p-toggleButton>
-                </div>
-            </div>
-            <div *ngIf="data.otroMedio" class="grid grid-cols-12 gap-4 mb-3">
-                <div class="col-span-12 md:col-span-2"></div>
-                <div class="col-span-12 md:col-span-10">
-                    <input pInputText [(ngModel)]="data.otroMedioTexto" placeholder="Especifique otro medio"
-                        class="w-full" />
-                </div>
-            </div>
+                @if (dimensionFormGroup.get('otroMedio')?.value) {
+                    <div class="grid grid-cols-12 gap-4 mb-3">
+                        <div class="col-span-12 md:col-span-2"></div>
+                        <div class="col-span-12 md:col-span-10">
+                            <input pInputText formControlName="otroMedioTexto" placeholder="Especifique otro medio"
+                                class="w-full" />
+                        </div>
+                    </div>
+                }
 
-            <!-- TECNICAS -->
-            <div class="grid grid-cols-12 gap-4 mb-3">
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Técnicas
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-multiselect [options]="tecnicasOpciones" [group]="true" [(ngModel)]="data.tecnicas"
-                        placeholder="Seleccione técnicas" scrollHeight="250px" display="chip" class="w-full">
-                        <ng-template let-group #group>
-                            <div class="flex items-center gap-2 font-semibold text-primary">
-                                <i [class]="group.icon"></i>
-                                <span>{{ group.label }}</span>
-                            </div>
-                        </ng-template>
-                    </p-multiselect>
+                <!-- TÉCNICAS -->
+                <div class="grid grid-cols-12 gap-4 mb-3">
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Técnicas
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-multiselect [options]="tecnicasOpciones" [group]="true" formControlName="tecnicas"
+                            placeholder="Seleccione técnicas" scrollHeight="250px" display="chip" class="w-full">
+                            <ng-template let-group #group>
+                                <div class="flex items-center gap-2 font-semibold text-primary">
+                                    <i [class]="group.icon"></i>
+                                    <span>{{ group.label }}</span>
+                                </div>
+                            </ng-template>
+                        </p-multiselect>
+                    </div>
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Otro
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-toggleButton formControlName="otraTecnica" onLabel="Sí" offLabel="No" class="w-full">
+                        </p-toggleButton>
+                    </div>
                 </div>
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Otro
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-toggleButton [(ngModel)]="data.otraTecnica" onLabel="Sí" offLabel="No" class="w-full">
-                    </p-toggleButton>
-                </div>
-            </div>
-            <div *ngIf="data.otraTecnica" class="grid grid-cols-12 gap-4 mb-3">
-                <div class="col-span-12 md:col-span-2"></div>
-                <div class="col-span-12 md:col-span-10">
-                    <input pInputText [(ngModel)]="data.otraTecnicaTexto" placeholder="Especifique otra técnica"
-                        class="w-full" />
-                </div>
-            </div>
+                @if (dimensionFormGroup.get('otraTecnica')?.value) {
+                    <div class="grid grid-cols-12 gap-4 mb-3">
+                        <div class="col-span-12 md:col-span-2"></div>
+                        <div class="col-span-12 md:col-span-10">
+                            <input pInputText formControlName="otraTecnicaTexto" placeholder="Especifique otra técnica"
+                                class="w-full" />
+                        </div>
+                    </div>
+                }
 
-            <!-- INSTRUMENTOS -->
-            <div class="grid grid-cols-12 gap-4 mb-3">
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Instrumentos
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-multiselect [options]="instrumentosOpciones" [(ngModel)]="data.instrumentos"
-                        placeholder="Seleccione instrumentos" scrollHeight="250px" display="chip" class="w-full">
-                    </p-multiselect>
+                <!-- INSTRUMENTOS -->
+                <div class="grid grid-cols-12 gap-4 mb-3">
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Instrumentos
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-multiselect [options]="instrumentosOpciones" formControlName="instrumentos"
+                            placeholder="Seleccione instrumentos" scrollHeight="250px" display="chip" class="w-full">
+                        </p-multiselect>
+                    </div>
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Otro
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-toggleButton formControlName="otroInstrumento" onLabel="Sí" offLabel="No" class="w-full">
+                        </p-toggleButton>
+                    </div>
                 </div>
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Otro
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-toggleButton [(ngModel)]="data.otroInstrumento" onLabel="Sí" offLabel="No" class="w-full">
-                    </p-toggleButton>
-                </div>
-            </div>
-            <div *ngIf="data.otroInstrumento" class="grid grid-cols-12 gap-4 mb-3">
-                <div class="col-span-12 md:col-span-2"></div>
-                <div class="col-span-12 md:col-span-10">
-                    <input pInputText [(ngModel)]="data.otroInstrumentoTexto"
-                        placeholder="Especifique otro instrumento" class="w-full" />
-                </div>
-            </div>
-        </p-accordion-content>
-    </p-accordion-panel>
+                @if (dimensionFormGroup.get('otroInstrumento')?.value) {
+                    <div class="grid grid-cols-12 gap-4 mb-3">
+                        <div class="col-span-12 md:col-span-2"></div>
+                        <div class="col-span-12 md:col-span-10">
+                            <input pInputText formControlName="otroInstrumentoTexto"
+                                placeholder="Especifique otro instrumento" class="w-full" />
+                        </div>
+                    </div>
+                }
+            </p-accordion-content>
+        </p-accordion-panel>
 
-    <p-accordion-panel value="1">
-        <p-accordion-header>
-            <div class="flex items-center justify-between w-full">
-                <span>Tipo de evaluación, Participantes y Momento</span>
-                <p-tag severity="warn" value="En desarrollo" class="mr-2"></p-tag>
-            </div>
-        </p-accordion-header>
-        <p-accordion-content>
-            <!-- TIPO DE EVALUACIÓN -->
-            <div class="grid grid-cols-12 gap-4 mb-3">
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Tipo de evaluación
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-select [options]="tipoEvaluacionOpciones" [(ngModel)]="data.tipoEvaluacion"
-                        placeholder="Seleccione un tipo de evaluación" scrollHeight="250px" class="w-full">
-                    </p-select>
+        <!-- Panel 2: Tipo de evaluación, Participantes y Momento -->
+        <p-accordion-panel value="1">
+            <p-accordion-header>
+                <div class="flex items-center justify-between w-full">
+                    <span>Tipo de evaluación, Participantes y Momento</span>
+                    <p-tag
+                        [severity]="getSeverity(getTipoParticipantesMomentoEstado())"
+                        [value]="getLabel(getTipoParticipantesMomentoEstado())"
+                        class="mr-2" />
                 </div>
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Otro
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-toggleButton [(ngModel)]="data.otroTipoEvaluacion" onLabel="Sí" offLabel="No" class="w-full">
-                    </p-toggleButton>
+            </p-accordion-header>
+            <p-accordion-content>
+                <!-- TIPO DE EVALUACIÓN -->
+                <div class="grid grid-cols-12 gap-4 mb-3">
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Tipo de evaluación
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-select [options]="tipoEvaluacionOpciones" formControlName="tipoEvaluacion"
+                            placeholder="Seleccione un tipo de evaluación" scrollHeight="250px" class="w-full">
+                        </p-select>
+                    </div>
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Otro
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-toggleButton formControlName="otroTipoEvaluacion" onLabel="Sí" offLabel="No" class="w-full">
+                        </p-toggleButton>
+                    </div>
                 </div>
-            </div>
-            <div *ngIf="data.otroTipoEvaluacion" class="grid grid-cols-12 gap-4 mb-3">
-                <div class="col-span-12 md:col-span-2"></div>
-                <div class="col-span-12 md:col-span-10">
-                    <input pInputText [(ngModel)]="data.otroTipoEvaluacionTexto"
-                        placeholder="Especifique otro Tipo de evaluación" class="w-full" />
+                @if (dimensionFormGroup.get('otroTipoEvaluacion')?.value) {
+                    <div class="grid grid-cols-12 gap-4 mb-3">
+                        <div class="col-span-12 md:col-span-2"></div>
+                        <div class="col-span-12 md:col-span-10">
+                            <input pInputText formControlName="otroTipoEvaluacionTexto"
+                                placeholder="Especifique otro tipo de evaluación" class="w-full" />
+                        </div>
+                    </div>
+                }
+
+                <!-- PARTICIPANTES -->
+                <div class="grid grid-cols-12 gap-4 mb-3">
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Participantes
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-select [options]="participantesOpciones" formControlName="participantes"
+                            placeholder="Seleccione los participantes" scrollHeight="250px" class="w-full">
+                        </p-select>
+                    </div>
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Otro
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-toggleButton formControlName="otrosParticipantes" onLabel="Sí" offLabel="No" class="w-full">
+                        </p-toggleButton>
+                    </div>
                 </div>
-            </div>
+                @if (dimensionFormGroup.get('otrosParticipantes')?.value) {
+                    <div class="grid grid-cols-12 gap-4 mb-3">
+                        <div class="col-span-12 md:col-span-2"></div>
+                        <div class="col-span-12 md:col-span-10">
+                            <input pInputText formControlName="otrosParticipantesTexto"
+                                placeholder="Especifique los otros participantes" class="w-full" />
+                        </div>
+                    </div>
+                }
 
-            <!-- PARTICIPANTES -->
-            <div class="grid grid-cols-12 gap-4 mb-3">
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Participantes
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-select [options]="participantesOpciones" [(ngModel)]="data.participantes"
-                        placeholder="Seleccione los participantes" scrollHeight="250px" class="w-full">
-                    </p-select>
+                <!-- MOMENTO -->
+                <div class="grid grid-cols-12 gap-4 mb-3">
+                    <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
+                        Momento
+                    </label>
+                    <div class="col-span-12 md:col-span-4">
+                        <p-select [options]="momentosOpciones" formControlName="momento"
+                            placeholder="Seleccione el momento" scrollHeight="250px" class="w-full">
+                        </p-select>
+                    </div>
                 </div>
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Otro
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-toggleButton [(ngModel)]="data.otrosParticipantes" onLabel="Sí" offLabel="No" class="w-full">
-                    </p-toggleButton>
+            </p-accordion-content>
+        </p-accordion-panel>
+
+        <!-- Panel 3: Criterios de evaluación -->
+        <p-accordion-panel value="2">
+            <p-accordion-header>
+                <div class="flex items-center justify-between w-full">
+                    <span>Criterios de evaluación</span>
+                    <p-tag
+                        [severity]="getSeverity(getCriteriosEstado())"
+                        [value]="getLabel(getCriteriosEstado())"
+                        class="mr-2" />
                 </div>
-            </div>
-            <div *ngIf="data.otrosParticipantes" class="grid grid-cols-12 gap-4 mb-3">
-                <div class="col-span-12 md:col-span-2"></div>
-                <div class="col-span-12 md:col-span-10">
-                    <input pInputText [(ngModel)]="data.otrosParticipantesTexto"
-                        placeholder="Especifique los otros participantes" class="w-full" />
-                </div>
-            </div>
+            </p-accordion-header>
+            <p-accordion-content>
+                @if (!programaSeleccionado) {
+                    <p-message severity="warn" class="mb-4 w-full">
+                        Seleccione si la asignatura es de <b>pregrado</b> o <b>posgrado</b> para definir la escala de
+                        evaluación.
+                    </p-message>
+                }
 
-            <!-- MOMENTO -->
-            <div class="grid grid-cols-12 gap-4 mb-3">
-                <label class="flex items-center col-span-12 md:col-span-2 font-semibold">
-                    Momento
-                </label>
-                <div class="col-span-12 md:col-span-4">
-                    <p-select [options]="momentosOpciones" [(ngModel)]="data.momento"
-                        placeholder="Seleccione el momento" scrollHeight="250px" class="w-full">
-                    </p-select>
-                </div>
-            </div>
-        </p-accordion-content>
-    </p-accordion-panel>
+                @if (programaSeleccionado === 'pregrado') {
+                    <p-message severity="info" class="mb-4 w-full">
+                        Escriba los criterios de aceptación acordes a una asignatura de <b>Pregrado</b>.
+                    </p-message>
+                }
 
-    <p-accordion-panel value="2">
-        <p-accordion-header>
-            <div class="flex items-center justify-between w-full">
-                <span>Criterios de evaluación</span>
-                <p-tag severity="warn" value="En desarrollo" class="mr-2"></p-tag>
-            </div>
-        </p-accordion-header>
-        <p-accordion-content>
-            <!-- MENSAJE CONTEXTUAL -->
-            <p-message *ngIf="!programaSeleccionado" severity="warn" class="mb-4 w-full">
-                Seleccione si la asignatura es de <b>pregrado</b> o <b>posgrado</b> para definir la escala de
-                evaluación.
-            </p-message>
+                @if (programaSeleccionado === 'posgrado') {
+                    <p-message severity="info" class="mb-4 w-full">
+                        Escriba los criterios de aceptación acordes a una asignatura de <b>Posgrado</b>.
+                    </p-message>
+                }
 
-            <p-message *ngIf="programaSeleccionado === 'pregrado'" severity="info" class="mb-4 w-full">
-                Escriba los criterios de aceptación acordes a una asignatura de <b>Pregrado</b>.
-            </p-message>
+                @if (programaSeleccionado) {
+                    <div class="mt-4">
+                        <p class="mb-4 text-sm text-color-secondary">
+                            Para cada nivel de logro, describa el criterio de aceptación correspondiente.
+                        </p>
 
-            <p-message *ngIf="programaSeleccionado === 'posgrado'" severity="info" class="mb-4 w-full">
-                Escriba los criterios de aceptación acordes a una asignatura de <b>Posgrado</b>.
-            </p-message>
-
-            <!-- Tabla de criterios -->
-            <div *ngIf="programaSeleccionado" class="mt-4">
-                <p class="mb-4 text-sm text-color-secondary">
-                    Para cada nivel de logro, describa el criterio de aceptación correspondiente.
-                </p>
-
-                <p-table [value]="data.criteriosEvaluacion" class="p-datatable-sm">
-                    <ng-template pTemplate="header">
-                        <tr>
-                            <th style="width: 100px" class="text-center">Valor</th>
-                            <th style="width: 280px">Nivel</th>
-                            <th>Criterio de aceptación</th>
-                        </tr>
-                    </ng-template>
-
-                    <ng-template pTemplate="body" let-criterio>
-                        <tr>
-                            <td class="text-center font-semibold">
-                                {{ criterio.valor }}
-                            </td>
-                            <td>
-                                {{ criterio.etiqueta }}
-                            </td>
-                            <td>
-                                <input pInputText [(ngModel)]="criterio.descripcion"
-                                    placeholder="Describa el criterio de aceptación" class="w-full" />
-                            </td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </div>
-        </p-accordion-content>
-    </p-accordion-panel>
-</p-accordion>
+                        <div formArrayName="criteriosEvaluacion">
+                            <table class="w-full">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 100px" class="text-center p-2">Valor</th>
+                                        <th style="width: 280px" class="p-2">Nivel</th>
+                                        <th class="p-2">Criterio de aceptación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (criterio of criteriosFormArray.controls; track $index) {
+                                        <tr [formGroupName]="$index" class="border-bottom-1 surface-border">
+                                            <td class="text-center font-semibold p-2">
+                                                {{ $any(criterio).value.valor }}
+                                            </td>
+                                            <td class="p-2">
+                                                {{ $any(criterio).value.etiqueta }}
+                                            </td>
+                                            <td class="p-2">
+                                                <input pInputText formControlName="descripcion"
+                                                    placeholder="Describa el criterio de aceptación" class="w-full" />
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </p-accordion-content>
+        </p-accordion-panel>
+    </p-accordion>
+</div>

@@ -1,0 +1,50 @@
+<div class="save-status-container">
+  @switch (saveState().status) {
+    @case ('idle') {
+      <div class="status-badge status-idle">
+        <i class="pi pi-circle-fill status-icon"></i>
+        <span class="status-text">Sin cambios</span>
+      </div>
+    }
+    @case ('pending') {
+      <div class="status-badge status-pending">
+        <i class="pi pi-exclamation-circle status-icon pulse"></i>
+        <span class="status-text">Cambios sin guardar</span>
+      </div>
+    }
+    @case ('saving') {
+      <div class="status-badge status-saving">
+        <i class="pi pi-spin pi-spinner status-icon"></i>
+        <span class="status-text">Guardando...</span>
+      </div>
+    }
+    @case ('saved') {
+      <div class="status-badge status-saved">
+        <i class="pi pi-check-circle status-icon"></i>
+        <span class="status-text">Guardado {{ formatTime(saveState().lastSaved) }}</span>
+      </div>
+    }
+    @case ('error') {
+      <div class="status-badge status-error">
+        <i class="pi pi-times-circle status-icon"></i>
+        <div class="error-content">
+          <span class="status-text">Error al guardar</span>
+          @if (saveState().errorMessage) {
+            <span class="error-message">{{ saveState().errorMessage }}</span>
+          }
+        </div>
+        <p-button
+          icon="pi pi-refresh"
+          [rounded]="true"
+          [text]="true"
+          severity="danger"
+          size="small"
+          pTooltip="Reintentar guardado"
+          tooltipPosition="top"
+          (onClick)="onRetry.emit()"
+          ariaLabel="Reintentar guardado"
+        />
+      </div>
+    }
+  }
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -30,6 +30,8 @@ import { Subtopic } from '../../../../../core/models/subtopic.model';
     templateUrl: './contentwidget.html'
 })
 export class Contentwidget implements OnInit {
+    @Output() recordCount = new EventEmitter<number>();
+
     topics: Topic[] = [];
     subtopics: Subtopic[] = [];
     selectedTopic: Topic | null = null;
@@ -52,6 +54,7 @@ export class Contentwidget implements OnInit {
     loadData() {
         this.contentService.getTopics().subscribe(topics => {
             this.topics = topics;
+            this.recordCount.emit(this.topics.length);
 
             this.contentService.getSubtopics().subscribe(subtopics => {
                 this.subtopics = subtopics;

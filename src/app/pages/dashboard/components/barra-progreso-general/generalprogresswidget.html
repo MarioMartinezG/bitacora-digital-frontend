@@ -1,4 +1,7 @@
 <div class="card">
-    <p>Progreso General de la Bitácora</p>
-    <p-progressbar [value]="11" />
+    <div class="flex justify-between items-center mb-3">
+        <span class="font-semibold text-xl">Progreso General de la Bitácora</span>
+        <span class="font-bold text-xl">{{ progresoGeneral }}%</span>
+    </div>
+    <p-progressbar [value]="progresoGeneral" />
 </div>
