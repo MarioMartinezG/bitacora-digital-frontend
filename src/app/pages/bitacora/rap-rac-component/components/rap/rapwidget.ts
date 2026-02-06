@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardModule } from 'primeng/card';
+import { FormsModule } from '@angular/forms';
+
+// PrimeNG
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import { ListboxModule } from 'primeng/listbox';
 import { MessageModule } from 'primeng/message';
 import { TooltipModule } from 'primeng/tooltip';
-import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-rapwidget',
@@ -14,29 +14,29 @@ import { FormsModule } from '@angular/forms';
     imports: [
         CommonModule,
         FormsModule,
-        CardModule,
         InputTextModule,
         ButtonModule,
-        ListboxModule,
         MessageModule,
         TooltipModule
     ],
     templateUrl: './rapwidget.html',
-
 })
 export class Rapwidget {
-    nuevoResultado: string = '';
-    resultados: string[] = [];
+    @Input() resultados: string[] = [];
+    @Output() onAgregar = new EventEmitter<string>();
+    @Output() onEliminar = new EventEmitter<number>();
 
-    agregarResultado() {
+    nuevoResultado: string = '';
+
+    agregarResultado(): void {
         const texto = this.nuevoResultado.trim();
         if (texto) {
-            this.resultados.push(texto);
+            this.onAgregar.emit(texto);
             this.nuevoResultado = '';
         }
     }
 
-    eliminarResultado(resultado: string) {
-        this.resultados = this.resultados.filter(r => r !== resultado);
+    eliminarResultado(index: number): void {
+        this.onEliminar.emit(index);
     }
 }

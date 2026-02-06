@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 // Servicios
 import { BaseHttpService } from './base-http.service';
 import { LoginService } from './login.service';
-import { EstadoSeccion, Respuesta, RespuestaRequest } from '../models';
+import { EstadoSeccion, Respuesta, RespuestaRequest, GuardarSeccionRequest, RespuestaSeccionDTO } from '../models';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -12,12 +12,53 @@ import { Observable } from 'rxjs';
 export class BitacoraService extends BaseHttpService {
   private loginService = inject(LoginService);
 
+  // ============================================
+  // Nuevos endpoints para secciones de bitácora
+  // ============================================
+
+  /**
+   * Guardar/actualizar respuesta de una sección
+   * PUT /api/bitacora/secciones/{seccionCodigo}
+   */
+  guardarSeccion(request: GuardarSeccionRequest): Observable<RespuestaSeccionDTO> {
+    return this.put<RespuestaSeccionDTO>(
+      `/api/bitacora/secciones/${request.seccionCodigo}`,
+      request
+    );
+  }
+
+  /**
+   * Obtener respuesta de una sección para el usuario actual
+   * GET /api/bitacora/secciones/{seccionCodigo}/usuario/{usuarioId}
+   */
+  obtenerSeccion(seccionCodigo: string): Observable<RespuestaSeccionDTO> {
+    const usuarioId = this.obtenerUsuarioId();
+    return this.get<RespuestaSeccionDTO>(
+      `/api/bitacora/secciones/${seccionCodigo}/usuario/${usuarioId}`
+    );
+  }
+
+  /**
+   * Obtener todas las secciones del usuario
+   * GET /api/bitacora/secciones/usuario/{usuarioId}
+   */
+  obtenerTodasSecciones(): Observable<Record<string, RespuestaSeccionDTO>> {
+    const usuarioId = this.obtenerUsuarioId();
+    return this.get<Record<string, RespuestaSeccionDTO>>(
+      `/api/bitacora/secciones/usuario/${usuarioId}`
+    );
+  }
+
+  // ============================================
+  // Endpoints legacy (mantener por compatibilidad)
+  // ============================================
+
   // Guardar respuestas en lote
   guardarRespuestasEnLote(respuestas: RespuestaRequest[]): Observable<Respuesta[]> {
     return this.post<Respuesta[]>(`/api/respuestas/lote`, respuestas);
   }
 
-  // Guardar una sola respuesta
+  // Guardar una sola respuesta (legacy)
   guardarRespuesta(respuesta: RespuestaRequest): Observable<Respuesta> {
     return this.post<Respuesta>(`/api/respuestas`, respuesta);
   }
@@ -28,7 +69,7 @@ export class BitacoraService extends BaseHttpService {
     return this.get<Respuesta[]>(`/api/respuestas/usuario/${usuarioId}/modulo/${moduloId}`);
   }
 
-  // Obtener respuestas de un usuario para una sección específica
+  // Obtener respuestas de un usuario para una sección específica (legacy)
   obtenerRespuestasPorSeccion(seccionId: number): Observable<Respuesta[]> {
     const usuarioId = this.obtenerUsuarioId();
     return this.get<Respuesta[]>(`/api/respuestas/usuario/${usuarioId}/seccion/${seccionId}`);
@@ -52,7 +93,7 @@ export class BitacoraService extends BaseHttpService {
   }
 
   // Métodos auxiliares
-  private obtenerUsuarioId(): number {
+  obtenerUsuarioId(): number {
     const usuario = JSON.parse(this.loginService.getUser() ?? '{}');
     return usuario.id;
   }

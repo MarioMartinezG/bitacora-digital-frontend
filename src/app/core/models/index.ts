@@ -4,3 +4,5 @@ export type { LoginRequest } from './login-request.model';
 export type * from './bitacora.model';
 export * from './notification.model';
 export * from './tutor.model';
+export * from './save-state.model';
+export * from './section-progress.model';

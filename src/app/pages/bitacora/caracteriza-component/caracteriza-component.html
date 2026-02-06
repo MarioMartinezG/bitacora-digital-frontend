@@ -1,187 +1,255 @@
-<app-loading></app-loading>
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
 <p-fluid>
-
-    <div class="flex mt-8">
-        <p-card class="w-full">
-            <p-fieldset legend="Identificación de la asignatura" [toggleable]="true">
-                <div class="card flex flex-col gap-4">
-                    <div class="grid grid-cols-12 gap-4 grid-cols-12 gap-2">
-                        <label for="name3"
-                            class="flex items-center col-span-12 mb-2 md:col-span-2 md:mb-0">Programa</label>
-                        <div class="col-span-12 md:col-span-10">
-                            <p-autoComplete [(ngModel)]="selectedAutoValue" [suggestions]="autoFilteredValue"
-                                optionLabel="name" placeholder="Buscar programa" dropdown
-                                (completeMethod)="filterPrograms($event)">
-                            </p-autoComplete>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-12 gap-4 grid-cols-12 gap-2">
-                        <label for="email3" class="flex items-center col-span-12 mb-2 md:col-span-2 md:mb-0">Nombre de
-                            asignatura</label>
-                        <div class="col-span-12 md:col-span-10">
-                            <input pInputText id="email3" type="text" />
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-12 gap-4 gap-2">
-                        <label for="tipoAsignatura" class="flex items-center col-span-12 mb-2 md:col-span-2 md:mb-0">
-                            Tipo de asignatura
-                        </label>
-                        <div class="col-span-12 md:col-span-10">
-                            <p-select id="tipoAsignatura" [(ngModel)]="selectedTipoAsignatura"
-                                [options]="tiposAsignatura" optionLabel="name" placeholder="Seleccione un tipo"
-                                class="w-full" required>
-                            </p-select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-12 gap-4">
-                        <!-- Semestre -->
-                        <label for="semestre" class="flex items-center col-span-12 md:col-span-2">
-                            Semestre
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <p-inputNumber id="semestre" [(ngModel)]="semestre" mode="decimal" [min]="1" [max]="12"
-                                showButtons placeholder="Ingrese el semestre" class="w-full">
-                            </p-inputNumber>
-                        </div>
-
-                        <!-- Periodo Académico -->
-                        <label for="periodoAcademico" class="flex items-center col-span-12 md:col-span-2">
-                            Periodo Académico
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <p-select id="periodoAcademico" [(ngModel)]="selectedPeriodo" [options]="periodos"
-                                optionLabel="name" placeholder="Seleccione un periodo" class="w-full">
-                            </p-select>
-                        </div>
-
-                        <!-- Prerrequisito -->
-                        <label for="prerequisito" class="flex items-center col-span-12 md:col-span-2">
-                            Prerrequisito
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <p-toggleButton id="prerequisito" [(ngModel)]="prerequisitoValue" onLabel="Sí" offLabel="No"
-                                class="w-full">
-                            </p-toggleButton>
-                        </div>
-
-                        <!-- Materia Prerrequisito -->
-                        <label for="materiaPrereq" class="flex items-center col-span-12 md:col-span-2">
-                            Materia Prerrequisito
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <input pInputText id="materiaPrereq" type="text" placeholder="Ej: Álgebra Lineal"
-                                [(ngModel)]="materiaPrerequisito" [disabled]="!prerequisitoValue" class="w-full" />
-                        </div>
-                    </div>
-
-
-                    <div class="grid grid-cols-12 gap-4">
-                        <!-- Número de créditos -->
-                        <label for="creditos" class="flex items-center col-span-12 md:col-span-2">
-                            Número de créditos
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <p-inputNumber id="creditos" [(ngModel)]="numeroCreditos" [min]="1" [max]="32"
-                                showButtons="true" mode="decimal" (onInput)="calcularHoras($event)" class="w-full">
-                            </p-inputNumber>
-                        </div>
-
-                        <!-- Total horas de trabajo -->
-                        <label for="horas" class="flex items-center col-span-12 md:col-span-2">
-                            Total horas de trabajo
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <p-inputNumber id="horas" [ngModel]="totalHoras" [readonly]="true" mode="decimal"
-                                class="w-full">
-                            </p-inputNumber>
-                        </div>
-
-                        <!-- Horas de trabajo directo -->
-                        <label for="horasDirecto" class="flex items-center col-span-12 md:col-span-2">
-                            Horas de trabajo directo
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <p-inputNumber id="horasDirecto" [(ngModel)]="horasDirecto" [min]="0" [max]="totalHoras"
-                                mode="decimal" placeholder="Ej: 24" (onInput)="validarHoras()" class="w-full">
-                            </p-inputNumber>
-                        </div>
-
-                        <!-- Horas de trabajo independiente -->
-                        <label for="horasIndependiente" class="flex items-center col-span-12 md:col-span-2">
-                            Horas de trabajo independiente
-                        </label>
-                        <div class="col-span-12 md:col-span-4">
-                            <p-inputNumber id="horasIndependiente" [(ngModel)]="horasIndependiente" [min]="0"
-                                [max]="totalHoras" mode="decimal" placeholder="Ej: 72" (onInput)="validarHoras()"
-                                class="w-full">
-                            </p-inputNumber>
-                        </div>
-                    </div>
-
-                    <!-- Mensaje de validación -->
-                    @if (errorHoras) {
-                    <div class="text-red-500 mt-2">
-                        <p-message severity="error">
-                            La suma de horas directas e independientes debe ser exactamente {{ totalHoras }}.
-                        </p-message>
-                    </div>
-                    }
-
-                </div>
-            </p-fieldset>
-
-        </p-card>
-
+    <!-- Header sticky -->
+    <div class="sticky-header-global">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <h3 class="m-0">Caracteriza tu curso</h3>
+                <p-tag
+                    [severity]="getSeverity(progress().estado)"
+                    [value]="getLabel(progress().estado) + ' (' + progress().totalPercentage + '%)'">
+                </p-tag>
+            </div>
+            <div class="flex items-center gap-3">
+                <app-save-status-indicator
+                    [saveState]="saveState"
+                    (onRetry)="retryOnError()">
+                </app-save-status-indicator>
+                <p-button
+                    label="Guardar"
+                    icon="pi pi-save"
+                    (onClick)="saveManually()"
+                    [disabled]="!saveState.isDirty"
+                    size="small">
+                </p-button>
+            </div>
+        </div>
     </div>
 
-
-    <div class="flex mt-8">
-        <p-card header="Información Académica" class="w-full">
-            <p-accordion [value]="['0']" [multiple]="true">
-                <p-accordion-panel value="0">
-                    <p-accordion-header>
-                        <div class="flex items-center justify-between w-full">
-                            <span>Equipo Docente</span>
-                            <p-tag severity="success" value="Completado" class="mr-2"></p-tag>
+    <form [formGroup]="form">
+        <!-- Identificacion de la asignatura -->
+        <div class="flex mt-4">
+            <p-card class="w-full">
+                <p-fieldset legend="Identificacion de la asignatura" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2">
+                            <span>Identificacion de la asignatura</span>
+                            <p-tag
+                                [severity]="getSeverity(getSectionProgress('datosBasicos')?.estado || 'sin_avances')"
+                                [value]="getLabel(getSectionProgress('datosBasicos')?.estado || 'sin_avances')"
+                                size="small">
+                            </p-tag>
                         </div>
-                    </p-accordion-header>
+                    </ng-template>
 
-                    <p-accordion-content>
-
-                        <p class="m-0">
-                            <app-teachingstaffwidget></app-teachingstaffwidget>
-                        </p>
-                    </p-accordion-content>
-                </p-accordion-panel>
-                <p-accordion-panel value="1">
-                    <p-accordion-header>
-                        <div class="flex items-center justify-between w-full">
-                            <span>Justificación</span>
-                            <p-tag severity="warn" value="En desarrollo" class="mr-2"></p-tag>
+                    <div formGroupName="datosBasicos" class="card flex flex-col gap-4">
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Programa</label>
+                            <div class="col-span-12 md:col-span-10">
+                                <p-autoComplete
+                                    formControlName="programa"
+                                    [suggestions]="filteredProgramas"
+                                    optionLabel="name"
+                                    placeholder="Buscar programa"
+                                    dropdown
+                                    (completeMethod)="filterProgramas($event)">
+                                </p-autoComplete>
+                            </div>
                         </div>
-                    </p-accordion-header>
-                    <p-accordion-content>
-                        <p class="m-0">
-                            <app-justificationwidget></app-justificationwidget>
-                        </p>
-                    </p-accordion-content>
-                </p-accordion-panel>
-                <p-accordion-panel value="2">
-                    <p-accordion-header>
-                        <div class="flex items-center justify-between w-full">
-                            <span>Contenidos</span>
-                            <p-tag severity="danger" value="Sin avances" class="mr-2"></p-tag>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Nombre de asignatura</label>
+                            <div class="col-span-12 md:col-span-10">
+                                <input pInputText formControlName="nombreAsignatura" type="text" />
+                            </div>
                         </div>
-                    </p-accordion-header>
-                    <p-accordion-content>
-                        <p class="m-0">
-                            <app-contentwidget></app-contentwidget>
-                    </p-accordion-content>
-                </p-accordion-panel>
-            </p-accordion>
 
-        </p-card>
-    </div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Tipo de asignatura</label>
+                            <div class="col-span-12 md:col-span-10">
+                                <p-select
+                                    formControlName="tipoAsignatura"
+                                    [options]="tiposAsignatura"
+                                    optionLabel="name"
+                                    placeholder="Seleccione un tipo"
+                                    class="w-full">
+                                </p-select>
+                            </div>
+                        </div>
 
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Semestre</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="semestre"
+                                    mode="decimal"
+                                    [min]="1"
+                                    [max]="12"
+                                    [showButtons]="true"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Periodo Academico</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-select
+                                    formControlName="periodoAcademico"
+                                    [options]="periodos"
+                                    optionLabel="name"
+                                    placeholder="Seleccione un periodo"
+                                    class="w-full">
+                                </p-select>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Prerrequisito</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-toggleButton
+                                    formControlName="prerequisito"
+                                    onLabel="Si"
+                                    offLabel="No"
+                                    class="w-full">
+                                </p-toggleButton>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Materia Prerrequisito</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <input
+                                    pInputText
+                                    formControlName="materiaPrerequisito"
+                                    type="text"
+                                    placeholder="Ej: Algebra Lineal"
+                                    class="w-full" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Numero de creditos</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="numeroCreditos"
+                                    [min]="1"
+                                    [max]="32"
+                                    [showButtons]="true"
+                                    mode="decimal"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Total horas de trabajo</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    [ngModel]="totalHoras"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [readonly]="true"
+                                    mode="decimal"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Horas de trabajo directo</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="horasDirecto"
+                                    [min]="0"
+                                    [max]="totalHoras"
+                                    mode="decimal"
+                                    placeholder="Ej: 24"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Horas de trabajo independiente</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="horasIndependiente"
+                                    [min]="0"
+                                    [max]="totalHoras"
+                                    mode="decimal"
+                                    placeholder="Ej: 72"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+                        </div>
+
+                        @if (errorHoras) {
+                            <div class="text-red-500 mt-2">
+                                <p-message severity="error">
+                                    La suma de horas directas e independientes debe ser exactamente {{ totalHoras }}.
+                                </p-message>
+                            </div>
+                        }
+                    </div>
+                </p-fieldset>
+            </p-card>
+        </div>
+
+        <!-- Informacion Academica -->
+        <div class="flex mt-8">
+            <p-card header="Informacion Academica" class="w-full">
+                <p-accordion [value]="['0']" [multiple]="true">
+                    <!-- Equipo Docente (persistencia propia) -->
+                    <p-accordion-panel value="0">
+                        <p-accordion-header>
+                            <div class="flex items-center justify-between w-full">
+                                <span>Equipo Docente</span>
+                                <p-tag
+                                    [severity]="getSeverity(getSectionProgress('equipoDocente')?.estado || 'sin_avances')"
+                                    [value]="getLabel(getSectionProgress('equipoDocente')?.estado || 'sin_avances')"
+                                    class="mr-2">
+                                </p-tag>
+                            </div>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                            <app-teachingstaffwidget
+                                (recordCount)="onRecordCountChange('equipoDocente', $event)">
+                            </app-teachingstaffwidget>
+                        </p-accordion-content>
+                    </p-accordion-panel>
+
+                    <!-- Justificacion -->
+                    <p-accordion-panel value="1">
+                        <p-accordion-header>
+                            <div class="flex items-center justify-between w-full">
+                                <span>Justificacion</span>
+                                <p-tag
+                                    [severity]="getSeverity(getSectionProgress('justificacion')?.estado || 'sin_avances')"
+                                    [value]="getLabel(getSectionProgress('justificacion')?.estado || 'sin_avances')"
+                                    class="mr-2">
+                                </p-tag>
+                            </div>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                            <app-justificationwidget
+                                [formGroup]="justificacionFormGroup"
+                                [totalCaracteres]="totalCaracteresJustificacion"
+                                [errorCaracteres]="errorCaracteresJustificacion">
+                            </app-justificationwidget>
+                        </p-accordion-content>
+                    </p-accordion-panel>
+
+                    <!-- Contenidos (persistencia propia) -->
+                    <p-accordion-panel value="2">
+                        <p-accordion-header>
+                            <div class="flex items-center justify-between w-full">
+                                <span>Contenidos</span>
+                                <p-tag
+                                    [severity]="getSeverity(getSectionProgress('contenidos')?.estado || 'sin_avances')"
+                                    [value]="getLabel(getSectionProgress('contenidos')?.estado || 'sin_avances')"
+                                    class="mr-2">
+                                </p-tag>
+                            </div>
+                        </p-accordion-header>
+                        <p-accordion-content>
+                            <app-contentwidget
+                                (recordCount)="onRecordCountChange('contenidos', $event)">
+                            </app-contentwidget>
+                        </p-accordion-content>
+                    </p-accordion-panel>
+                </p-accordion>
+            </p-card>
+        </div>
+    </form>
 </p-fluid>
+}

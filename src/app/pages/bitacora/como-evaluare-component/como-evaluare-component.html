@@ -1,128 +1,141 @@
-<p-card class="shadow-sm border-round-lg p-4 mb-5">
-    <div class="mb-5 flex items-center gap-3">
-        <i class="pi pi-list text-primary text-2xl"></i>
-        <p class="text-lg font-semibold m-0">
-            ¿Tu asignatura es de pregrado o posgrado?
-        </p>
-    </div>
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <p-fluid>
+        <!-- Selección de programa -->
+        <p-card class="shadow-sm border-round-lg mb-5">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="pi pi-list text-primary text-2xl"></i>
+                <p class="text-lg font-semibold m-0">
+                    ¿Tu asignatura es de pregrado o posgrado?
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <p-button label="Pregrado" icon="pi pi-book"
+                    [severity]="esProgramaSeleccionado('pregrado') ? 'primary' : 'secondary'"
+                    [outlined]="!esProgramaSeleccionado('pregrado')"
+                    (onClick)="seleccionarPrograma('pregrado')">
+                </p-button>
+                <p-button label="Posgrado" icon="pi pi-graduation-cap"
+                    [severity]="esProgramaSeleccionado('posgrado') ? 'primary' : 'secondary'"
+                    [outlined]="!esProgramaSeleccionado('posgrado')"
+                    (onClick)="seleccionarPrograma('posgrado')">
+                </p-button>
+            </div>
+        </p-card>
 
-    <div class="flex gap-3">
-        <button pButton label="Pregrado" icon="pi pi-book"
-            [severity]="esProgramaSeleccionado('pregrado') ? 'primary' : 'secondary'"
-            [outlined]="!esProgramaSeleccionado('pregrado')" (click)="seleccionarPrograma('pregrado')">
-        </button>
-
-        <button pButton label="Posgrado" icon="pi pi-graduation-cap"
-            [severity]="esProgramaSeleccionado('posgrado') ? 'primary' : 'secondary'"
-            [outlined]="!esProgramaSeleccionado('posgrado')" (click)="seleccionarPrograma('posgrado')">
-        </button>
-    </div>
-</p-card>
-
-
-<div class="mb-5 pt-4 border-top-1 surface-border">
-    <div class="flex items-center justify-center gap-3">
-        <i class="pi pi-sparkles text-primary text-2xl"></i>
-        <p class="text-lg font-semibold m-0">
-            Resultados de aprendizaje, Actividades de aprendizaje y Actividades de evaluación
-        </p>
-    </div>
-</div>
-
-
-<!-- Iteración sobre las 6 dimensiones -->
-<div class="p-m-4" *ngFor="let dim of dimensiones; let i = index">
-    <p-card class="mb-4">
-        <ng-template pTemplate="header">
-            <div class="flex items-center gap-3 p-4 pb-0">
-                <i class="pi {{ dim.icono }} {{ dim.iconoColor }}" style="font-size: 1.5rem"></i>
-                <div>
-                    <h3 class="m-0 text-lg font-semibold">{{ dim.nombre }}</h3>
-                    <p class="m-0 mt-1 text-sm text-color-secondary">{{ dim.resultado }}</p>
+        <p-card>
+            <!-- Header sticky -->
+            <div class="sticky-header">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-sparkles text-primary text-2xl"></i>
+                        <h4 class="m-0">Resultados, Actividades y Evaluación</h4>
+                        <p-tag
+                            [severity]="getSeverity(progress().estado)"
+                            [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <app-save-status-indicator
+                            [saveState]="saveState"
+                            (onRetry)="retryOnError()">
+                        </app-save-status-indicator>
+                        <p-button
+                            label="Guardar"
+                            icon="pi pi-save"
+                            (onClick)="saveManually()"
+                            [disabled]="!saveState.isDirty"
+                            size="small">
+                        </p-button>
+                    </div>
                 </div>
             </div>
-        </ng-template>
 
-        <app-dimension-evaluacion-widget [dimensionNombre]="dim.nombre" [resultadoAprendizaje]="dim.resultado"
-            [icono]="dim.icono" [iconoColor]="dim.iconoColor" [programaSeleccionado]="programaSeleccionado">
-        </app-dimension-evaluacion-widget>
-    </p-card>
-</div>
+            <form [formGroup]="form">
+                <!-- Dimensiones -->
+                @for (dim of dimensionFormGroups; track $index) {
+                    <p-card class="mb-4 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <i [class]="'pi ' + dimensionMeta[$index].icono + ' ' + dimensionMeta[$index].iconoColor"
+                                   style="font-size: 1.5rem"></i>
+                                <div>
+                                    <h3 class="m-0 text-lg font-semibold">{{ dimensionMeta[$index].nombre }}</h3>
+                                    <p class="m-0 mt-1 text-sm text-color-secondary">{{ dimensionMeta[$index].resultado }}</p>
+                                </div>
+                            </div>
+                            
+                        </div>
 
-<div class="mb-5 pt-4 border-top-1 surface-border">
-    <div class="flex items-center justify-center gap-3">
-        <i class="pi pi-bullseye text-primary text-2xl"></i>
-        <p class="text-lg font-semibold m-0">
-            Evalúa tu plan de evaluación
-        </p>
-    </div>
-</div>
+                        <app-dimension-evaluacion-widget
+                            [dimensionFormGroup]="dim"
+                            [programaSeleccionado]="form.get('programaSeleccionado')?.value">
+                        </app-dimension-evaluacion-widget>
+                    </p-card>
+                }
 
-
-<p-card>
-    <p-accordion [multiple]="false">
-        <p-accordion-panel
-            *ngFor="let criterio of criteriosEvaluacionChecklist; let i = index"
-            [value]="i.toString()">
-
-            <!-- HEADER -->
-            <p-accordion-header>
-                <div class="flex items-center justify-between w-full">
-                    <span>{{ criterio.titulo }}</span>
-                    <p-tag severity="warn" value="En desarrollo" class="mr-2"></p-tag>
+                <!-- Checklist: Evalúa tu plan de evaluación -->
+                <div class="mb-4 pt-4 border-top-1 surface-border">
+                    <div class="flex items-center justify-center gap-3">
+                        <i class="pi pi-bullseye text-primary text-2xl"></i>
+                        <p class="text-lg font-semibold m-0">
+                            Evalúa tu plan de evaluación
+                        </p>
+                    </div>
                 </div>
-            </p-accordion-header>
 
-            <!-- CONTENT -->
-            <p-accordion-content>
+                <p-card>
+                    <p-accordion [multiple]="false" formArrayName="checklist">
+                        @for (grupo of checklistConfig; track $index) {
+                            <p-accordion-panel [value]="$index.toString()">
+                                <p-accordion-header>
+                                    <div class="flex items-center justify-between w-full">
+                                        <span>{{ grupo.titulo }}</span>
+                                        <p-tag
+                                            [severity]="getSeverity(getChecklistGrupoEstado($index))"
+                                            [value]="getLabel(getChecklistGrupoEstado($index))"
+                                            class="mr-2" />
+                                    </div>
+                                </p-accordion-header>
 
-                <p-table
-                    [value]="criterio.preguntas">
-
-                    <!-- BODY TABLE -->
-                    <ng-template pTemplate="body" let-pregunta let-j="rowIndex">
-                        <tr>
-                            <!-- Pregunta -->
-                            <td>
-                                {{ pregunta.texto }}
-                            </td>
-
-                            <!-- Sí -->
-                            <td class="text-center">
-                                <label
-                                    [for]="'criterio_' + i + '_pregunta_' + j + '_si'"
-                                    class="text-green-500 mr-2">
-                                    Sí
-                                </label>
-                                <p-radioButton
-                                    [name]="'criterio_' + i + '_pregunta_' + j"
-                                    value="si"
-                                    [inputId]="'criterio_' + i + '_pregunta_' + j + '_si'"
-                                    [(ngModel)]="pregunta.respuesta">
-                                </p-radioButton>
-                            </td>
-
-                            <!-- No -->
-                            <td class="text-center">
-                                <label
-                                    [for]="'criterio_' + i + '_pregunta_' + j + '_no'"
-                                    class="text-red-500 mr-2">
-                                    No
-                                </label>
-                                <p-radioButton
-                                    [name]="'criterio_' + i + '_pregunta_' + j"
-                                    value="no"
-                                    [inputId]="'criterio_' + i + '_pregunta_' + j + '_no'"
-                                    [(ngModel)]="pregunta.respuesta">
-                                </p-radioButton>
-                            </td>
-                        </tr>
-                    </ng-template>
-
-                </p-table>
-
-            </p-accordion-content>
-
-        </p-accordion-panel>
-    </p-accordion>
-</p-card>
+                                <p-accordion-content>
+                                    <div [formArrayName]="$index">
+                                        <table class="w-full">
+                                            <tbody>
+                                                @for (pregunta of grupo.preguntas; track $index) {
+                                                    <tr class="border-bottom-1 surface-border">
+                                                        <td class="py-3">{{ pregunta.texto }}</td>
+                                                        <td class="text-center py-3" style="width: 80px">
+                                                            <label [for]="grupo.titulo + '_' + $index + '_si'"
+                                                                   class="text-green-500 mr-2">Sí</label>
+                                                            <p-radioButton
+                                                                [formControlName]="$index"
+                                                                [value]="'si'"
+                                                                [name]="grupo.titulo + '_' + $index"
+                                                                [inputId]="grupo.titulo + '_' + $index + '_si'">
+                                                            </p-radioButton>
+                                                        </td>
+                                                        <td class="text-center py-3" style="width: 80px">
+                                                            <label [for]="grupo.titulo + '_' + $index + '_no'"
+                                                                   class="text-red-500 mr-2">No</label>
+                                                            <p-radioButton
+                                                                [formControlName]="$index"
+                                                                [value]="'no'"
+                                                                [name]="grupo.titulo + '_' + $index"
+                                                                [inputId]="grupo.titulo + '_' + $index + '_no'">
+                                                            </p-radioButton>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </p-accordion-content>
+                            </p-accordion-panel>
+                        }
+                    </p-accordion>
+                </p-card>
+            </form>
+        </p-card>
+    </p-fluid>
+}

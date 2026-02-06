@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -79,6 +79,8 @@ export class Teachingstaffwidget implements OnInit {
     };
     teachingStaffDialog: boolean = false;
 
+    @Output() recordCount = new EventEmitter<number>();
+
     @ViewChild('dt') dt!: Table;
 
     constructor(
@@ -104,6 +106,7 @@ export class Teachingstaffwidget implements OnInit {
     loadTeachers() {
         this.teachingStaffService.getTeachingStaffData().subscribe(data => {
             this.teachers.set(data || []);
+            this.recordCount.emit(this.teachers().length);
         });
     }
 

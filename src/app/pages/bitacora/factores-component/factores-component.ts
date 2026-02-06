@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 // PrimeNG
@@ -8,12 +8,16 @@ import { FluidModule } from 'primeng/fluid';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
-import { FieldsetModule } from 'primeng/fieldset';
 import { AccordionModule } from 'primeng/accordion';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
+import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
+
+// Base
+import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 
 @Component({
   selector: 'app-factores-component',
@@ -26,16 +30,41 @@ import { LoadingComponent } from '../../../utils/loading/loading';
     InputNumberModule,
     SelectModule,
     TextareaModule,
-    FieldsetModule,
     AccordionModule,
     TagModule,
-    LoadingComponent
+    TooltipModule,
+    LoadingComponent,
+    SaveStatusIndicatorComponent
   ],
   templateUrl: './factores-component.html',
+  styleUrl: './factores-component.css'
 })
-export class FactoresComponent implements OnInit {
+export class FactoresComponent extends BaseBitacoraComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
 
-  // Listas a utilizar
+  // Código de sección para Factores
+  protected seccionCodigo = 'factores';
+
+  // Configuración de secciones para el cálculo de progreso
+  protected sectionsConfig: SectionConfig[] = [
+    {
+      name: 'panel1',
+      formGroupName: 'panel1',
+      fields: ['pregunta1', 'pregunta2', 'pregunta3', 'pregunta4', 'pregunta5', 'pregunta6', 'pregunta7', 'pregunta8', 'pregunta9']
+    },
+    {
+      name: 'panel2',
+      formGroupName: 'panel2',
+      fields: ['pregunta10', 'pregunta11', 'pregunta12', 'pregunta13']
+    },
+    {
+      name: 'panel3',
+      formGroupName: 'panel3',
+      fields: ['pregunta14', 'pregunta15', 'pregunta16', 'pregunta17']
+    }
+  ];
+
+  // Opciones para los selects
   pregunta1Options = [
     { name: 'Pregrado', code: 'pregrado' },
     { name: 'Posgrado', code: 'posgrado' },
@@ -81,11 +110,16 @@ export class FactoresComponent implements OnInit {
     { name: 'No', code: 'no' },
   ];
 
-  form!: FormGroup;
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.setupPregunta9Listener();
+  }
 
-  constructor(private fb: FormBuilder) { }
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+  }
 
-  ngOnInit(): void {
+  protected initForm(): void {
     this.form = this.fb.group({
       panel1: this.fb.group({
         pregunta1: ['', Validators.required],
@@ -112,28 +146,18 @@ export class FactoresComponent implements OnInit {
         pregunta17: ['', Validators.required],
       })
     });
+  }
 
+  private setupPregunta9Listener(): void {
     this.form.get('panel1.pregunta9')?.valueChanges.subscribe((value: string) => {
       const detalleControl = this.form.get('panel1.detallePregunta9');
       if (value === 'si') {
         detalleControl?.setValidators([Validators.required]);
       } else {
         detalleControl?.clearValidators();
-        detalleControl?.setValue('');
+        detalleControl?.setValue('', { emitEvent: false });
       }
       detalleControl?.updateValueAndValidity();
     });
   }
-
-
-
-  onSubmit(): void {
-    if (this.form.valid) {
-      console.log('Formulario listo para enviar:', this.form.value);
-      // TODO: llamar servicio backend para guardar
-    } else {
-      this.form.markAllAsTouched();
-    }
-  }
-
 }

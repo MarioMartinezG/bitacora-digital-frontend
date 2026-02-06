@@ -1,32 +1,44 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Topic } from '../models/topic.model';
 import { Subtopic } from '../models/subtopic.model';
 
 @Injectable({ providedIn: 'root' })
 export class ContentService {
-    private topicsSubject = new BehaviorSubject<Topic[]>([
-        { id: 1, name: 'Tema 1' },
-        { id: 2, name: 'Tema 2' }
-    ]);
+    private topicsSubject = new BehaviorSubject<Topic[]>([]);
     topics$ = this.topicsSubject.asObservable();
 
-    private subtopicsSubject = new BehaviorSubject<Subtopic[]>([
-        { id: 1, name: 'Introducción', topicId: 1 },
-        { id: 2, name: 'Variables', topicId: 1 },
-        { id: 3, name: 'Funciones', topicId: 2 }
-    ]);
+    private subtopicsSubject = new BehaviorSubject<Subtopic[]>([]);
     subtopics$ = this.subtopicsSubject.asObservable();
+
+    /** Emite cuando los datos cambian por operaciones CRUD (no en carga inicial) */
+    private dataChanged = new Subject<void>();
+    dataChanged$ = this.dataChanged.asObservable();
 
     constructor() { }
 
-    // Obtener topics
+    /**
+     * Carga datos desde el JSON guardado en base de datos.
+     * NO emite dataChanged$ para evitar disparar auto-save en la carga inicial.
+     */
+    loadFromData(data: { topics?: Topic[], subtopics?: Subtopic[] }): void {
+        if (data?.topics) this.topicsSubject.next(data.topics);
+        if (data?.subtopics) this.subtopicsSubject.next(data.subtopics);
+    }
+
+    /** Retorna el estado actual para incluir en el JSON de guardado */
+    getData(): { topics: Topic[], subtopics: Subtopic[] } {
+        return {
+            topics: this.topicsSubject.getValue(),
+            subtopics: this.subtopicsSubject.getValue()
+        };
+    }
+
     getTopics(): Observable<Topic[]> {
         return this.topics$;
     }
 
-    // Obtener subtopics con referencia al topic
     getSubtopics(): Observable<Subtopic[]> {
         return combineLatest([this.subtopics$, this.topics$]).pipe(
             map(([subs, topics]) =>
@@ -39,6 +51,7 @@ export class ContentService {
         const topics = this.topicsSubject.getValue();
         const id = topics.length ? Math.max(...topics.map(t => t.id)) + 1 : 1;
         this.topicsSubject.next([...topics, { id, name }]);
+        this.dataChanged.next();
     }
 
     editTopic(id: number, name: string) {
@@ -47,6 +60,7 @@ export class ContentService {
         if (topic) {
             topic.name = name;
             this.topicsSubject.next([...topics]);
+            this.dataChanged.next();
         }
     }
 
@@ -55,12 +69,14 @@ export class ContentService {
         const subtopics = this.subtopicsSubject.getValue().filter(s => s.topicId !== id);
         this.topicsSubject.next([...topics]);
         this.subtopicsSubject.next([...subtopics]);
+        this.dataChanged.next();
     }
 
     addSubtopic(name: string, topicId: number) {
         const subs = this.subtopicsSubject.getValue();
-        const id = subs.length + 1;
+        const id = subs.length ? Math.max(...subs.map(s => s.id)) + 1 : 1;
         this.subtopicsSubject.next([...subs, { id, name, topicId }]);
+        this.dataChanged.next();
     }
 
     editSubtopic(id: number, name: string, topicId: number) {
@@ -70,11 +86,13 @@ export class ContentService {
             sub.name = name;
             sub.topicId = topicId;
             this.subtopicsSubject.next([...subs]);
+            this.dataChanged.next();
         }
     }
 
     deleteSubtopic(id: number) {
         const subs = this.subtopicsSubject.getValue().filter(s => s.id !== id);
         this.subtopicsSubject.next([...subs]);
+        this.dataChanged.next();
     }
 }
