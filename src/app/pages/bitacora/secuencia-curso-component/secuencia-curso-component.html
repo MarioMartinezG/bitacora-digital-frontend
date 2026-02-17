@@ -142,9 +142,15 @@
                                 Planee el desarrollo del curso y distribuya las horas de trabajo académico
                             </p>
                         </div>
-                        <p-tag
-                            [severity]="getSeverity(progress().estado)"
-                            [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(progress().estado)"
+                                [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="general"
+                                [badge]="comentariosCounts()['general'] || 0" />
+                        </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <app-save-status-indicator

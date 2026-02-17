@@ -3,7 +3,9 @@ export type TipoNotificacion =
     | 'SOLICITUD_SESION'
     | 'RESPUESTA_SOLICITUD'
     | 'VENCIMIENTO_PROXIMO'
-    | 'UMBRAL_ALCANZADO';
+    | 'UMBRAL_ALCANZADO'
+    | 'COMENTARIO_TUTOR'
+    | 'ESTADO_TUTOR_ACTUALIZADO';
 
 export type PrioridadNotificacion = 'CRITICO' | 'ALERTA' | 'INFO' | 'SUCCESS';
 export type SeverityPrimeNG = 'error' | 'warn' | 'info' | 'success';
@@ -46,7 +48,9 @@ export const TIPO_ICONO: Record<TipoNotificacion, string> = {
     SOLICITUD_SESION: 'pi-calendar-plus',
     RESPUESTA_SOLICITUD: 'pi-check-circle',
     VENCIMIENTO_PROXIMO: 'pi-clock',
-    UMBRAL_ALCANZADO: 'pi-chart-line'
+    UMBRAL_ALCANZADO: 'pi-chart-line',
+    COMENTARIO_TUTOR: 'pi-comments',
+    ESTADO_TUTOR_ACTUALIZADO: 'pi-flag'
 };
 
 // Mapeo de prioridad a clases de color para iconos

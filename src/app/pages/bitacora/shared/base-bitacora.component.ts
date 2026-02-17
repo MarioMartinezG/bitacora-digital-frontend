@@ -1,6 +1,10 @@
-import { Directive, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Directive, OnInit, OnDestroy, inject, signal, computed, Input } from '@angular/core';
 import { FormGroup, AbstractControl } from '@angular/forms';
 import { AutoSaveService } from '../../../core/services';
+import { ComentarioSubseccionService } from '../../../core/services/comentario-subseccion.service';
+import { EstadoTutorSubseccionService } from '../../../core/services/estado-tutor-subseccion.service';
+import { BitacoraService } from '../../../core/services/bitacora.service';
+import { EstadoTutorSubseccionDTO } from '../../../core/models/estado-tutor-subseccion.model';
 import {
   AutoSaveConfig,
   SaveState,
@@ -34,6 +38,9 @@ export interface SectionConfig {
 @Directive()
 export abstract class BaseBitacoraComponent implements OnInit, OnDestroy {
   protected autoSaveService = inject(AutoSaveService);
+  protected comentarioSubseccionService = inject(ComentarioSubseccionService);
+  protected estadoTutorSubseccionService = inject(EstadoTutorSubseccionService);
+  protected bitacoraService = inject(BitacoraService);
 
   /** Código de la sección de bitácora (debe ser definido por cada componente hijo) */
   protected abstract seccionCodigo: string;
@@ -44,8 +51,18 @@ export abstract class BaseBitacoraComponent implements OnInit, OnDestroy {
   /** FormGroup principal del componente */
   protected form!: FormGroup;
 
+  /** Inputs para modo revisión (tutor) */
+  @Input() estudianteIdOverride?: number;
+  @Input() readOnly = false;
+
   /** Estado de carga de datos */
   isLoading = signal(true);
+
+  /** Conteo de comentarios por sub-sección */
+  comentariosCounts = signal<Record<string, number>>({});
+
+  /** Estados del tutor por sub-sección */
+  estadosTutor = signal<EstadoTutorSubseccionDTO[]>([]);
 
   /** Progreso del componente (reactivo) - protected para permitir override en clases hijas */
   protected _progress = signal<ComponentProgress>({
@@ -68,7 +85,13 @@ export abstract class BaseBitacoraComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initForm();
-    this.loadExistingData();
+    if (this.readOnly && this.estudianteIdOverride) {
+      this.loadForReview(this.estudianteIdOverride);
+    } else {
+      this.loadExistingData();
+      this.loadComentariosCounts();
+      this.loadEstadosTutor();
+    }
   }
 
   ngOnDestroy(): void {
@@ -111,6 +134,82 @@ export abstract class BaseBitacoraComponent implements OnInit, OnDestroy {
    */
   protected patchFormWithData(data: any): void {
     this.form.patchValue(data, { emitEvent: false });
+  }
+
+  /**
+   * Carga datos de un estudiante en modo revisión (readOnly)
+   */
+  protected loadForReview(estudianteId: number): void {
+    this.isLoading.set(true);
+
+    this.bitacoraService.obtenerSeccionPorEstudiante(this.seccionCodigo, estudianteId).subscribe({
+      next: (respuesta) => {
+        if (respuesta && respuesta.datos) {
+          this.patchFormWithData(respuesta.datos);
+        }
+        this.form.disable();
+        this.calculateProgress();
+        this.loadComentariosCounts(estudianteId);
+        this.loadEstadosTutor(estudianteId);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.form.disable();
+        this.calculateProgress();
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  /**
+   * Carga el conteo de comentarios por sub-sección
+   */
+  protected loadComentariosCounts(estudianteId?: number): void {
+    const id = estudianteId || this.bitacoraService.obtenerUsuarioId();
+    if (!id) return;
+
+    this.comentarioSubseccionService.obtenerConteoPorSeccion(id, this.seccionCodigo).subscribe({
+      next: (conteo) => this.comentariosCounts.set(conteo),
+      error: () => {}
+    });
+  }
+
+  /**
+   * Carga los estados del tutor por sub-sección
+   */
+  protected loadEstadosTutor(estudianteId?: number): void {
+    const id = estudianteId || this.bitacoraService.obtenerUsuarioId();
+    if (!id) return;
+
+    this.estadoTutorSubseccionService.obtenerEstadosPorSeccion(id, this.seccionCodigo).subscribe({
+      next: (estados) => this.estadosTutor.set(estados),
+      error: () => {}
+    });
+  }
+
+  /**
+   * Obtiene el estado del tutor para una sub-sección específica
+   */
+  getEstadoTutor(subseccionCodigo: string): EstadoAvance | undefined {
+    const estado = this.estadosTutor().find(e => e.subseccionCodigo === subseccionCodigo);
+    return estado?.estado as EstadoAvance | undefined;
+  }
+
+  /**
+   * Obtiene el estado efectivo para mostrar en el badge de una sub-sección.
+   * Prioriza el estado del tutor (si existe) sobre el estado auto-calculado.
+   */
+  getDisplayEstado(subseccionCodigo: string): EstadoAvance {
+    return this.getEstadoTutor(subseccionCodigo)
+        || this.getSectionProgress(subseccionCodigo)?.estado
+        || 'sin_avances';
+  }
+
+  /**
+   * Indica si una sub-sección tiene un estado asignado por el tutor
+   */
+  hasTutorEstado(subseccionCodigo: string): boolean {
+    return !!this.getEstadoTutor(subseccionCodigo);
   }
 
   /**

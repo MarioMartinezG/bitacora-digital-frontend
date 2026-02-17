@@ -181,7 +181,9 @@ export class Notificaciones implements OnInit {
             SOLICITUD_SESION: 'Solicitud',
             RESPUESTA_SOLICITUD: 'Respuesta',
             VENCIMIENTO_PROXIMO: 'Vencimiento',
-            UMBRAL_ALCANZADO: 'Umbral'
+            UMBRAL_ALCANZADO: 'Umbral',
+            COMENTARIO_TUTOR: 'Comentario',
+            ESTADO_TUTOR_ACTUALIZADO: 'Estado actualizado'
         };
         return labels[tipo] || tipo;
     }

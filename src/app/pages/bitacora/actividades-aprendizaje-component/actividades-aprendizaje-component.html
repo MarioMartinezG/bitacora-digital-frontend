@@ -47,10 +47,16 @@
                                         {{ dimensionMeta[$index].dimension }}
                                     </h3>
                                 </div>
-                                <p-tag
-                                    [severity]="getSeverity(getSectionProgress(dimensionMeta[$index].dimension)?.estado || 'sin_avances')"
-                                    [value]="getLabel(getSectionProgress(dimensionMeta[$index].dimension)?.estado || 'sin_avances')"
-                                    class="mr-2" />
+                                <div class="flex items-center gap-2">
+                                    <p-tag
+                                        [severity]="getSeverity(getDisplayEstado(dimensionMeta[$index].dimension))"
+                                        [value]="getLabel(getDisplayEstado(dimensionMeta[$index].dimension))"
+                                        class="mr-2" />
+                                    <app-bitacora-comment-button
+                                        [seccionCodigo]="seccionCodigo"
+                                        [subseccionCodigo]="dimensionMeta[$index].dimension"
+                                        [badge]="comentariosCounts()[dimensionMeta[$index].dimension] || 0" />
+                                </div>
                             </div>
 
                             <!-- Grid interno con campos -->

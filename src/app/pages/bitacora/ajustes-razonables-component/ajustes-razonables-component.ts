@@ -12,6 +12,7 @@ import { TagModule } from 'primeng/tag';
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
+import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -31,7 +32,8 @@ import { SectionProgress, calcularEstadoAvance } from '../../../core/models';
     ButtonModule,
     TagModule,
     LoadingComponent,
-    SaveStatusIndicatorComponent
+    SaveStatusIndicatorComponent,
+    BitacoraCommentButtonComponent
   ],
   templateUrl: './ajustes-razonables-component.html',
   styleUrl: './ajustes-razonables-component.css'

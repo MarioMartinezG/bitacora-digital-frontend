@@ -34,11 +34,17 @@
                 <p-accordion-header>
                     <div class="flex items-center justify-between w-full">
                         <span>Resultados de aprendizaje del Programa (RAP)</span>
-                        <p-tag
-                            [severity]="getSeverity(getSectionProgress('rap')?.estado || 'sin_avances')"
-                            [value]="getLabel(getSectionProgress('rap')?.estado || 'sin_avances')"
-                            class="mr-2">
-                        </p-tag>
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('rap'))"
+                                [value]="getLabel(getDisplayEstado('rap'))"
+                                class="mr-2">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="rap"
+                                [badge]="comentariosCounts()['rap'] || 0" />
+                        </div>
                     </div>
                 </p-accordion-header>
                 <p-accordion-content>
@@ -55,11 +61,17 @@
                 <p-accordion-header>
                     <div class="flex items-center justify-between w-full">
                         <span>Resultados de aprendizaje del curso (RAC)</span>
-                        <p-tag
-                            [severity]="getSeverity(getSectionProgress('rac')?.estado || 'sin_avances')"
-                            [value]="getLabel(getSectionProgress('rac')?.estado || 'sin_avances')"
-                            class="mr-2">
-                        </p-tag>
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('rac'))"
+                                [value]="getLabel(getDisplayEstado('rac'))"
+                                class="mr-2">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="rac"
+                                [badge]="comentariosCounts()['rac'] || 0" />
+                        </div>
                     </div>
                 </p-accordion-header>
                 <p-accordion-content>

@@ -27,6 +27,7 @@ export const appRoutes: Routes = [
             { path: 'bitacora', loadChildren: () => import('./app/pages/bitacora/bitacora.routes') },
             { path: 'notificaciones', component: Notificaciones },
             { path: 'solicitudes-sesion', component: SolicitudesSesion },
+            { path: 'tutor', loadChildren: () => import('./app/pages/tutor/tutor.routes'), data: { roles: [2] } },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ],

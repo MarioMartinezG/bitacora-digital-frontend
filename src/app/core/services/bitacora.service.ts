@@ -39,6 +39,16 @@ export class BitacoraService extends BaseHttpService {
   }
 
   /**
+   * Obtener respuesta de una sección para un estudiante específico (modo revisión tutor)
+   * GET /api/bitacora/secciones/{seccionCodigo}/usuario/{estudianteId}
+   */
+  obtenerSeccionPorEstudiante(seccionCodigo: string, estudianteId: number): Observable<RespuestaSeccionDTO> {
+    return this.get<RespuestaSeccionDTO>(
+      `/api/bitacora/secciones/${seccionCodigo}/usuario/${estudianteId}`
+    );
+  }
+
+  /**
    * Obtener todas las secciones del usuario
    * GET /api/bitacora/secciones/usuario/{usuarioId}
    */

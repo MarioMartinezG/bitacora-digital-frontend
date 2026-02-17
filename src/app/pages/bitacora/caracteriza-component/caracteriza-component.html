@@ -36,11 +36,17 @@
                     <ng-template pTemplate="header">
                         <div class="flex items-center gap-2">
                             <span>Identificacion de la asignatura</span>
-                            <p-tag
-                                [severity]="getSeverity(getSectionProgress('datosBasicos')?.estado || 'sin_avances')"
-                                [value]="getLabel(getSectionProgress('datosBasicos')?.estado || 'sin_avances')"
-                                size="small">
-                            </p-tag>
+                            <div class="flex items-center gap-2">
+                                <p-tag
+                                    [severity]="getSeverity(getDisplayEstado('datosBasicos'))"
+                                    [value]="getLabel(getDisplayEstado('datosBasicos'))"
+                                    size="small">
+                                </p-tag>
+                                <app-bitacora-comment-button
+                                    [seccionCodigo]="seccionCodigo"
+                                    subseccionCodigo="datosBasicos"
+                                    [badge]="comentariosCounts()['datosBasicos'] || 0" />
+                            </div>
                         </div>
                     </ng-template>
 
@@ -194,11 +200,17 @@
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
                                 <span>Equipo Docente</span>
-                                <p-tag
-                                    [severity]="getSeverity(getSectionProgress('equipoDocente')?.estado || 'sin_avances')"
-                                    [value]="getLabel(getSectionProgress('equipoDocente')?.estado || 'sin_avances')"
-                                    class="mr-2">
-                                </p-tag>
+                                <div class="flex items-center gap-2">
+                                    <p-tag
+                                        [severity]="getSeverity(getDisplayEstado('equipoDocente'))"
+                                        [value]="getLabel(getDisplayEstado('equipoDocente'))"
+                                        class="mr-2">
+                                    </p-tag>
+                                    <app-bitacora-comment-button
+                                        [seccionCodigo]="seccionCodigo"
+                                        subseccionCodigo="equipoDocente"
+                                        [badge]="comentariosCounts()['equipoDocente'] || 0" />
+                                </div>
                             </div>
                         </p-accordion-header>
                         <p-accordion-content>
@@ -213,11 +225,17 @@
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
                                 <span>Justificacion</span>
-                                <p-tag
-                                    [severity]="getSeverity(getSectionProgress('justificacion')?.estado || 'sin_avances')"
-                                    [value]="getLabel(getSectionProgress('justificacion')?.estado || 'sin_avances')"
-                                    class="mr-2">
-                                </p-tag>
+                                <div class="flex items-center gap-2">
+                                    <p-tag
+                                        [severity]="getSeverity(getDisplayEstado('justificacion'))"
+                                        [value]="getLabel(getDisplayEstado('justificacion'))"
+                                        class="mr-2">
+                                    </p-tag>
+                                    <app-bitacora-comment-button
+                                        [seccionCodigo]="seccionCodigo"
+                                        subseccionCodigo="justificacion"
+                                        [badge]="comentariosCounts()['justificacion'] || 0" />
+                                </div>
                             </div>
                         </p-accordion-header>
                         <p-accordion-content>
@@ -234,11 +252,17 @@
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
                                 <span>Contenidos</span>
-                                <p-tag
-                                    [severity]="getSeverity(getSectionProgress('contenidos')?.estado || 'sin_avances')"
-                                    [value]="getLabel(getSectionProgress('contenidos')?.estado || 'sin_avances')"
-                                    class="mr-2">
-                                </p-tag>
+                                <div class="flex items-center gap-2">
+                                    <p-tag
+                                        [severity]="getSeverity(getDisplayEstado('contenidos'))"
+                                        [value]="getLabel(getDisplayEstado('contenidos'))"
+                                        class="mr-2">
+                                    </p-tag>
+                                    <app-bitacora-comment-button
+                                        [seccionCodigo]="seccionCodigo"
+                                        subseccionCodigo="contenidos"
+                                        [badge]="comentariosCounts()['contenidos'] || 0" />
+                                </div>
                             </div>
                         </p-accordion-header>
                         <p-accordion-content>

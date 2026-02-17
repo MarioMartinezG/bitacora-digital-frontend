@@ -1,1 +1,108 @@
-<p>bibliografia-component works!</p>
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <p-fluid>
+        <p-card>
+            <!-- Sticky header -->
+            <div class="sticky-header">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-book text-primary text-2xl"></i>
+                        <div>
+                            <h3 class="m-0 text-lg font-semibold">Bibliografia</h3>
+                            <p class="m-0 text-sm text-color-secondary">
+                                Referencias bibliograficas del curso
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(progress().estado)"
+                                [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="general"
+                                [badge]="comentariosCounts()['general'] || 0" />
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <app-save-status-indicator
+                            [saveState]="saveState"
+                            (onRetry)="retryOnError()">
+                        </app-save-status-indicator>
+                        <p-button
+                            label="Guardar"
+                            icon="pi pi-save"
+                            (onClick)="saveManually()"
+                            [disabled]="!saveState.isDirty"
+                            size="small">
+                        </p-button>
+                    </div>
+                </div>
+            </div>
+
+            <form [formGroup]="form">
+                <div class="table-responsive">
+                    <table class="w-full" formArrayName="bibliografia">
+                        <thead>
+                            <tr>
+                                <th class="p-2" style="width: 3rem;">#</th>
+                                <th class="p-2" style="min-width: 12rem;">Autor(es)</th>
+                                <th class="p-2" style="min-width: 14rem;">Titulo</th>
+                                <th class="p-2" style="width: 6rem;">Año</th>
+                                <th class="p-2" style="min-width: 10rem;">Editorial</th>
+                                <th class="p-2" style="min-width: 12rem;">URL</th>
+                                <th class="p-2" style="width: 4rem;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (ref of bibliografiaFormArray.controls; track $index) {
+                                <tr [formGroupName]="$index" class="border-bottom-1 surface-border">
+                                    <td class="text-center font-semibold text-primary p-2">
+                                        {{ $index + 1 }}
+                                    </td>
+
+                                    <td class="p-2">
+                                        <input pInputText formControlName="autor"
+                                            placeholder="Apellido, Nombre" class="w-full" />
+                                    </td>
+
+                                    <td class="p-2">
+                                        <input pInputText formControlName="titulo"
+                                            placeholder="Titulo de la obra" class="w-full" />
+                                    </td>
+
+                                    <td class="p-2">
+                                        <input pInputText formControlName="year"
+                                            placeholder="2024" class="w-full" />
+                                    </td>
+
+                                    <td class="p-2">
+                                        <input pInputText formControlName="editorial"
+                                            placeholder="Editorial" class="w-full" />
+                                    </td>
+
+                                    <td class="p-2">
+                                        <input pInputText formControlName="url"
+                                            placeholder="https://..." class="w-full" />
+                                    </td>
+
+                                    <td class="text-center p-2">
+                                        <p-button icon="pi pi-trash" severity="danger" [text]="true"
+                                            (onClick)="eliminarReferencia($index)">
+                                        </p-button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+
+            <div class="mt-4">
+                <p-button icon="pi pi-plus" label="Agregar referencia" [outlined]="true"
+                    (onClick)="agregarReferencia()">
+                </p-button>
+            </div>
+        </p-card>
+    </p-fluid>
+}
