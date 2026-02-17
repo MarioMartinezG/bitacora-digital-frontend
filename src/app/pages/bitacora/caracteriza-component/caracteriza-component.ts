@@ -26,6 +26,7 @@ import { Justificationwidget } from './components/justificacion/justificationwid
 // Componentes comunes
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
+import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -59,7 +60,8 @@ import { EstadoAvance, calcularEstadoAvance } from '../../../core/models';
         Contentwidget,
         Justificationwidget,
         LoadingComponent,
-        SaveStatusIndicatorComponent
+        SaveStatusIndicatorComponent,
+        BitacoraCommentButtonComponent
     ],
     templateUrl: './caracteriza-component.html',
     styleUrl: './caracteriza-component.css'

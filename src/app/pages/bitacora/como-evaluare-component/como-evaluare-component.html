@@ -91,10 +91,16 @@
                                 <p-accordion-header>
                                     <div class="flex items-center justify-between w-full">
                                         <span>{{ grupo.titulo }}</span>
-                                        <p-tag
-                                            [severity]="getSeverity(getChecklistGrupoEstado($index))"
-                                            [value]="getLabel(getChecklistGrupoEstado($index))"
-                                            class="mr-2" />
+                                        <div class="flex items-center gap-2">
+                                            <p-tag
+                                                [severity]="getSeverity(getChecklistGrupoEstado($index))"
+                                                [value]="getLabel(getChecklistGrupoEstado($index))"
+                                                class="mr-2" />
+                                            <app-bitacora-comment-button
+                                                [seccionCodigo]="seccionCodigo"
+                                                [subseccionCodigo]="grupo.titulo"
+                                                [badge]="comentariosCounts()[grupo.titulo] || 0" />
+                                        </div>
                                     </div>
                                 </p-accordion-header>
 

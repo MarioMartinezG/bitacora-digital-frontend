@@ -7,10 +7,16 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <h4 class="m-0">Ajustes Razonables</h4>
-                    <p-tag
-                        [severity]="getSeverity(getAjustesProgress()?.estado || 'sin_avances')"
-                        [value]="getLabel(getAjustesProgress()?.estado || 'sin_avances') + ' (' + (getAjustesProgress()?.percentage || 0) + '%)'"
-                    />
+                    <div class="flex items-center gap-2">
+                        <p-tag
+                            [severity]="getSeverity(getDisplayEstado('ajustes'))"
+                            [value]="getLabel(getDisplayEstado('ajustes')) + ' (' + (getAjustesProgress()?.percentage || 0) + '%)'"
+                        />
+                        <app-bitacora-comment-button
+                            [seccionCodigo]="seccionCodigo"
+                            subseccionCodigo="ajustes"
+                            [badge]="comentariosCounts()['ajustes'] || 0" />
+                    </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <app-save-status-indicator

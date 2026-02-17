@@ -12,6 +12,7 @@ import { TagModule } from 'primeng/tag';
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
+import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -39,7 +40,8 @@ interface DimensionMeta {
     TextareaModule,
     TagModule,
     LoadingComponent,
-    SaveStatusIndicatorComponent
+    SaveStatusIndicatorComponent,
+    BitacoraCommentButtonComponent
   ],
   templateUrl: './actividades-aprendizaje-component.html',
   styleUrl: './actividades-aprendizaje-component.css'

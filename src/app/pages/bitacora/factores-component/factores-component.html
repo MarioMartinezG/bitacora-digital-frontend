@@ -29,10 +29,15 @@
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
                                 <span>a. Contexto Específico de la situación de Enseñanza/Aprendizaje.</span>
-                                <p-tag
-                                    [severity]="getSeverity(getSectionProgress('panel1')?.estado || 'sin_avances')"
-                                    [value]="getLabel(getSectionProgress('panel1')?.estado || 'sin_avances')"
-                                    class="mr-2" />
+                                <div class="flex items-center gap-2">
+                                    <p-tag
+                                        [severity]="getSeverity(getDisplayEstado('panel1'))"
+                                        [value]="getLabel(getDisplayEstado('panel1'))" />
+                                    <app-bitacora-comment-button
+                                        [seccionCodigo]="seccionCodigo"
+                                        subseccionCodigo="panel1"
+                                        [badge]="comentariosCounts()['panel1'] || 0" />
+                                </div>
                             </div>
                         </p-accordion-header>
                         <p-accordion-content>
@@ -125,10 +130,15 @@
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
                                 <span>b. Características de los estudiantes</span>
-                                <p-tag
-                                    [severity]="getSeverity(getSectionProgress('panel2')?.estado || 'sin_avances')"
-                                    [value]="getLabel(getSectionProgress('panel2')?.estado || 'sin_avances')"
-                                    class="mr-2" />
+                                <div class="flex items-center gap-2">
+                                    <p-tag
+                                        [severity]="getSeverity(getDisplayEstado('panel2'))"
+                                        [value]="getLabel(getDisplayEstado('panel2'))" />
+                                    <app-bitacora-comment-button
+                                        [seccionCodigo]="seccionCodigo"
+                                        subseccionCodigo="panel2"
+                                        [badge]="comentariosCounts()['panel2'] || 0" />
+                                </div>
                             </div>
                         </p-accordion-header>
 
@@ -174,10 +184,15 @@
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
                                 <span>c. Tus características como docente</span>
-                                <p-tag
-                                    [severity]="getSeverity(getSectionProgress('panel3')?.estado || 'sin_avances')"
-                                    [value]="getLabel(getSectionProgress('panel3')?.estado || 'sin_avances')"
-                                    class="mr-2" />
+                                <div class="flex items-center gap-2">
+                                    <p-tag
+                                        [severity]="getSeverity(getDisplayEstado('panel3'))"
+                                        [value]="getLabel(getDisplayEstado('panel3'))" />
+                                    <app-bitacora-comment-button
+                                        [seccionCodigo]="seccionCodigo"
+                                        subseccionCodigo="panel3"
+                                        [badge]="comentariosCounts()['panel3'] || 0" />
+                                </div>
                             </div>
                         </p-accordion-header>
 

@@ -12,6 +12,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
+import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
 import { DimensionEvaluacionWidget } from './components/dimension-evaluacion/dimension-evaluacion.widget';
 
 // Base
@@ -49,6 +50,7 @@ interface ChecklistGrupo {
     RadioButtonModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
+    BitacoraCommentButtonComponent,
     DimensionEvaluacionWidget
   ],
   templateUrl: './como-evaluare-component.html',

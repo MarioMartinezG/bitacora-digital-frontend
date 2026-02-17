@@ -1,14 +1,25 @@
-<div class="grid grid-cols-12 gap-8">
-    <div class="col-span-12">
-        <app-timeline-widget />
-    </div>
+@if (userRole === 1) {
+    <div class="grid grid-cols-12 gap-8">
         <div class="col-span-12">
-        <app-generalprogress-widget [secciones]="secciones"/>
+            <app-timeline-widget />
+        </div>
+        <div class="col-span-12">
+            <app-generalprogress-widget [secciones]="secciones"/>
+        </div>
+        <div class="col-span-12 xl:col-span-6">
+            <app-moduleprogress-widget [secciones]="secciones"/>
+        </div>
+        <div class="col-span-12 xl:col-span-6">
+            <app-notifications-widget />
+        </div>
     </div>
-    <div class="col-span-12 xl:col-span-6">
-        <app-moduleprogress-widget [secciones]="secciones"/>
+} @else {
+    <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 xl:col-span-8">
+            <app-student-progress-summary />
+        </div>
+        <div class="col-span-12 xl:col-span-4">
+            <app-notifications-widget />
+        </div>
     </div>
-    <div class="col-span-12 xl:col-span-6">
-        <app-notifications-widget />
-    </div>
-</div>
+}

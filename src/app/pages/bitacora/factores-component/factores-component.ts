@@ -15,6 +15,7 @@ import { TooltipModule } from 'primeng/tooltip';
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
+import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -34,7 +35,8 @@ import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.co
     TagModule,
     TooltipModule,
     LoadingComponent,
-    SaveStatusIndicatorComponent
+    SaveStatusIndicatorComponent,
+    BitacoraCommentButtonComponent
   ],
   templateUrl: './factores-component.html',
   styleUrl: './factores-component.css'

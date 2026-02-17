@@ -6,3 +6,6 @@ export * from './notification.model';
 export * from './tutor.model';
 export * from './save-state.model';
 export * from './section-progress.model';
+export * from './comentario-subseccion.model';
+export * from './estado-tutor-subseccion.model';
+export * from './estudiante-progreso.model';
