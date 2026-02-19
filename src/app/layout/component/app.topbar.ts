@@ -19,10 +19,10 @@ import { NotificationService } from '../../core/services/notification.service';
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
             </button>
-            <a class="layout-topbar-logo" routerLink="/">
-                
+            <span class="layout-topbar-logo" style="display: flex; align-items: center; gap: 0.5rem; cursor: default;">
+                <img src="ueb-escudo.jpg" alt="Escudo UEB" style="height: 2.5rem; width: auto; object-fit: contain;">
                 <span>Bitácora Digital</span>
-            </a>
+            </span>
         </div>
 
         <div class="layout-topbar-actions">
@@ -46,16 +46,10 @@ import { NotificationService } from '../../core/services/notification.service';
                 </div>
             </div>
 
-            <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
-                <i class="pi pi-ellipsis-v"></i>
-            </button>
+            
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
-                    </button>
                     <div class="relative">
                         <button
                             type="button"

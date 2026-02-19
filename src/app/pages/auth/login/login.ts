@@ -35,6 +35,7 @@ import { LoginRequest } from '../../../core/models';
     AppFloatingConfigurator,
     LoadingComponent],
   templateUrl: 'login.html',
+  styleUrl: 'login.scss',
 })
 export class LoginComponent {
   loginForm: FormGroup;
