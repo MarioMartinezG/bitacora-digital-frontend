@@ -1,0 +1,74 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# GCP Cloud Build – Pipeline CI/CD frontend (Angular + nginx)
+# Trigger: push a la rama develop
+#
+# Variables configuradas en el TRIGGER (no hardcodear aquí):
+#   _REGION        Región de GCP                    (ej: us-central1)
+#   _REPO          Repositorio en Artifact Registry  (ej: bitacora-digital)
+#   _SERVICE_NAME  Nombre del servicio en Cloud Run  (ej: bitacora-frontend)
+#   _BACKEND_URL   URL del backend en Cloud Run      (ej: https://bitacora-backend-xxxxx-uc.a.run.app)
+#
+# Variables automáticas de Cloud Build (no configurar):
+#   $PROJECT_ID    ID del proyecto GCP
+#   $SHORT_SHA     Hash corto del commit (sirve como tag de la imagen)
+# ──────────────────────────────────────────────────────────────────────────────
+
+steps:
+  # 1. Build de la imagen Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build'
+    args:
+      - 'build'
+      - '--tag'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+      - '--tag'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:latest'
+      - '.'
+
+  # 2. Push de ambos tags a Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push'
+    waitFor: ['build']
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE_NAME}'
+
+  # 3. Deploy en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy'
+    waitFor: ['push']
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--set-env-vars'
+      - 'BACKEND_URL=${_BACKEND_URL}'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '3'
+
+# Valores por defecto para las sustituciones.
+# _BACKEND_URL NO tiene default aquí — debe configurarse en el trigger.
+substitutions:
+  _REGION: us-central1
+  _REPO: bitacora-digital
+  _SERVICE_NAME: bitacora-frontend
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
