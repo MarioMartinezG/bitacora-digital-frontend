@@ -1,0 +1,24 @@
+# Dependencias (se instalan dentro del contenedor)
+node_modules/
+
+# Build anterior
+dist/
+
+# Control de versiones
+.git/
+.gitignore
+
+# Archivos de entorno locales
+.env
+.env.*
+
+# IDE y herramientas de desarrollo
+.vscode/
+.idea/
+*.log
+
+# Archivos de test y cobertura
+coverage/
+
+# Cache de Angular CLI
+.angular/
