@@ -86,16 +86,16 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
     // Opciones para autocomplete de programas
     programas = [
         { name: 'Medicina', code: 'MED' },
-        { name: 'Odontologia', code: 'ODO' },
-        { name: 'Psicologia', code: 'PSI' },
-        { name: 'Enfermeria', code: 'ENF' },
-        { name: 'Ingenieria de Sistemas', code: 'IS' },
-        { name: 'Ingenieria Industrial', code: 'II' },
+        { name: 'Odontología', code: 'ODO' },
+        { name: 'Psicología', code: 'PSI' },
+        { name: 'Enfermería', code: 'ENF' },
+        { name: 'Ingeniería de Sistemas', code: 'IS' },
+        { name: 'Ingeniería Industrial', code: 'II' },
         { name: 'Diseno Industrial', code: 'DI' },
-        { name: 'Administracion de Empresas', code: 'ADE' },
-        { name: 'Economia', code: 'ECO' },
-        { name: 'Arte dramatico', code: 'ART' },
-        { name: 'Musica', code: 'MUS' }
+        { name: 'Administración de Empresas', code: 'ADE' },
+        { name: 'Economía', code: 'ECO' },
+        { name: 'Arte dramático', code: 'ART' },
+        { name: 'Música', code: 'MUS' }
     ];
     filteredProgramas: any[] = [];
 

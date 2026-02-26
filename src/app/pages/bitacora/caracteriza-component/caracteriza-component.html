@@ -32,10 +32,9 @@
         <!-- Identificacion de la asignatura -->
         <div class="flex mt-4">
             <p-card class="w-full">
-                <p-fieldset legend="Identificacion de la asignatura" [toggleable]="true">
+                <p-fieldset legend="Identificación de la asignatura" [toggleable]="true">
                     <ng-template pTemplate="header">
                         <div class="flex items-center gap-2">
-                            <span>Identificacion de la asignatura</span>
                             <div class="flex items-center gap-2">
                                 <p-tag
                                     [severity]="getSeverity(getDisplayEstado('datosBasicos'))"
@@ -98,7 +97,7 @@
                                 </p-inputNumber>
                             </div>
 
-                            <label class="flex items-center col-span-12 md:col-span-2">Periodo Academico</label>
+                            <label class="flex items-center col-span-12 md:col-span-2">Periodo Académico</label>
                             <div class="col-span-12 md:col-span-4">
                                 <p-select
                                     formControlName="periodoAcademico"
@@ -131,7 +130,7 @@
                         </div>
 
                         <div class="grid grid-cols-12 gap-4">
-                            <label class="flex items-center col-span-12 md:col-span-2">Numero de creditos</label>
+                            <label class="flex items-center col-span-12 md:col-span-2">Número de créditos</label>
                             <div class="col-span-12 md:col-span-4">
                                 <p-inputNumber
                                     formControlName="numeroCreditos"
@@ -193,7 +192,7 @@
 
         <!-- Informacion Academica -->
         <div class="flex mt-8">
-            <p-card header="Informacion Academica" class="w-full">
+            <p-card header="Información Académica" class="w-full">
                 <p-accordion [value]="['0']" [multiple]="true">
                     <!-- Equipo Docente (persistencia propia) -->
                     <p-accordion-panel value="0">
@@ -224,7 +223,7 @@
                     <p-accordion-panel value="1">
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
-                                <span>Justificacion</span>
+                                <span>Justificación</span>
                                 <div class="flex items-center gap-2">
                                     <p-tag
                                         [severity]="getSeverity(getDisplayEstado('justificacion'))"
