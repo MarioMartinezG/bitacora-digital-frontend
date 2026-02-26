@@ -1,7 +1,7 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <p-button label="Nuevo Tema" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNewTopic()" />
-        <p-button label="New Subtema" icon="pi pi-plus" severity="secondary" outlined (click)="openNewSubtopic()"
+        <p-button label="Nuevo Subtema" icon="pi pi-plus" severity="secondary" outlined (click)="openNewSubtopic()"
             [disabled]="!topics || topics.length === 0" tooltip="Se tiene que crear por lo menos un tema primero"
             tooltipPosition="top" />
     </ng-template>
@@ -11,7 +11,7 @@
     <ng-template #header>
         <tr>
             <th>#</th>
-            <th>Modulo/Unidad/Tema</th>
+            <th>Módulo/Unidad/Tema</th>
             <th>Acciones Tema</th>
             <th>Subtema</th>
             <th>Acciones Subtema</th>

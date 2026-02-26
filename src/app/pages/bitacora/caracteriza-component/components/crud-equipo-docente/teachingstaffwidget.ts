@@ -201,7 +201,9 @@ export class Teachingstaffwidget implements OnInit {
                             this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Docente eliminado', life: 3000 });
                         });
                 }
-            }
+            },
+            acceptLabel: 'Si',
+            rejectLabel: 'No'
         });
     }
     roles: { label: string; value: string }[] = [

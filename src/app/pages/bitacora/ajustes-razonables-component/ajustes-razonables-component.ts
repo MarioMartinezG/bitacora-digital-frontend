@@ -54,17 +54,17 @@ export class AjustesRazonablesComponent extends BaseBitacoraComponent implements
 
   ajustesData = [
     { desde: 'Los contenidos', ajuste: 'Proporcionar materiales en formatos accesibles (braille, audio, digital)' },
-    { desde: 'Los contenidos', ajuste: 'Simplificar el lenguaje tecnico.' },
-    { desde: 'Los contenidos', ajuste: 'Utilizar imagenes descriptivas y diagramas.' },
-    { desde: 'Los contenidos', ajuste: 'Ofrecer resumenes o guias de estudio.' },
-    { desde: 'Las actividades', ajuste: 'Permitir la participacion en grupos de trabajo con apoyo.' },
-    { desde: 'Las actividades', ajuste: 'Adaptar las tareas segun las habilidades del estudiante' },
+    { desde: 'Los contenidos', ajuste: 'Simplificar el lenguaje técnico.' },
+    { desde: 'Los contenidos', ajuste: 'Utilizar imágenes descriptivas y diagramas.' },
+    { desde: 'Los contenidos', ajuste: 'Ofrecer resúmenes o guías de estudio.' },
+    { desde: 'Las actividades', ajuste: 'Permitir la participación en grupos de trabajo con apoyo.' },
+    { desde: 'Las actividades', ajuste: 'Adaptar las tareas según las habilidades del estudiante' },
     { desde: 'Las actividades', ajuste: 'Ofrecer opciones de entrega de tareas (oral, escrita, digital)' },
-    { desde: 'La evaluacion', ajuste: 'Extender el tiempo para realizar las evaluaciones.' },
-    { desde: 'La evaluacion', ajuste: 'Permitir el uso de herramientas tecnologicas.' },
-    { desde: 'La evaluacion', ajuste: 'Ofrecer opciones de evaluacion alternativas.' },
-    { desde: 'Las dinamicas', ajuste: 'Proporcionar apoyo adicional en clase (tutorias, asistentes personales).' },
-    { desde: 'Las dinamicas', ajuste: 'Facilitar la comunicacion por correo electronico, chat, videoconferencias.' },
+    { desde: 'La evaluación', ajuste: 'Extender el tiempo para realizar las evaluaciones.' },
+    { desde: 'La evaluación', ajuste: 'Permitir el uso de herramientas tecnológicas.' },
+    { desde: 'La evaluación', ajuste: 'Ofrecer opciones de evaluación alternativas.' },
+    { desde: 'Las dinamicas', ajuste: 'Proporcionar apoyo adicional en clase (tutorías, asistentes personales).' },
+    { desde: 'Las dinamicas', ajuste: 'Facilitar la comunicación por correo electrónico, chat, videoconferencias.' },
     { desde: 'Las dinamicas', ajuste: 'Crear un ambiente de aula inclusivo y respetuoso.' },
   ];
 
