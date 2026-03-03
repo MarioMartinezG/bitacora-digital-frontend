@@ -1,4 +1,6 @@
-export type { AuthSuccessResponse, AuthErrorResponse, LogoutResponse } from './auth-response';
+export type { AuthSuccessResponse, AuthErrorResponse, LogoutResponse, User } from './auth-response';
+export { normalizeUserRoles } from './auth-response';
+export { UserRole, ROLE_LABELS } from './role.model';
 export type { ApiError, ApiResponse } from './api-response';
 export type { LoginRequest } from './login-request.model';
 export type * from './bitacora.model';
@@ -9,3 +11,6 @@ export * from './section-progress.model';
 export * from './comentario-subseccion.model';
 export * from './estado-tutor-subseccion.model';
 export * from './estudiante-progreso.model';
+export * from './usuario.model';
+export * from './asignatura.model';
+export * from './estadisticas.model';

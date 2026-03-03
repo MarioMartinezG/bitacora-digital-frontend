@@ -1,0 +1,45 @@
+<div class="flex flex-col gap-4">
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" (onClick)="volver()" />
+    @if (cargando()) {
+      <p-skeleton width="12rem" height="1.5rem" />
+    } @else if (nombreEstudiante()) {
+      <div>
+        <h3 class="m-0">{{ nombreEstudiante() }}</h3>
+        <span class="text-surface-400 text-sm">{{ correoEstudiante() }}</span>
+      </div>
+    }
+    <span class="ml-auto text-surface-400 text-sm">
+      <i class="pi pi-eye mr-1"></i> Solo lectura
+    </span>
+  </div>
+
+  <!-- Section cards -->
+  @if (cargando()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+        <p-card>
+          <p-skeleton height="6rem" />
+        </p-card>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      @for (seccion of secciones(); track seccion.codigo) {
+        <p-card [style]="{ cursor: 'pointer' }" (click)="verSeccion(seccion.codigo)" styleClass="hover:shadow-lg transition-shadow">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-sm">{{ seccion.nombre }}</span>
+              <p-tag [severity]="getSeverity(seccion.estado)" [value]="getLabel(seccion.estado)" />
+            </div>
+            <p-progressbar [value]="seccion.porcentaje" [showValue]="true" styleClass="h-5" />
+            <div class="flex justify-end">
+              <p-button icon="pi pi-eye" label="Ver" size="small" [text]="true" />
+            </div>
+          </div>
+        </p-card>
+      }
+    </div>
+  }
+</div>

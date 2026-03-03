@@ -1,18 +1,38 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, BehaviorSubject, tap, finalize } from 'rxjs';
-import { AuthSuccessResponse, LoginRequest, LogoutResponse } from '../models';
+import { AuthSuccessResponse, LoginRequest, LogoutResponse, normalizeUserRoles } from '../models';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BaseHttpService } from './base-http.service';
+import { AuthStateService } from './auth-state.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginService extends BaseHttpService {
+  private authStateService = inject(AuthStateService);
+
   private tokenKey = 'auth_token';
   private refreshTokenKey = 'refresh_token';
   private userKey = 'user_data';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+
+  constructor(http: HttpClient) {
+    super(http);
+    this.loadStoredUser();
+  }
+
+  private loadStoredUser(): void {
+    const userData = this.getUser();
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        this.authStateService.setUser(user);
+      } catch {
+        this.clearAuthData();
+      }
+    }
+  }
 
   login(loginData: LoginRequest): Observable<AuthSuccessResponse> {
     return this.post<AuthSuccessResponse>(`/api/auth/login`, loginData)
@@ -61,6 +81,7 @@ export class LoginService extends BaseHttpService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.refreshTokenKey);
     localStorage.removeItem(this.userKey);
+    this.authStateService.clearUser();
     this.isAuthenticatedSubject.next(false);
   }
 
@@ -73,9 +94,13 @@ export class LoginService extends BaseHttpService {
   }
 
   private storeAuthData(response: AuthSuccessResponse): void {
+    const normalizedUser = normalizeUserRoles(response.user);
+
     localStorage.setItem(this.tokenKey, response.access_token);
     localStorage.setItem(this.refreshTokenKey, response.refresh_token);
-    localStorage.setItem(this.userKey, JSON.stringify(response.user));
+    localStorage.setItem(this.userKey, JSON.stringify(normalizedUser));
+
+    this.authStateService.setUser(normalizedUser);
   }
 
   private getRefreshToken(): string | null {
