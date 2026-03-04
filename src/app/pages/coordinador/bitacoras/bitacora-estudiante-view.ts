@@ -21,7 +21,7 @@ interface SeccionInfo {
 }
 
 const SECCIONES_BITACORA: { codigo: string; nombre: string }[] = [
-  { codigo: 'caracteriza', nombre: 'Caracteriza tu Asignatura' },
+  { codigo: 'caracteriza', nombre: 'Identificación de tu curso' },
   { codigo: 'factores', nombre: 'Factores Situacionales' },
   { codigo: 'ajustes', nombre: 'Ambientes Sanos y Seguros' },
   { codigo: 'rap-rac', nombre: 'RAP y RAC' },

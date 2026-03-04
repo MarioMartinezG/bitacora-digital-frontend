@@ -5,6 +5,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AccordionModule } from 'primeng/accordion';
+import { MessageModule } from 'primeng/message';
 import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
 import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
@@ -29,7 +30,7 @@ interface PanelView {
 @Component({
     selector: 'app-tutor-revision-seccion',
     standalone: true,
-    imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, CommentThreadComponent, EstadoTutorSelectorComponent],
+    imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, CommentThreadComponent, EstadoTutorSelectorComponent],
     template: `
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
@@ -51,35 +52,48 @@ interface PanelView {
                                     <div class="flex items-center justify-between w-full gap-2">
                                         <span>{{ panel.label }}</span>
                                         <div class="flex items-center gap-2">
-                                            <app-estado-tutor-selector
-                                                [estudianteId]="estudianteId"
-                                                [seccionCodigo]="seccionCodigo"
-                                                [subseccionCodigo]="panel.key"
-                                                [estadoActual]="getEstadoTutor(panel.key)" />
+                                            <div (click)="$event.stopPropagation()">
+                                                <app-estado-tutor-selector
+                                                    [estudianteId]="estudianteId"
+                                                    [seccionCodigo]="seccionCodigo"
+                                                    [subseccionCodigo]="panel.key"
+                                                    [estadoActual]="getEstadoInicial(panel)" />
+                                            </div>
                                             <p-button icon="pi pi-comments" [rounded]="true" [text]="true" severity="secondary" [badge]="getComentarioCount(panel.key)" badgeSeverity="info" (onClick)="abrirComentarios(panel.key); $event.stopPropagation()" />
                                         </div>
                                     </div>
                                 </p-accordion-header>
                                 <p-accordion-content>
                                     <div class="pt-4">
+
                                         <!-- FIELDS: key-value pairs -->
                                         @if (panel.displayType === 'fields' && panel.fields) {
-                                            <div class="flex flex-col gap-4">
-                                                @for (campo of panel.fields; track campo.key) {
-                                                    @if (campo.value) {
+                                            @if (panelSinContenido(panel)) {
+                                                <p-message severity="secondary" icon="pi pi-info-circle" styleClass="w-full">
+                                                    <span>El estudiante aún no ha diligenciado esta sección.</span>
+                                                </p-message>
+                                            } @else {
+                                                <div class="flex flex-col gap-4">
+                                                    @for (campo of panel.fields; track campo.key) {
                                                         <div class="flex flex-col gap-1">
                                                             <label class="font-medium text-sm text-surface-500">{{ campo.label }}</label>
-                                                            <div class="p-3 bg-surface-50 rounded-lg border border-surface-200 text-sm whitespace-pre-wrap">{{ campo.value }}</div>
+                                                            @if (campo.value) {
+                                                                <div class="p-3 bg-surface-50 rounded-lg border border-surface-200 text-sm whitespace-pre-wrap">{{ campo.value }}</div>
+                                                            } @else {
+                                                                <div class="p-3 bg-surface-50 rounded-lg border border-surface-200 text-sm text-surface-400 italic">—</div>
+                                                            }
                                                         </div>
                                                     }
-                                                }
-                                            </div>
+                                                </div>
+                                            }
                                         }
 
                                         <!-- TABLE: array of objects -->
                                         @if (panel.displayType === 'table' && panel.rows && panel.columns) {
                                             @if (panel.rows.length === 0) {
-                                                <p class="text-surface-400 text-sm italic">Sin registros</p>
+                                                <p-message severity="secondary" icon="pi pi-info-circle" styleClass="w-full">
+                                                    <span>El estudiante aún no ha diligenciado esta sección.</span>
+                                                </p-message>
                                             } @else {
                                                 <div class="overflow-x-auto">
                                                     <table class="w-full border-collapse">
@@ -107,7 +121,9 @@ interface PanelView {
                                         <!-- LIST: array of strings -->
                                         @if (panel.displayType === 'list') {
                                             @if (!panel.listItems || panel.listItems.length === 0) {
-                                                <p class="text-surface-400 text-sm italic">Sin registros</p>
+                                                <p-message severity="secondary" icon="pi pi-info-circle" styleClass="w-full">
+                                                    <span>El estudiante aún no ha diligenciado esta sección.</span>
+                                                </p-message>
                                             } @else {
                                                 <ul class="list-disc pl-6">
                                                     @for (item of panel.listItems; track $index) {
@@ -190,56 +206,68 @@ export class TutorRevisionSeccion implements OnInit {
     private construirPaneles(datos: any): void {
         const seccionLabels = BITACORA_LABELS[this.seccionCodigo] || {};
         const panelesResult: PanelView[] = [];
+        this.panelValues = [];
 
         if (typeof datos !== 'object' || datos === null) {
-            this.paneles.set([]);
-            return;
+            datos = {};
         }
 
-        Object.keys(datos).forEach(panelKey => {
-            const panelData = datos[panelKey];
-            const meta: PanelMeta | undefined = seccionLabels[panelKey];
-            const panelLabel = meta?.panelLabel || panelKey;
-            const displayType = meta?.displayType || this.inferDisplayType(panelData);
+        // Iterar primero sobre los paneles definidos en BITACORA_LABELS (garantiza orden
+        // y muestra todos los paneles aunque el estudiante no haya guardado datos aún)
+        const labelKeys = Object.keys(seccionLabels);
+        const procesados = new Set<string>();
 
-            const panel: PanelView = {
-                key: panelKey,
-                label: panelLabel,
-                displayType
-            };
+        for (const panelKey of labelKeys) {
+            const panelData = datos[panelKey] ?? {};
+            this.procesarPanel(panelKey, panelData, seccionLabels, panelesResult);
+            procesados.add(panelKey);
+        }
 
-            switch (displayType) {
-                case 'table':
-                    panel.columns = meta?.columns || this.inferColumns(panelData);
-                    if (panelKey === 'contenidos' && !Array.isArray(panelData) && panelData?.topics) {
-                        panel.rows = this.flattenContenidos(panelData);
-                    } else {
-                        panel.rows = Array.isArray(panelData) ? panelData : [];
-                    }
-                    break;
-
-                case 'list':
-                    panel.listItems = this.extractListItems(panelData);
-                    break;
-
-                case 'info':
-                    const count = typeof panelData === 'object' && panelData?.count != null
-                        ? panelData.count
-                        : (Array.isArray(panelData) ? panelData.length : 0);
-                    panel.infoText = `${count} ${meta?.infoLabel || 'registros'}`;
-                    break;
-
-                case 'fields':
-                default:
-                    panel.fields = this.buildFieldViews(panelKey, panelData, meta);
-                    break;
-            }
-
-            panelesResult.push(panel);
-            this.panelValues.push(panelKey);
-        });
+        // Agregar paneles extra que existan en datos pero no en labels
+        for (const panelKey of Object.keys(datos)) {
+            if (procesados.has(panelKey)) continue;
+            this.procesarPanel(panelKey, datos[panelKey], seccionLabels, panelesResult);
+        }
 
         this.paneles.set(panelesResult);
+    }
+
+    private procesarPanel(panelKey: string, panelData: any, seccionLabels: any, panelesResult: PanelView[]): void {
+        const meta: PanelMeta | undefined = seccionLabels[panelKey];
+        const panelLabel = meta?.panelLabel || panelKey;
+        const displayType = meta?.displayType || this.inferDisplayType(panelData);
+
+        const panel: PanelView = { key: panelKey, label: panelLabel, displayType };
+
+        switch (displayType) {
+            case 'table':
+                panel.columns = meta?.columns || this.inferColumns(panelData);
+                if (panelKey === 'contenidos' && !Array.isArray(panelData) && panelData?.topics) {
+                    panel.rows = this.flattenContenidos(panelData);
+                } else {
+                    panel.rows = Array.isArray(panelData) ? panelData : [];
+                }
+                break;
+
+            case 'list':
+                panel.listItems = this.extractListItems(panelData);
+                break;
+
+            case 'info':
+                const count = typeof panelData === 'object' && panelData?.count != null
+                    ? panelData.count
+                    : (Array.isArray(panelData) ? panelData.length : 0);
+                panel.infoText = `${count} ${meta?.infoLabel || 'registros'}`;
+                break;
+
+            case 'fields':
+            default:
+                panel.fields = this.buildFieldViews(panelKey, panelData, meta);
+                break;
+        }
+
+        panelesResult.push(panel);
+        this.panelValues.push(panelKey);
     }
 
     /** Determina cómo mostrar un panel basado en la estructura de sus datos */
@@ -250,7 +278,6 @@ export class TutorRevisionSeccion implements OnInit {
             if (typeof data[0] === 'object') return 'table';
         }
         if (typeof data === 'object' && data !== null) {
-            // Si tiene solo 'count', es info
             const keys = Object.keys(data);
             if (keys.length === 1 && keys[0] === 'count') return 'info';
             return 'fields';
@@ -274,41 +301,42 @@ export class TutorRevisionSeccion implements OnInit {
         return [];
     }
 
-    /** Construye la lista de campos con sus valores formateados */
+    /** Construye la lista de campos con sus valores formateados.
+     *  Siempre incluye los campos definidos en meta, aunque el estudiante no los haya llenado. */
     private buildFieldViews(panelKey: string, panelData: any, meta?: PanelMeta): { key: string; label: string; value: string }[] {
-        if (typeof panelData !== 'object' || panelData === null || Array.isArray(panelData)) {
-            return [];
-        }
+        const safeData = (typeof panelData === 'object' && panelData !== null && !Array.isArray(panelData))
+            ? panelData : {};
 
         const fieldLabels = meta?.fields || {};
         const result: { key: string; label: string; value: string }[] = [];
 
-        // Si hay campos definidos en meta, usar ese orden; sino usar las keys del dato
-        const keys = Object.keys(fieldLabels).length > 0
-            ? Object.keys(fieldLabels)
-            : Object.keys(panelData);
+        const metaKeys = Object.keys(fieldLabels);
 
-        for (const key of keys) {
-            if (!(key in panelData)) continue;
-            const rawValue = panelData[key];
-            // Omitir campos de control booleanos (otroMedio, otraTecnica, etc.) que son solo toggles
-            if (typeof rawValue === 'boolean' && !fieldLabels[key]) continue;
-
-            const label = fieldLabels[key] || key;
-            const value = this.formatAnyValue(rawValue);
-
-            // No agregar si el valor es vacío/nulo y no tiene label definido
-            if (!value && !fieldLabels[key]) continue;
-
-            result.push({ key, label, value });
-        }
-
-        // Si hay keys en panelData que no estaban en fieldLabels, agregarlas al final
-        if (Object.keys(fieldLabels).length > 0) {
-            for (const key of Object.keys(panelData)) {
-                if (key in fieldLabels) continue; // ya procesada
-                const rawValue = panelData[key];
-                if (typeof rawValue === 'boolean') continue; // skip toggles
+        if (metaKeys.length > 0) {
+            // Campos definidos en meta: siempre se muestran aunque estén vacíos
+            for (const key of metaKeys) {
+                const rawValue = safeData[key] ?? null;
+                if (typeof rawValue === 'boolean' && !fieldLabels[key]) continue;
+                result.push({
+                    key,
+                    label: fieldLabels[key] || key,
+                    value: this.formatAnyValue(rawValue)
+                });
+            }
+            // Campos extra en datos que no estaban en meta (con valor)
+            for (const key of Object.keys(safeData)) {
+                if (key in fieldLabels) continue;
+                const rawValue = safeData[key];
+                if (typeof rawValue === 'boolean') continue;
+                const value = this.formatAnyValue(rawValue);
+                if (!value) continue;
+                result.push({ key, label: key, value });
+            }
+        } else {
+            // Sin meta: usar solo las claves de los datos que tienen valor
+            for (const key of Object.keys(safeData)) {
+                const rawValue = safeData[key];
+                if (typeof rawValue === 'boolean') continue;
                 const value = this.formatAnyValue(rawValue);
                 if (!value) continue;
                 result.push({ key, label: key, value });
@@ -318,54 +346,64 @@ export class TutorRevisionSeccion implements OnInit {
         return result;
     }
 
+    /** Indica si un panel de tipo fields no tiene ningún campo con valor */
+    panelSinContenido(panel: PanelView): boolean {
+        if (panel.displayType !== 'fields' || !panel.fields) return false;
+        return panel.fields.every(f => !f.value);
+    }
+
+    /** Calcula el estado del estudiante a partir de los datos cargados del panel */
+    getEstadoEstudiante(panel: PanelView): EstadoAvance {
+        switch (panel.displayType) {
+            case 'fields': {
+                if (!panel.fields || panel.fields.length === 0) return 'sin_avances';
+                const conValor = panel.fields.filter(f => f.value).length;
+                if (conValor === 0) return 'sin_avances';
+                if (conValor === panel.fields.length) return 'completado';
+                return 'en_desarrollo';
+            }
+            case 'table':
+                if (!panel.rows || panel.rows.length === 0) return 'sin_avances';
+                return 'completado';
+            case 'list':
+                if (!panel.listItems || panel.listItems.length === 0) return 'sin_avances';
+                return 'completado';
+            default:
+                return 'sin_avances';
+        }
+    }
+
     /** Formatea cualquier valor para mostrarlo como texto legible */
     formatAnyValue(val: any): string {
         if (val === null || val === undefined || val === '') return '';
 
-        // Boolean
         if (typeof val === 'boolean') return val ? 'Sí' : 'No';
-
-        // Number
         if (typeof val === 'number') return val.toString();
 
-        // String → buscar en SELECT_VALUE_LABELS
         if (typeof val === 'string') {
             return SELECT_VALUE_LABELS[val] || val;
         }
 
-        // Array
         if (Array.isArray(val)) {
             if (val.length === 0) return '';
-            // Array de strings
             if (typeof val[0] === 'string') {
                 return val.map(v => SELECT_VALUE_LABELS[v] || v).join(', ');
             }
-            // Array de objects con .name
             if (typeof val[0] === 'object' && val[0]?.name) {
                 return val.map((v: any) => v.name).join(', ');
             }
-            // Array de objects con .label
             if (typeof val[0] === 'object' && val[0]?.label) {
                 return val.map((v: any) => v.label).join(', ');
             }
-            // Array de objects con .value
             if (typeof val[0] === 'object' && val[0]?.value && !val[0]?.name && !val[0]?.label) {
                 return val.map((v: any) => SELECT_VALUE_LABELS[v.value] || v.value).join(', ');
             }
             return val.map((v: any) => this.formatAnyValue(v)).join(', ');
         }
 
-        // Object con .name (selects de p-select/p-autoComplete)
-        if (typeof val === 'object' && val.name) {
-            return val.name;
-        }
+        if (typeof val === 'object' && val.name) return val.name;
+        if (typeof val === 'object' && val.label) return val.label;
 
-        // Object con .label
-        if (typeof val === 'object' && val.label) {
-            return val.label;
-        }
-
-        // Object genérico: mostrar sus valores
         if (typeof val === 'object') {
             const entries = Object.entries(val)
                 .filter(([, v]) => v !== null && v !== undefined && v !== '' && v !== false)
@@ -388,6 +426,15 @@ export class TutorRevisionSeccion implements OnInit {
     getEstadoTutor(subseccionCodigo: string): EstadoAvance {
         const estado = this.estadosTutor().find(e => e.subseccionCodigo === subseccionCodigo);
         return (estado?.estado as EstadoAvance) || 'sin_avances';
+    }
+
+    /** Retorna el estado del tutor si ya lo asignó; si no, usa el estado del estudiante como valor inicial */
+    getEstadoInicial(panel: PanelView): EstadoAvance {
+        const estadoTutor = this.estadosTutor().find(e => e.subseccionCodigo === panel.key);
+        if (estadoTutor) {
+            return estadoTutor.estado as EstadoAvance;
+        }
+        return this.getEstadoEstudiante(panel);
     }
 
     getComentarioCount(subseccionCodigo: string): string {
@@ -432,7 +479,7 @@ export class TutorRevisionSeccion implements OnInit {
 
     private getNombreSeccion(codigo: string): string {
         const nombres: Record<string, string> = {
-            'caracteriza': 'Caracteriza tu Asignatura',
+            'caracteriza': 'Identificación de tu curso',
             'factores': 'Factores Situacionales',
             'ajustes': 'Ambientes Sanos y Seguros',
             'rap-rac': 'RAP y RAC',

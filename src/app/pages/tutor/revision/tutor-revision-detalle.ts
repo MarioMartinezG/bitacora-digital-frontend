@@ -18,7 +18,7 @@ interface SeccionInfo {
 }
 
 const SECCIONES_NOMBRES: Record<string, string> = {
-    'caracteriza': 'Caracteriza tu Asignatura',
+    'caracteriza': 'Identificación de tu curso',
     'factores': 'Factores Situacionales',
     'ajustes': 'Ambientes Sanos y seguros',
     'rap-rac': 'RAP y RAC',

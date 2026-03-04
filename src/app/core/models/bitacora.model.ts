@@ -56,7 +56,7 @@ export interface EstadoSeccion {
 // Interfaces JSON por Sección
 // ============================================
 
-/** Sección 1: Caracteriza (seccion_id: 1) */
+/** Sección 1: Identificación de tu curso (seccion_id: 1) */
 export interface CaracterizaJson {
     datosBasicos: {
         programa?: string;
@@ -67,25 +67,9 @@ export interface CaracterizaJson {
         horasPresenciales?: number;
         horasIndependientes?: number;
     };
-    equipoDocente: EquipoDocenteItem[];
-    contenidos: {
-        temas: string[];
-        subtemas: string[];
-    };
     justificacion: {
-        respuesta1?: string;
-        respuesta2?: string;
-        respuesta3?: string;
+        respuesta?: string;
     };
-}
-
-export interface EquipoDocenteItem {
-    rol?: string;
-    name?: string;
-    email?: string;
-    days?: string[];
-    schedule?: string;
-    site?: string;
 }
 
 /** Sección 2: Factores (seccion_id: 2) */

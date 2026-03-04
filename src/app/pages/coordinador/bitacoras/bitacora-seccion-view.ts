@@ -5,6 +5,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AccordionModule } from 'primeng/accordion';
+import { MessageModule } from 'primeng/message';
 import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
 import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
@@ -27,7 +28,7 @@ interface PanelView {
 }
 
 const SECCIONES_NOMBRES: Record<string, string> = {
-  'caracteriza': 'Caracteriza tu Asignatura',
+  'caracteriza': 'Identificación de tu curso',
   'factores': 'Factores Situacionales',
   'ajustes': 'Ambientes Sanos y Seguros',
   'rap-rac': 'RAP y RAC',
@@ -41,7 +42,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
   selector: 'app-bitacora-seccion-view',
   templateUrl: './bitacora-seccion-view.html',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, CommentThreadComponent, EstadoTutorSelectorComponent]
+  imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, CommentThreadComponent, EstadoTutorSelectorComponent]
 })
 export class BitacoraSeccionView implements OnInit {
   private route = inject(ActivatedRoute);
@@ -99,49 +100,67 @@ export class BitacoraSeccionView implements OnInit {
   private construirPaneles(datos: any): void {
     const seccionLabels = BITACORA_LABELS[this.seccionCodigo] || {};
     const panelesResult: PanelView[] = [];
+    this.panelValues = [];
 
     if (typeof datos !== 'object' || datos === null) {
-      this.paneles.set([]);
-      return;
+      datos = {};
     }
 
-    Object.keys(datos).forEach(panelKey => {
-      const panelData = datos[panelKey];
-      const meta: PanelMeta | undefined = seccionLabels[panelKey];
-      const panelLabel = meta?.panelLabel || panelKey;
-      const displayType = meta?.displayType || this.inferDisplayType(panelData);
+    // Iterar primero sobre los paneles definidos en BITACORA_LABELS para garantizar
+    // que se muestren todos aunque el estudiante no haya guardado datos aún
+    const labelKeys = Object.keys(seccionLabels);
+    const procesados = new Set<string>();
 
-      const panel: PanelView = { key: panelKey, label: panelLabel, displayType };
+    for (const panelKey of labelKeys) {
+      const panelData = datos[panelKey] ?? {};
+      this.procesarPanel(panelKey, panelData, seccionLabels, panelesResult);
+      procesados.add(panelKey);
+    }
 
-      switch (displayType) {
-        case 'table':
-          panel.columns = meta?.columns || this.inferColumns(panelData);
-          if (panelKey === 'contenidos' && !Array.isArray(panelData) && panelData?.topics) {
-            panel.rows = this.flattenContenidos(panelData);
-          } else {
-            panel.rows = Array.isArray(panelData) ? panelData : [];
-          }
-          break;
-        case 'list':
-          panel.listItems = Array.isArray(panelData) ? panelData.map((item: any) => typeof item === 'string' ? item : this.formatAnyValue(item)) : [];
-          break;
-        case 'info':
-          const count = typeof panelData === 'object' && panelData?.count != null
-            ? panelData.count
-            : (Array.isArray(panelData) ? panelData.length : 0);
-          panel.infoText = `${count} ${meta?.infoLabel || 'registros'}`;
-          break;
-        case 'fields':
-        default:
-          panel.fields = this.buildFieldViews(panelKey, panelData, meta);
-          break;
-      }
-
-      panelesResult.push(panel);
-      this.panelValues.push(panelKey);
-    });
+    // Agregar paneles extra que existan en datos pero no en labels
+    for (const panelKey of Object.keys(datos)) {
+      if (procesados.has(panelKey)) continue;
+      this.procesarPanel(panelKey, datos[panelKey], seccionLabels, panelesResult);
+    }
 
     this.paneles.set(panelesResult);
+  }
+
+  private procesarPanel(panelKey: string, panelData: any, seccionLabels: any, panelesResult: PanelView[]): void {
+    const meta: PanelMeta | undefined = seccionLabels[panelKey];
+    const panelLabel = meta?.panelLabel || panelKey;
+    const displayType = meta?.displayType || this.inferDisplayType(panelData);
+
+    const panel: PanelView = { key: panelKey, label: panelLabel, displayType };
+
+    switch (displayType) {
+      case 'table':
+        panel.columns = meta?.columns || this.inferColumns(panelData);
+        if (panelKey === 'contenidos' && !Array.isArray(panelData) && panelData?.topics) {
+          panel.rows = this.flattenContenidos(panelData);
+        } else {
+          panel.rows = Array.isArray(panelData) ? panelData : [];
+        }
+        break;
+      case 'list':
+        panel.listItems = Array.isArray(panelData)
+          ? panelData.map((item: any) => typeof item === 'string' ? item : this.formatAnyValue(item))
+          : [];
+        break;
+      case 'info':
+        const count = typeof panelData === 'object' && panelData?.count != null
+          ? panelData.count
+          : (Array.isArray(panelData) ? panelData.length : 0);
+        panel.infoText = `${count} ${meta?.infoLabel || 'registros'}`;
+        break;
+      case 'fields':
+      default:
+        panel.fields = this.buildFieldViews(panelKey, panelData, meta);
+        break;
+    }
+
+    panelesResult.push(panel);
+    this.panelValues.push(panelKey);
   }
 
   private inferDisplayType(data: any): 'fields' | 'table' | 'list' | 'info' {
@@ -165,27 +184,34 @@ export class BitacoraSeccionView implements OnInit {
     return [];
   }
 
+  /** Siempre incluye los campos definidos en meta, aunque el estudiante no los haya llenado */
   private buildFieldViews(panelKey: string, panelData: any, meta?: PanelMeta): { key: string; label: string; value: string }[] {
-    if (typeof panelData !== 'object' || panelData === null || Array.isArray(panelData)) return [];
+    const safeData = (typeof panelData === 'object' && panelData !== null && !Array.isArray(panelData))
+      ? panelData : {};
 
     const fieldLabels = meta?.fields || {};
     const result: { key: string; label: string; value: string }[] = [];
-    const keys = Object.keys(fieldLabels).length > 0 ? Object.keys(fieldLabels) : Object.keys(panelData);
+    const metaKeys = Object.keys(fieldLabels);
 
-    for (const key of keys) {
-      if (!(key in panelData)) continue;
-      const rawValue = panelData[key];
-      if (typeof rawValue === 'boolean' && !fieldLabels[key]) continue;
-      const label = fieldLabels[key] || key;
-      const value = this.formatAnyValue(rawValue);
-      if (!value && !fieldLabels[key]) continue;
-      result.push({ key, label, value });
-    }
-
-    if (Object.keys(fieldLabels).length > 0) {
-      for (const key of Object.keys(panelData)) {
+    if (metaKeys.length > 0) {
+      // Campos definidos en meta: siempre se muestran aunque estén vacíos
+      for (const key of metaKeys) {
+        const rawValue = safeData[key] ?? null;
+        if (typeof rawValue === 'boolean' && !fieldLabels[key]) continue;
+        result.push({ key, label: fieldLabels[key] || key, value: this.formatAnyValue(rawValue) });
+      }
+      // Campos extra en datos no definidos en meta (con valor)
+      for (const key of Object.keys(safeData)) {
         if (key in fieldLabels) continue;
-        const rawValue = panelData[key];
+        const rawValue = safeData[key];
+        if (typeof rawValue === 'boolean') continue;
+        const value = this.formatAnyValue(rawValue);
+        if (!value) continue;
+        result.push({ key, label: key, value });
+      }
+    } else {
+      for (const key of Object.keys(safeData)) {
+        const rawValue = safeData[key];
         if (typeof rawValue === 'boolean') continue;
         const value = this.formatAnyValue(rawValue);
         if (!value) continue;
@@ -194,6 +220,40 @@ export class BitacoraSeccionView implements OnInit {
     }
 
     return result;
+  }
+
+  /** Indica si un panel de tipo fields no tiene ningún campo con valor */
+  panelSinContenido(panel: PanelView): boolean {
+    if (panel.displayType !== 'fields' || !panel.fields) return false;
+    return panel.fields.every(f => !f.value);
+  }
+
+  /** Calcula el estado del estudiante a partir de los datos cargados del panel */
+  getEstadoEstudiante(panel: PanelView): EstadoAvance {
+    switch (panel.displayType) {
+      case 'fields': {
+        if (!panel.fields || panel.fields.length === 0) return 'sin_avances';
+        const conValor = panel.fields.filter(f => f.value).length;
+        if (conValor === 0) return 'sin_avances';
+        if (conValor === panel.fields.length) return 'completado';
+        return 'en_desarrollo';
+      }
+      case 'table':
+        return (!panel.rows || panel.rows.length === 0) ? 'sin_avances' : 'completado';
+      case 'list':
+        return (!panel.listItems || panel.listItems.length === 0) ? 'sin_avances' : 'completado';
+      default:
+        return 'sin_avances';
+    }
+  }
+
+  /** Retorna el estado del tutor si ya lo asignó; si no, usa el estado del estudiante como valor inicial */
+  getEstadoInicial(panel: PanelView): EstadoAvance {
+    const estadoTutor = this.estadosTutor().find(e => e.subseccionCodigo === panel.key);
+    if (estadoTutor) {
+      return estadoTutor.estado as EstadoAvance;
+    }
+    return this.getEstadoEstudiante(panel);
   }
 
   formatAnyValue(val: any): string {
