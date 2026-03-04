@@ -1,0 +1,133 @@
+<p-toast />
+
+<div class="flex flex-col gap-6">
+  <!-- Title -->
+  <h2 class="text-2xl font-semibold m-0">Dashboard del Coordinador</h2>
+
+  <!-- Row 1: Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    @if (loading()) {
+      @for (_ of [1,2,3,4]; track $index) {
+        <p-card>
+          <p-skeleton height="4rem" />
+        </p-card>
+      }
+    } @else {
+      @for (card of statsCards(); track card.label) {
+        <p-card>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-sm text-surface-500">{{ card.label }}</span>
+              <div class="text-3xl font-bold mt-1">{{ card.value }}</div>
+            </div>
+            <div
+              class="flex items-center justify-center rounded-full w-12 h-12"
+              [ngClass]="{
+                'bg-blue-100 text-blue-600': card.color === 'blue',
+                'bg-green-100 text-green-600': card.color === 'green',
+                'bg-orange-100 text-orange-600': card.color === 'orange',
+                'bg-red-100 text-red-600': card.color === 'red'
+              }"
+            >
+              <i [class]="card.icon" class="text-2xl"></i>
+            </div>
+          </div>
+        </p-card>
+      }
+    }
+  </div>
+
+  <!-- Row 2: Chart + Alerts -->
+  <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+    <!-- Bar Chart -->
+    <div class="xl:col-span-8">
+      <p-card header="Progreso por sección">
+        @if (loading()) {
+          <p-skeleton height="20rem" />
+        } @else if (chartData()) {
+          <div style="height: 22rem;">
+            <p-chart type="bar" [data]="chartData()!" [options]="chartOptions" height="100%" />
+          </div>
+        }
+      </p-card>
+    </div>
+
+    <!-- Alerts Panel -->
+    <div class="xl:col-span-4">
+      <p-card header="Alertas">
+        @if (loading()) {
+          @for (_ of [1,2,3]; track $index) {
+            <div class="mb-4">
+              <p-skeleton height="3.5rem" />
+            </div>
+          }
+        } @else if (alertasPendientes().length === 0) {
+          <div class="text-center py-6 text-surface-500">
+            <i class="pi pi-check-circle text-4xl mb-2 text-green-500"></i>
+            <p class="mt-2">No hay alertas pendientes</p>
+          </div>
+        } @else {
+          <div class="flex flex-col gap-3">
+            @for (alerta of alertasPendientes(); track alerta.id) {
+              <div class="flex items-start gap-3 p-3 border border-surface-200 rounded-lg">
+                <i [class]="getTipoIcon(alerta.tipo)" class="text-lg mt-0.5"></i>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="font-semibold text-sm truncate">{{ alerta.titulo }}</span>
+                    <p-tag
+                      [severity]="getPrioridadSeverity(alerta.prioridad)"
+                      [value]="getPrioridadLabel(alerta.prioridad)"
+                      [rounded]="true"
+                      class="text-xs"
+                    />
+                  </div>
+                  <p class="text-sm text-surface-500 m-0 line-clamp-2">{{ alerta.mensaje }}</p>
+                  <div class="flex items-center justify-between mt-2">
+                    <span class="text-xs text-surface-400">{{ alerta.fechaCreacion | date:'short' }}</span>
+                    <p-button
+                      label="Resolver"
+                      severity="secondary"
+                      [text]="true"
+                      size="small"
+                      (onClick)="resolverAlerta(alerta)"
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Row 3: Progress Bars by Section -->
+  <p-card header="Completitud por sección">
+    @if (loading()) {
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="mb-4">
+          <p-skeleton height="2.5rem" />
+        </div>
+      }
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (seccion of seccionesOrdenadas(); track seccion.seccionCodigo) {
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-medium text-sm">{{ seccion.seccionNombre }}</span>
+              <span class="text-sm text-surface-500">
+                {{ seccion.completados }}/{{ seccion.totalEstudiantes }} completados
+                ({{ seccion.porcentajeCompletado }}%)
+              </span>
+            </div>
+            <p-progressbar
+              [value]="seccion.porcentajeCompletado"
+              [showValue]="false"
+              styleClass="h-2"
+            />
+          </div>
+        }
+      </div>
+    }
+  </p-card>
+</div>

@@ -1,0 +1,103 @@
+<p-toast />
+
+<div class="max-w-2xl mx-auto">
+  <p-card [header]="titulo">
+    @if (cargando()) {
+      <div class="flex flex-col gap-4">
+        <p-skeleton height="3rem" />
+        <p-skeleton height="3rem" />
+        <p-skeleton height="5rem" />
+        <p-skeleton height="3rem" />
+        <p-skeleton height="3rem" />
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+
+        <div class="flex flex-col gap-1">
+          <label for="codigo" class="font-medium">Código <span class="text-red-500">*</span></label>
+          <input
+            pInputText
+            id="codigo"
+            formControlName="codigo"
+            placeholder="Ej: MAT-101"
+            [class.ng-invalid]="isFieldInvalid('codigo')"
+            [class.ng-dirty]="isFieldInvalid('codigo')"
+          />
+          @if (isFieldInvalid('codigo')) {
+            <small class="text-red-500">El código es requerido</small>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="nombre" class="font-medium">Nombre <span class="text-red-500">*</span></label>
+          <input
+            pInputText
+            id="nombre"
+            formControlName="nombre"
+            placeholder="Nombre de la asignatura"
+            [class.ng-invalid]="isFieldInvalid('nombre')"
+            [class.ng-dirty]="isFieldInvalid('nombre')"
+          />
+          @if (isFieldInvalid('nombre')) {
+            <small class="text-red-500">El nombre es requerido</small>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="descripcion" class="font-medium">Descripción</label>
+          <textarea
+            pInputText
+            id="descripcion"
+            formControlName="descripcion"
+            placeholder="Descripción de la asignatura (opcional)"
+            rows="3"
+            style="resize: vertical;"
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label for="creditos" class="font-medium">Créditos</label>
+            <input
+              pInputText
+              id="creditos"
+              type="number"
+              formControlName="creditos"
+              placeholder="Número de créditos"
+              min="1"
+              max="20"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="semestre" class="font-medium">Semestre</label>
+            <input
+              pInputText
+              id="semestre"
+              type="number"
+              formControlName="semestre"
+              placeholder="Número de semestre"
+              min="1"
+              max="10"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-4">
+          <p-button
+            type="button"
+            label="Cancelar"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="cancelar()"
+          />
+          <p-button
+            type="submit"
+            [label]="isEditMode() ? 'Actualizar' : 'Crear'"
+            [loading]="guardando()"
+          />
+        </div>
+
+      </form>
+    }
+  </p-card>
+</div>

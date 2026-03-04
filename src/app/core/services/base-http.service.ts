@@ -1,9 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ApiError } from '../models';
-import { LoginService } from './login.service';
 
 @Injectable({
   providedIn: 'root'
@@ -92,6 +91,10 @@ export abstract class BaseHttpService {
 
   protected delete<T>(url: string, options: { headers?: HttpHeaders, params?: HttpParams } = {}): Observable<T> {
     return this.handleRequest<T>(this.http.delete<T>(url, options));
+  }
+
+  protected patch<T>(url: string, body: any, options: { headers?: HttpHeaders, params?: HttpParams } = {}): Observable<T> {
+    return this.handleRequest<T>(this.http.patch<T>(url, body, options));
   }
 
   // 🔧 MÉTODOS SIN HEADERS (para compatibilidad)

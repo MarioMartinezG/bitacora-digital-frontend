@@ -22,6 +22,12 @@ export class TutorReviewService extends BaseHttpService {
         );
     }
 
+    obtenerProgresoIndividual(estudianteId: number): Observable<EstudianteProgresoResumenDTO> {
+        return this.get<EstudianteProgresoResumenDTO>(
+            `/api/bitacora/progreso/usuario/${estudianteId}`
+        );
+    }
+
     obtenerRespuestasEstudiante(estudianteId: number, seccionCodigo: string): Observable<RespuestaSeccionDTO> {
         return this.get<RespuestaSeccionDTO>(
             `/api/bitacora/secciones/${seccionCodigo}/usuario/${estudianteId}`
