@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -9,16 +9,11 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { CardModule } from 'primeng/card';
 import { FieldsetModule } from 'primeng/fieldset';
-import { AccordionModule } from 'primeng/accordion';
 import { TagModule } from 'primeng/tag';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { MessageModule } from 'primeng/message';
-
-// Widgets (con persistencia propia)
-import { Teachingstaffwidget } from './components/crud-equipo-docente/teachingstaffwidget';
-import { Contentwidget } from './components/contenido/contentwidget';
 
 // Widgets (integrados al formulario)
 import { Justificationwidget } from './components/justificacion/justificationwidget';
@@ -31,12 +26,8 @@ import { BitacoraCommentButtonComponent } from '../../../shared/components/bitac
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 
-// Services
-import { ContentService } from '../../../core/services/content.service';
-import { TeachingStaffService } from '../../../core/services/teachingstaff.service';
-
 // Models
-import { EstadoAvance, calcularEstadoAvance } from '../../../core/models';
+import { calcularEstadoAvance } from '../../../core/models';
 
 @Component({
     selector: 'app-caracteriza-component',
@@ -50,14 +41,11 @@ import { EstadoAvance, calcularEstadoAvance } from '../../../core/models';
         SelectModule,
         CardModule,
         FieldsetModule,
-        AccordionModule,
         TagModule,
         AutoCompleteModule,
         InputNumberModule,
         ToggleButtonModule,
         MessageModule,
-        Teachingstaffwidget,
-        Contentwidget,
         Justificationwidget,
         LoadingComponent,
         SaveStatusIndicatorComponent,
@@ -68,20 +56,13 @@ import { EstadoAvance, calcularEstadoAvance } from '../../../core/models';
 })
 export class CaracterizaComponent extends BaseBitacoraComponent implements OnInit, OnDestroy {
     private fb = inject(FormBuilder);
-    private contentService = inject(ContentService);
-    private teachingStaffService = inject(TeachingStaffService);
-    private contentSubscription: Subscription | null = null;
-    private teachingStaffSubscription: Subscription | null = null;
+    private horasSubscriptions: Subscription[] = [];
 
     // Codigo de seccion
     protected seccionCodigo = 'caracteriza';
 
     // Configuracion de secciones para calculo de progreso
     protected sectionsConfig: SectionConfig[] = [];
-
-    // Conteo de registros de secciones con persistencia propia
-    equipoDocenteCount = signal(0);
-    contenidosCount = signal(0);
 
     // Opciones para autocomplete de programas
     programas = [
@@ -117,8 +98,24 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
         return creditos * 48;
     }
 
-    // Getter para validar horas
+    // Hay algún campo de horas con valor negativo
+    get errorHorasNegativas(): boolean {
+        const horasDirecto = this.form.get('datosBasicos.horasDirecto')?.value ?? 0;
+        const horasIndependiente = this.form.get('datosBasicos.horasIndependiente')?.value ?? 0;
+        return horasDirecto < 0 || horasIndependiente < 0;
+    }
+
+    // Algún campo supera el total de horas disponibles
+    get errorHorasExcedidas(): boolean {
+        if (this.totalHoras <= 0) return false;
+        const horasDirecto = this.form.get('datosBasicos.horasDirecto')?.value ?? 0;
+        const horasIndependiente = this.form.get('datosBasicos.horasIndependiente')?.value ?? 0;
+        return horasDirecto > this.totalHoras || horasIndependiente > this.totalHoras;
+    }
+
+    // La suma no coincide con el total (caso: créditos cambiaron después de ingresar horas)
     get errorHoras(): boolean {
+        if (this.errorHorasNegativas || this.errorHorasExcedidas) return false;
         const horasDirecto = this.form.get('datosBasicos.horasDirecto')?.value || 0;
         const horasIndependiente = this.form.get('datosBasicos.horasIndependiente')?.value || 0;
         return (horasDirecto + horasIndependiente) !== this.totalHoras && this.totalHoras > 0;
@@ -132,42 +129,37 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
         const prerequisitoControl = this.form.get('datosBasicos.prerequisito');
         const materiaControl = this.form.get('datosBasicos.materiaPrerequisito');
         if (prerequisitoControl && materiaControl) {
-            // Estado inicial
             prerequisitoControl.value ? materiaControl.enable() : materiaControl.disable();
-            // Escuchar cambios
             prerequisitoControl.valueChanges.subscribe(value => {
                 value ? materiaControl.enable() : materiaControl.disable();
             });
         }
 
-        // Sincronizar cambios CRUD al form control oculto
-        // Esto dispara el auto-save cuando el usuario agrega/edita/elimina registros
-        this.teachingStaffSubscription = this.teachingStaffService.dataChanged$.subscribe(() => {
-            this.form.get('equipoDocente')?.setValue(this.teachingStaffService.getData());
-        });
-        this.contentSubscription = this.contentService.dataChanged$.subscribe(() => {
-            this.form.get('contenidos')?.setValue(this.contentService.getData());
-        });
+        // Auto-cálculo de horas complementarias
+        const horasDirectoCtrl = this.form.get('datosBasicos.horasDirecto');
+        const horasIndependienteCtrl = this.form.get('datosBasicos.horasIndependiente');
+
+        if (horasDirectoCtrl && horasIndependienteCtrl) {
+            this.horasSubscriptions.push(
+                horasDirectoCtrl.valueChanges.subscribe(value => {
+                    if (value === null || value === undefined || value < 0) return;
+                    const total = this.totalHoras;
+                    if (total <= 0 || value > total) return;
+                    horasIndependienteCtrl.setValue(total - value, { emitEvent: false });
+                }),
+                horasIndependienteCtrl.valueChanges.subscribe(value => {
+                    if (value === null || value === undefined || value < 0) return;
+                    const total = this.totalHoras;
+                    if (total <= 0 || value > total) return;
+                    horasDirectoCtrl.setValue(total - value, { emitEvent: false });
+                })
+            );
+        }
     }
 
     override ngOnDestroy(): void {
-        this.teachingStaffSubscription?.unsubscribe();
-        this.contentSubscription?.unsubscribe();
+        this.horasSubscriptions.forEach(s => s.unsubscribe());
         super.ngOnDestroy();
-    }
-
-    /**
-     * Override: al cargar datos del backend, hidratar ContentService
-     * con los temas/subtemas guardados en el JSON
-     */
-    protected override patchFormWithData(data: any): void {
-        if (data.equipoDocente) {
-            this.teachingStaffService.loadFromData(data.equipoDocente);
-        }
-        if (data.contenidos) {
-            this.contentService.loadFromData(data.contenidos);
-        }
-        super.patchFormWithData(data);
     }
 
     private initPeriodos(): void {
@@ -195,39 +187,16 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
                 horasIndependiente: [0]
             }),
             justificacion: this.fb.group({
-                respuesta1: [''],
-                respuesta2: [''],
-                respuesta3: ['']
-            }),
-            equipoDocente: [null],
-            contenidos: [null]
+                respuesta: ['']
+            })
         });
     }
 
-    /** Deriva el estado a partir de un conteo de registros (0 = sin_avances, 1+ = completado) */
-    getEstadoFromCount(count: number): EstadoAvance {
-        return count > 0 ? 'completado' : 'sin_avances';
-    }
-
-    /** Callback cuando cambia el conteo de registros en widgets con persistencia propia */
-    onRecordCountChange(section: 'equipoDocente' | 'contenidos', count: number): void {
-        if (section === 'equipoDocente') {
-            this.equipoDocenteCount.set(count);
-        } else {
-            this.contenidosCount.set(count);
-        }
-        this.calculateProgress();
-    }
-
-    /**
-     * Sobrescribimos calculateProgress
-     */
     protected override calculateProgress(): void {
         const datosBasicosFields = [
             'programa', 'nombreAsignatura', 'tipoAsignatura', 'semestre',
             'periodoAcademico', 'numeroCreditos', 'horasDirecto', 'horasIndependiente'
         ];
-        const justificacionFields = ['respuesta1', 'respuesta2', 'respuesta3'];
 
         // Calcular progreso de datos basicos
         let datosCompletados = 0;
@@ -238,23 +207,13 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
         });
         const datosPercentage = Math.round((datosCompletados / datosBasicosFields.length) * 100);
 
-        // Calcular progreso de justificacion
-        let justCompletados = 0;
-        const justGroup = this.form.get('justificacion');
-        justificacionFields.forEach(field => {
-            const value = justGroup?.get(field)?.value;
-            if (value && value.trim().length > 0) justCompletados++;
-        });
-        const justPercentage = Math.round((justCompletados / justificacionFields.length) * 100);
+        // Calcular progreso de justificacion (1 campo)
+        const respuesta = this.form.get('justificacion.respuesta')?.value;
+        const justCompletado = respuesta && respuesta.trim().length > 0 ? 1 : 0;
+        const justPercentage = justCompletado * 100;
 
-        // Progreso de secciones con persistencia propia (binario: 0% o 100%)
-        const equipoDocentePercentage = this.equipoDocenteCount() > 0 ? 100 : 0;
-        const contenidosPercentage = this.contenidosCount() > 0 ? 100 : 0;
-
-        // Progreso total (promedio de 4 secciones)
-        const totalPercentage = Math.round(
-            (datosPercentage + justPercentage + equipoDocentePercentage + contenidosPercentage) / 4
-        );
+        // Progreso total (promedio de 2 secciones)
+        const totalPercentage = Math.round((datosPercentage + justPercentage) / 2);
 
         this._progress.set({
             sections: [
@@ -266,25 +225,11 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
                     estado: calcularEstadoAvance(datosPercentage)
                 },
                 {
-                    sectionName: 'equipoDocente',
-                    completedFields: this.equipoDocenteCount() > 0 ? 1 : 0,
-                    totalFields: 1,
-                    percentage: equipoDocentePercentage,
-                    estado: calcularEstadoAvance(equipoDocentePercentage)
-                },
-                {
                     sectionName: 'justificacion',
-                    completedFields: justCompletados,
-                    totalFields: justificacionFields.length,
+                    completedFields: justCompletado,
+                    totalFields: 1,
                     percentage: justPercentage,
                     estado: calcularEstadoAvance(justPercentage)
-                },
-                {
-                    sectionName: 'contenidos',
-                    completedFields: this.contenidosCount() > 0 ? 1 : 0,
-                    totalFields: 1,
-                    percentage: contenidosPercentage,
-                    estado: calcularEstadoAvance(contenidosPercentage)
                 }
             ],
             totalPercentage,
@@ -305,17 +250,5 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
         this.filteredProgramas = this.programas.filter(p =>
             p.name.toLowerCase().includes(query)
         );
-    }
-
-    // Getter para total caracteres de justificacion
-    get totalCaracteresJustificacion(): number {
-        const j = this.form.get('justificacion');
-        return (j?.get('respuesta1')?.value?.length || 0) +
-               (j?.get('respuesta2')?.value?.length || 0) +
-               (j?.get('respuesta3')?.value?.length || 0);
-    }
-
-    get errorCaracteresJustificacion(): boolean {
-        return this.totalCaracteresJustificacion > 900;
     }
 }

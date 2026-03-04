@@ -6,7 +6,7 @@
     <div class="sticky-header-global">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <h3 class="m-0">Caracteriza tu curso</h3>
+                <h3 class="m-0">Identificación de tu curso</h3>
                 <p-tag
                     [severity]="getSeverity(progress().estado)"
                     [value]="getLabel(progress().estado) + ' (' + progress().totalPercentage + '%)'">
@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <form [formGroup]="form">
+    <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
         <!-- Identificacion de la asignatura -->
         <div class="flex mt-4">
             <p-card class="w-full">
@@ -48,6 +48,13 @@
                             </div>
                         </div>
                     </ng-template>
+
+                    <p-message severity="info" styleClass="w-full mb-4" icon="pi pi-lightbulb">
+                        <span>
+                            Llena el espacio de <strong>IDENTIFICACIÓN DE TU CURSO</strong> informando
+                            sus características generales que están declaradas en el plan de estudios del programa.
+                        </span>
+                    </p-message>
 
                     <div formGroupName="datosBasicos" class="card flex flex-col gap-4">
                         <div class="grid grid-cols-12 gap-4">
@@ -129,7 +136,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-12 gap-4">
+                        <div class="grid grid-cols-12 gap-4 items-center">
                             <label class="flex items-center col-span-12 md:col-span-2">Número de créditos</label>
                             <div class="col-span-12 md:col-span-4">
                                 <p-inputNumber
@@ -178,99 +185,56 @@
                             </div>
                         </div>
 
+                        <!-- Mensajes de validación de horas -->
+                        @if (errorHorasNegativas) {
+                            <p-message severity="error" icon="pi pi-times-circle" styleClass="w-full">
+                                <span>Las horas de trabajo no pueden ser negativas.</span>
+                            </p-message>
+                        }
+                        @if (errorHorasExcedidas) {
+                            <p-message severity="error" icon="pi pi-times-circle" styleClass="w-full">
+                                <span>
+                                    Ningún campo puede superar el total de <strong>{{ totalHoras }} horas</strong>.
+                                    Verifica los valores ingresados.
+                                </span>
+                            </p-message>
+                        }
                         @if (errorHoras) {
-                            <div class="text-red-500 mt-2">
-                                <p-message severity="error">
-                                    La suma de horas directas e independientes debe ser exactamente {{ totalHoras }}.
-                                </p-message>
-                            </div>
+                            <p-message severity="error" icon="pi pi-times-circle" styleClass="w-full">
+                                <span>
+                                    La suma de horas directas e independientes debe ser exactamente
+                                    <strong>{{ totalHoras }}</strong>. Es posible que hayas cambiado el número
+                                    de créditos después de ingresar las horas.
+                                </span>
+                            </p-message>
                         }
                     </div>
                 </p-fieldset>
             </p-card>
         </div>
 
-        <!-- Informacion Academica -->
+        <!-- Justificacion -->
         <div class="flex mt-8">
-            <p-card header="Información Académica" class="w-full">
-                <p-accordion [value]="['0']" [multiple]="true">
-                    <!-- Equipo Docente (persistencia propia) -->
-                    <p-accordion-panel value="0">
-                        <p-accordion-header>
-                            <div class="flex items-center justify-between w-full">
-                                <span>Equipo Docente</span>
-                                <div class="flex items-center gap-2">
-                                    <p-tag
-                                        [severity]="getSeverity(getDisplayEstado('equipoDocente'))"
-                                        [value]="getLabel(getDisplayEstado('equipoDocente'))"
-                                        class="mr-2">
-                                    </p-tag>
-                                    <app-bitacora-comment-button
-                                        [seccionCodigo]="seccionCodigo"
-                                        subseccionCodigo="equipoDocente"
-                                        [badge]="comentariosCounts()['equipoDocente'] || 0" />
-                                </div>
-                            </div>
-                        </p-accordion-header>
-                        <p-accordion-content>
-                            <app-teachingstaffwidget
-                                (recordCount)="onRecordCountChange('equipoDocente', $event)">
-                            </app-teachingstaffwidget>
-                        </p-accordion-content>
-                    </p-accordion-panel>
+            <p-card class="w-full">
+                <p-fieldset legend="Justificación" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('justificacion'))"
+                                [value]="getLabel(getDisplayEstado('justificacion'))"
+                                size="small">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="justificacion"
+                                [badge]="comentariosCounts()['justificacion'] || 0" />
+                        </div>
+                    </ng-template>
 
-                    <!-- Justificacion -->
-                    <p-accordion-panel value="1">
-                        <p-accordion-header>
-                            <div class="flex items-center justify-between w-full">
-                                <span>Justificación</span>
-                                <div class="flex items-center gap-2">
-                                    <p-tag
-                                        [severity]="getSeverity(getDisplayEstado('justificacion'))"
-                                        [value]="getLabel(getDisplayEstado('justificacion'))"
-                                        class="mr-2">
-                                    </p-tag>
-                                    <app-bitacora-comment-button
-                                        [seccionCodigo]="seccionCodigo"
-                                        subseccionCodigo="justificacion"
-                                        [badge]="comentariosCounts()['justificacion'] || 0" />
-                                </div>
-                            </div>
-                        </p-accordion-header>
-                        <p-accordion-content>
-                            <app-justificationwidget
-                                [formGroup]="justificacionFormGroup"
-                                [totalCaracteres]="totalCaracteresJustificacion"
-                                [errorCaracteres]="errorCaracteresJustificacion">
-                            </app-justificationwidget>
-                        </p-accordion-content>
-                    </p-accordion-panel>
-
-                    <!-- Contenidos (persistencia propia) -->
-                    <p-accordion-panel value="2">
-                        <p-accordion-header>
-                            <div class="flex items-center justify-between w-full">
-                                <span>Contenidos</span>
-                                <div class="flex items-center gap-2">
-                                    <p-tag
-                                        [severity]="getSeverity(getDisplayEstado('contenidos'))"
-                                        [value]="getLabel(getDisplayEstado('contenidos'))"
-                                        class="mr-2">
-                                    </p-tag>
-                                    <app-bitacora-comment-button
-                                        [seccionCodigo]="seccionCodigo"
-                                        subseccionCodigo="contenidos"
-                                        [badge]="comentariosCounts()['contenidos'] || 0" />
-                                </div>
-                            </div>
-                        </p-accordion-header>
-                        <p-accordion-content>
-                            <app-contentwidget
-                                (recordCount)="onRecordCountChange('contenidos', $event)">
-                            </app-contentwidget>
-                        </p-accordion-content>
-                    </p-accordion-panel>
-                </p-accordion>
+                    <app-justificationwidget
+                        [formGroup]="justificacionFormGroup">
+                    </app-justificationwidget>
+                </p-fieldset>
             </p-card>
         </div>
     </form>

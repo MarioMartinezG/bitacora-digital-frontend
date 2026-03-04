@@ -73,35 +73,12 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
                 'horasIndependiente': 'Horas de trabajo independiente'
             }
         },
-        'equipoDocente': {
-            panelLabel: 'Equipo Docente',
-            displayType: 'table',
-            columns: [
-                { key: 'rol', label: 'Cargo' },
-                { key: 'name', label: 'Nombre' },
-                { key: 'email', label: 'Correo' },
-                { key: 'attention', label: 'Atención' },
-                { key: 'days', label: 'Días' },
-                { key: 'schedule', label: 'Horario' },
-                { key: 'site', label: 'Lugar asignado' }
-            ]
-        },
         'justificacion': {
             panelLabel: 'Justificación',
             displayType: 'fields',
             fields: {
-                'respuesta1': 'Respuesta 1',
-                'respuesta2': 'Respuesta 2',
-                'respuesta3': 'Respuesta 3'
+                'respuesta': 'Justificación'
             }
-        },
-        'contenidos': {
-            panelLabel: 'Contenidos',
-            displayType: 'table',
-            columns: [
-                { key: 'tema', label: 'Módulo/Unidad/Tema' },
-                { key: 'subtema', label: 'Subtema' }
-            ]
         }
     },
 
