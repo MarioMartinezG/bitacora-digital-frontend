@@ -2,103 +2,370 @@
     <app-loading></app-loading>
 } @else {
     <p-fluid>
-        <p-card>
-            <!-- Header sticky -->
-            <div class="sticky-header">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <i class="pi pi-list text-primary text-2xl"></i>
-                        <h4 class="m-0">Actividades de aprendizaje</h4>
-                        <p-tag
-                            [severity]="getSeverity(progress().estado)"
-                            [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <app-save-status-indicator
-                            [saveState]="saveState"
-                            (onRetry)="retryOnError()">
-                        </app-save-status-indicator>
-                        <p-button
-                            label="Guardar"
-                            icon="pi pi-save"
-                            (onClick)="saveManually()"
-                            [disabled]="!saveState.isDirty"
-                            size="small">
-                        </p-button>
-                    </div>
+
+        <!-- Sticky header global -->
+        <div class="sticky-header-global">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h3 class="m-0">Actividades de aprendizaje</h3>
+                    <p-tag
+                        [severity]="getSeverity(progress().estado)"
+                        [value]="getLabel(progress().estado) + ' (' + progress().totalPercentage + '%)'">
+                    </p-tag>
+                </div>
+                <div class="flex items-center gap-3">
+                    <app-save-status-indicator
+                        [saveState]="saveState"
+                        (onRetry)="retryOnError()">
+                    </app-save-status-indicator>
+                    <p-button
+                        label="Guardar"
+                        icon="pi pi-save"
+                        (onClick)="saveManually()"
+                        [disabled]="!saveState.isDirty"
+                        size="small">
+                    </p-button>
                 </div>
             </div>
+        </div>
 
-            <p class="text-sm text-gray-600 mb-5">
-                Los resultados de aprendizaje se cargan automáticamente desde el módulo RAC.
-                Selecciona la metodología y describe las actividades para cada dimensión.
-            </p>
+        <div class="flex flex-col gap-4">
 
-            <form [formGroup]="form">
-                <div formArrayName="dimensiones" class="flex flex-col gap-5">
-                    @for (dim of dimensionesFormArray.controls; track $index) {
-                        <p-card class="shadow-sm border-round-lg">
-                            <!-- Header de dimensión: icono + nombre + tag -->
-                            <div class="flex justify-between items-center mb-3">
-                                <div class="flex items-center gap-3">
-                                    <i [class]="dimensionMeta[$index].icon + ' ' + dimensionMeta[$index].iconColor"
-                                       style="font-size: 1.5rem"></i>
-                                    <h3 class="m-0 text-lg font-semibold">
-                                        {{ dimensionMeta[$index].dimension }}
-                                    </h3>
+            <!-- ===== CARD 1: INSTRUCCIONES ===== -->
+            <p-card class="w-full">
+                <p-fieldset legend="Instrucciones" [toggleable]="true">
+                    <div class="flex flex-col gap-4">
+
+                        <!-- Intro text -->
+                        <div class="flex flex-col gap-1">
+                            <p class="m-0 text-sm">
+                                Esta herramienta te permitirá organizar tus actividades de aprendizaje según las
+                                <strong>dimensiones del aprendizaje significativo</strong>. Con ella podrás planear
+                                experiencias de clase variadas y retadoras para tus estudiantes.
+                            </p>
+                        </div>
+
+                        <!-- Step cards grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            @for (step of instructionSteps; track $index) {
+                                <div class="instruction-step">
+                                    <div class="step-icon-wrap">
+                                        <i [class]="step.icon + ' ' + step.iconColor" style="font-size: 1.1rem"></i>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-xs font-semibold text-surface-500 uppercase tracking-wide">
+                                            Paso {{ $index + 1 }}
+                                        </span>
+                                        <p class="m-0 text-sm">{{ step.text }}</p>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <p-tag
-                                        [severity]="getSeverity(getDisplayEstado(dimensionMeta[$index].dimension))"
-                                        [value]="getLabel(getDisplayEstado(dimensionMeta[$index].dimension))"
-                                        class="mr-2" />
-                                    <app-bitacora-comment-button
-                                        [seccionCodigo]="seccionCodigo"
-                                        [subseccionCodigo]="dimensionMeta[$index].dimension"
-                                        [badge]="comentariosCounts()[dimensionMeta[$index].dimension] || 0" />
-                                </div>
-                            </div>
+                            }
+                        </div>
 
-                            <!-- Grid interno con campos -->
-                            <div [formGroupName]="$index" class="grid grid-cols-3 gap-4">
-                                <!-- Labels -->
-                                <label class="font-medium text-center">Resultado de Aprendizaje</label>
-                                <label class="font-medium text-center">Metodología</label>
-                                <label class="font-medium text-center">Descripción de las actividades</label>
+                    </div>
+                </p-fieldset>
+            </p-card>
 
-                                <!-- Resultado (readonly) -->
-                                <div class="text-sm text-gray-700">
-                                    {{ dimensionMeta[$index].resultado }}
-                                </div>
+            <!-- ===== CARD 2: PLANIFICACIÓN (CARD-PICKER + FORMULARIO) ===== -->
+            <p-card class="w-full">
+                <p-fieldset legend="Planifica tus actividades de aprendizaje" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('actividades'))"
+                                [value]="getLabel(getDisplayEstado('actividades'))"
+                                size="small">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="actividades"
+                                [badge]="comentariosCounts()['actividades'] || 0" />
+                        </div>
+                    </ng-template>
 
-                                <!-- Metodología -->
-                                <div>
-                                    <p-select
-                                        [options]="metodologias"
-                                        optionLabel="label"
-                                        optionValue="value"
-                                        formControlName="metodologia"
-                                        placeholder="Seleccione una metodología"
-                                        class="w-full">
-                                    </p-select>
-                                </div>
+                    <!-- Loading factores -->
+                    @if (!factoresLoaded()) {
+                        <div class="flex justify-center p-6">
+                            <i class="pi pi-spin pi-spinner text-2xl text-surface-400"></i>
+                        </div>
+                    } @else {
 
-                                <!-- Descripción -->
-                                <div>
-                                    <textarea
-                                        pTextarea
-                                        formControlName="descripcion"
-                                        [autoResize]="true"
-                                        rows="2"
-                                        class="w-full"
-                                        placeholder="Describa las actividades...">
-                                    </textarea>
+                        <div class="flex flex-col gap-5">
+
+                            <!-- Alertas de estado de factores -->
+                            @if (!hasFactoresData()) {
+                                <p-message severity="warn" styleClass="w-full" icon="pi pi-exclamation-triangle">
+                                    <span>
+                                        No se encontraron resultados de aprendizaje ni contenidos en
+                                        <strong>Factores Situacionales</strong>. Completa esa sección primero para
+                                        poder crear actividades de aprendizaje.
+                                    </span>
+                                </p-message>
+                            }
+
+                            @if (topicsWithoutSubtopics().length > 0) {
+                                <p-message severity="warn" styleClass="w-full" icon="pi pi-exclamation-triangle">
+                                    <span>
+                                        Los siguientes temas aún <strong>no tienen subtemas</strong> asociados:
+                                        @for (t of topicsWithoutSubtopics(); track t.id) {
+                                            <strong> "{{ t.name }}"</strong>@if ($index < topicsWithoutSubtopics().length - 1) {<span>, </span>}
+                                        }.
+                                        Ve al módulo de <strong>Factores Situacionales → Contenidos</strong> para completarlos.
+                                    </span>
+                                </p-message>
+                            }
+
+                            <!-- Formulario de actividades -->
+                            <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
+                                <div class="flex flex-col gap-4">
+
+                                    <!-- Toolbar superior -->
+                                    <div class="flex items-center justify-between gap-4">
+                                        <p class="m-0 text-sm text-surface-500">
+                                            Selecciona las cartas de RA y contenido para cada actividad, luego completa
+                                            la información restante.
+                                        </p>
+                                        <p-button
+                                            label="Agregar actividad"
+                                            icon="pi pi-plus"
+                                            size="small"
+                                            severity="secondary"
+                                            (onClick)="addActividad()">
+                                        </p-button>
+                                    </div>
+
+                                    <!-- Empty state -->
+                                    @if (actividadesArray.length === 0) {
+                                        <div class="flex flex-col items-center gap-3 py-8 text-center">
+                                            <i class="pi pi-inbox text-4xl text-surface-300"></i>
+                                            <p class="m-0 text-surface-400">
+                                                Aún no has creado actividades.<br>
+                                                Haz clic en <strong>Agregar actividad</strong> para comenzar.
+                                            </p>
+                                        </div>
+                                    }
+
+                                    <!-- FormArray -->
+                                    <div formArrayName="actividades" class="flex flex-col gap-5">
+                                        @for (ctrl of actividadesArray.controls; track $index; let actividadIdx = $index) {
+                                            <div class="actividad-card">
+                                                <div [formGroupName]="actividadIdx" class="flex flex-col gap-5">
+
+                                                    <!-- Header de la actividad -->
+                                                    <div class="flex items-center justify-between gap-3">
+                                                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                                                            <div class="actividad-badge flex-shrink-0">{{ actividadIdx + 1 }}</div>
+                                                            <input pInputText
+                                                                formControlName="nombre"
+                                                                class="nombre-actividad-input"
+                                                                placeholder="Nombre de la actividad" />
+                                                        </div>
+                                                        <p-button
+                                                            icon="pi pi-trash"
+                                                            severity="danger"
+                                                            [outlined]="true"
+                                                            [rounded]="true"
+                                                            size="small"
+                                                            pTooltip="Eliminar actividad"
+                                                            tooltipPosition="top"
+                                                            (onClick)="removeActividad(actividadIdx)">
+                                                        </p-button>
+                                                    </div>
+
+                                                    <!-- PASO 1: Elegir Resultado de Aprendizaje -->
+                                                    <div class="flex flex-col gap-3">
+                                                        <div class="step-label">
+                                                            <span class="step-number">1</span>
+                                                            <i class="pi pi-star text-primary"></i>
+                                                            <span class="font-semibold text-sm">Elige el Resultado de Aprendizaje</span>
+                                                        </div>
+                                                        @if (!hasRA()) {
+                                                            <p-message severity="secondary" styleClass="w-full" icon="pi pi-info-circle">
+                                                                <span>No hay Resultados de Aprendizaje registrados en Factores Situacionales.</span>
+                                                            </p-message>
+                                                        } @else {
+                                                            <div class="picker-row">
+                                                                @for (ra of raList(); track ra; let raIdx = $index) {
+                                                                    <div class="picker-card ra-picker-card"
+                                                                         [class.selected]="ctrl.get('ra')?.value === ra"
+                                                                         (click)="setFieldValue(actividadIdx, 'ra', ra)"
+                                                                         [pTooltip]="ra"
+                                                                         tooltipPosition="top">
+                                                                        <div class="flex items-start gap-2">
+                                                                            <i class="pi pi-star-fill text-xs mt-0.5"
+                                                                               [class.text-primary]="ctrl.get('ra')?.value === ra"
+                                                                               [class.text-surface-300]="ctrl.get('ra')?.value !== ra">
+                                                                            </i>
+                                                                            <div class="flex flex-col gap-1">
+                                                                                <span class="text-xs font-bold text-surface-500">Resultado de Aprendizaje {{ raIdx + 1 }}</span>
+                                                                                <span class="text-sm picker-text">{{ ra }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        @if (ctrl.get('ra')?.value === ra) {
+                                                                            <i class="pi pi-check-circle check-icon text-primary"></i>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+
+                                                    <p-divider styleClass="my-0" />
+
+                                                    <!-- PASO 2: Elegir Tema / Subtema -->
+                                                    <div class="flex flex-col gap-3">
+                                                        <div class="step-label">
+                                                            <span class="step-number">2</span>
+                                                            <i class="pi pi-book text-blue-500"></i>
+                                                            <span class="font-semibold text-sm">Elige el tema o contenido</span>
+                                                        </div>
+                                                        @if (!hasTopics()) {
+                                                            <p-message severity="secondary" styleClass="w-full" icon="pi pi-info-circle">
+                                                                <span>No hay contenidos registrados en Factores Situacionales.</span>
+                                                            </p-message>
+                                                        } @else {
+                                                            <!-- Topic cards -->
+                                                            <div class="picker-row">
+                                                                @for (topic of topics(); track topic.id) {
+                                                                    <div class="picker-card topic-picker-card"
+                                                                         [class.selected]="ctrl.get('tema')?.value === topic.name"
+                                                                         [class.incomplete]="topicIsIncomplete(topic.name)"
+                                                                         (click)="setFieldValue(actividadIdx, 'tema', topic.name)">
+                                                                        <div class="flex flex-col gap-1">
+                                                                            <div class="flex items-center justify-between gap-2">
+                                                                                <span class="text-sm font-semibold picker-text">{{ topic.name }}</span>
+                                                                                @if (topicIsIncomplete(topic.name)) {
+                                                                                    <i class="pi pi-exclamation-triangle text-xs text-orange-400"
+                                                                                       pTooltip="Este tema no tiene subtemas"
+                                                                                       tooltipPosition="top">
+                                                                                    </i>
+                                                                                }
+                                                                            </div>
+                                                                            @if (topicHasSubtopics(topic.name)) {
+                                                                                <span class="text-xs text-surface-500">
+                                                                                    <i class="pi pi-list text-xs"></i>
+                                                                                    {{ getSubtopicOptions(topic.name).length }} subtema(s)
+                                                                                </span>
+                                                                            } @else {
+                                                                                <span class="text-xs text-orange-400 italic">Sin subtemas</span>
+                                                                            }
+                                                                        </div>
+                                                                        @if (ctrl.get('tema')?.value === topic.name) {
+                                                                            <i class="pi pi-check-circle check-icon text-primary"></i>
+                                                                        }
+                                                                    </div>
+                                                                }
+                                                            </div>
+
+                                                            <!-- Subtema chips (aparecen solo si el tema tiene subtemas) -->
+                                                            @if (ctrl.get('tema')?.value && hasSubtopicsForTema(ctrl.get('tema')?.value)) {
+                                                                <div class="flex flex-col gap-2">
+                                                                    <span class="text-sm text-surface-500 font-medium">
+                                                                        <i class="pi pi-angle-right"></i>
+                                                                        Ahora elige el subtema de <strong>{{ ctrl.get('tema')?.value }}</strong>:
+                                                                    </span>
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        @for (sub of getSubtopicOptions(ctrl.get('tema')?.value); track sub.value) {
+                                                                            <div class="subtema-chip"
+                                                                                 [class.selected]="ctrl.get('subtema')?.value === sub.value"
+                                                                                 (click)="setFieldValue(actividadIdx, 'subtema', sub.value)">
+                                                                                @if (ctrl.get('subtema')?.value === sub.value) {
+                                                                                    <i class="pi pi-check mr-1"></i>
+                                                                                }
+                                                                                {{ sub.label }}
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    </div>
+
+                                                    <p-divider styleClass="my-0" />
+
+                                                    <!-- PASO 3: Dimensión, Metodología, Descripción -->
+                                                    <div class="flex flex-col gap-4">
+                                                        <div class="step-label">
+                                                            <span class="step-number">3</span>
+                                                            <i class="pi pi-pencil text-purple-500"></i>
+                                                            <span class="font-semibold text-sm">Completa la información de la actividad</span>
+                                                        </div>
+
+                                                        <div class="flex flex-col md:flex-row gap-4">
+                                                            <div class="flex flex-col gap-2 w-full">
+                                                                <label>
+                                                                    <i class="pi pi-compass text-sm text-surface-400 mr-1"></i>
+                                                                    Dimensión a la que apunta
+                                                                </label>
+                                                                <p-select
+                                                                    formControlName="dimension"
+                                                                    [options]="dimensionOptions"
+                                                                    optionLabel="label"
+                                                                    optionValue="value"
+                                                                    placeholder="Seleccione una dimensión"
+                                                                    appendTo="body"
+                                                                    class="w-full">
+                                                                </p-select>
+                                                            </div>
+                                                            <div class="flex flex-col gap-2 w-full">
+                                                                <label>
+                                                                    <i class="pi pi-cog text-sm text-surface-400 mr-1"></i>
+                                                                    Metodología de aprendizaje activo
+                                                                </label>
+                                                                <p-select
+                                                                    formControlName="metodologia"
+                                                                    [options]="metodologias"
+                                                                    optionLabel="label"
+                                                                    optionValue="value"
+                                                                    placeholder="Seleccione una metodología"
+                                                                    appendTo="body"
+                                                                    class="w-full">
+                                                                </p-select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="flex flex-col gap-2">
+                                                            <label>
+                                                                <i class="pi pi-align-left text-sm text-surface-400 mr-1"></i>
+                                                                Descripción de la actividad de aprendizaje
+                                                            </label>
+                                                            <textarea pTextarea
+                                                                formControlName="descripcion"
+                                                                [autoResize]="true"
+                                                                rows="3"
+                                                                class="w-full"
+                                                                placeholder="Describe la actividad de aprendizaje...">
+                                                            </textarea>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Botón agregar al final si hay actividades -->
+                                    @if (actividadesArray.length > 0) {
+                                        <div class="flex justify-center">
+                                            <p-button
+                                                label="Agregar otra actividad"
+                                                icon="pi pi-plus"
+                                                size="small"
+                                                severity="secondary"
+                                                [outlined]="true"
+                                                (onClick)="addActividad()">
+                                            </p-button>
+                                        </div>
+                                    }
+
                                 </div>
-                            </div>
-                        </p-card>
+                            </form>
+
+                        </div>
                     }
-                </div>
-            </form>
-        </p-card>
+                </p-fieldset>
+            </p-card>
+
+        </div>
     </p-fluid>
 }

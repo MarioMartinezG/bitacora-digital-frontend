@@ -183,59 +183,18 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
     },
 
     'actividades': {
-        'Compromiso o valoración': {
-            panelLabel: 'Compromiso o valoración',
-            displayType: 'fields',
-            fields: {
-                'resultado': 'Resultado de aprendizaje',
-                'metodologia': 'Metodología',
-                'descripcion': 'Descripción de las actividades'
-            }
-        },
-        'Dimensiones humanas del aprendizaje': {
-            panelLabel: 'Dimensiones humanas del aprendizaje',
-            displayType: 'fields',
-            fields: {
-                'resultado': 'Resultado de aprendizaje',
-                'metodologia': 'Metodología',
-                'descripcion': 'Descripción de las actividades'
-            }
-        },
-        'Conocimiento Fundamental': {
-            panelLabel: 'Conocimiento Fundamental',
-            displayType: 'fields',
-            fields: {
-                'resultado': 'Resultado de aprendizaje',
-                'metodologia': 'Metodología',
-                'descripcion': 'Descripción de las actividades'
-            }
-        },
-        'Aplicación del aprendizaje': {
-            panelLabel: 'Aplicación del aprendizaje',
-            displayType: 'fields',
-            fields: {
-                'resultado': 'Resultado de aprendizaje',
-                'metodologia': 'Metodología',
-                'descripcion': 'Descripción de las actividades'
-            }
-        },
-        'Integración': {
-            panelLabel: 'Integración',
-            displayType: 'fields',
-            fields: {
-                'resultado': 'Resultado de aprendizaje',
-                'metodologia': 'Metodología',
-                'descripcion': 'Descripción de las actividades'
-            }
-        },
-        'Aprender a aprender': {
-            panelLabel: 'Aprender a aprender',
-            displayType: 'fields',
-            fields: {
-                'resultado': 'Resultado de aprendizaje',
-                'metodologia': 'Metodología',
-                'descripcion': 'Descripción de las actividades'
-            }
+        'actividades': {
+            panelLabel: 'Actividades de aprendizaje',
+            displayType: 'table',
+            columns: [
+                { key: 'nombre', label: 'Nombre' },
+                { key: 'ra', label: 'Resultado de Aprendizaje' },
+                { key: 'tema', label: 'Tema' },
+                { key: 'subtema', label: 'Subtema' },
+                { key: 'dimension', label: 'Dimensión' },
+                { key: 'metodologia', label: 'Metodología' },
+                { key: 'descripcion', label: 'Descripción de la actividad' }
+            ]
         }
     },
 

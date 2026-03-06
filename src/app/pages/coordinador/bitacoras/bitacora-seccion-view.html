@@ -52,7 +52,7 @@
                       @for (campo of panel.fields; track campo.key) {
                         <div class="flex flex-col gap-1">
                           <label class="font-medium text-sm text-surface-500">{{ campo.label }}</label>
-                          <div class="p-3 bg-surface-50 rounded-lg border border-surface-200 text-sm whitespace-pre-wrap">{{ campo.value || '—' }}</div>
+                          <div class="p-3 bg-surface-ground rounded-lg border border-surface-border text-sm whitespace-pre-wrap">{{ campo.value || '—' }}</div>
                         </div>
                       }
                     </div>
@@ -66,20 +66,20 @@
                       <span>El estudiante aún no ha completado esta sección.</span>
                     </p-message>
                   } @else {
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto rounded-xl border border-surface-border shadow-sm">
                       <table class="w-full border-collapse">
                         <thead>
                           <tr>
                             @for (col of panel.columns; track col.key) {
-                              <th class="text-left p-2 bg-surface-100 font-semibold text-sm border border-surface-200">{{ col.label }}</th>
+                              <th class="text-left px-4 py-3 bg-surface-section font-semibold text-sm border-b-2 border-surface-border whitespace-nowrap">{{ col.label }}</th>
                             }
                           </tr>
                         </thead>
                         <tbody>
                           @for (row of panel.rows; track $index) {
-                            <tr>
+                            <tr class="border-b border-surface-border last:border-b-0 even:bg-surface-ground hover:bg-surface-section transition-colors duration-150">
                               @for (col of panel.columns; track col.key) {
-                                <td class="p-2 text-sm border border-surface-200 align-top">{{ formatCellValue(row[col.key]) }}</td>
+                                <td class="px-4 py-3 text-sm align-top">{{ formatCellValue(row[col.key]) }}</td>
                               }
                             </tr>
                           }

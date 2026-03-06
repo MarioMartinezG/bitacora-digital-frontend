@@ -237,11 +237,18 @@ export class FactoresComponent extends BaseBitacoraComponent implements OnInit, 
     };
 
     const contenidosData = this.contentService.getData();
-    const hasContenidos = contenidosData.topics.length > 0;
-    const contenidosPercentage = hasContenidos ? 100 : 0;
+    const topics = contenidosData.topics || [];
+    const subtopicsArr = contenidosData.subtopics || [];
+    let contenidosPercentage: number;
+    if (topics.length === 0) {
+      contenidosPercentage = 0;
+    } else {
+      const allHaveSubtopics = topics.every((t: any) => subtopicsArr.some((st: any) => st.topicId === t.id));
+      contenidosPercentage = allHaveSubtopics ? 100 : 50;
+    }
     const contenidosSectionProgress: SectionProgress = {
       sectionName: 'contenidos',
-      completedFields: hasContenidos ? 1 : 0,
+      completedFields: contenidosPercentage === 100 ? 1 : 0,
       totalFields: 1,
       percentage: contenidosPercentage,
       estado: calcularEstadoAvance(contenidosPercentage)
