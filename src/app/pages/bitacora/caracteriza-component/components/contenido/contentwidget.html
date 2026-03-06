@@ -84,9 +84,9 @@
             <!-- Selección de Tema -->
             <div class="flex flex-col">
                 <label for="topicAutocomplete" class="block font-bold mb-2">Tema</label>
-                <p-autocomplete [(ngModel)]="selectedTopic" [virtualScroll]="true" [suggestions]="filteredTopics"
+                <p-autocomplete [(ngModel)]="selectedTopic" [suggestions]="filteredTopics"
                     (completeMethod)="filterTopics($event)" optionLabel="name" [dropdown]="true"
-                    placeholder="Seleccione un tema"></p-autocomplete>
+                    appendTo="body" placeholder="Seleccione un tema"></p-autocomplete>
                 <small class="text-red-500" *ngIf="submitted && !selectedTopic">
                     Debe seleccionar un tema.
                 </small>

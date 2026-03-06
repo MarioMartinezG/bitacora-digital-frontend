@@ -1,15 +1,14 @@
-.sticky-header {
+.sticky-header-global {
   position: sticky;
   top: 0;
-  z-index: 10;
-  background-color: var(--surface-card);
-  padding: 1rem 0;
-  margin: -1rem 0 1rem 0;
+  z-index: 100;
+  background-color: var(--surface-ground);
+  padding: 1rem;
+  margin: -1rem -1rem 1rem -1rem;
   border-bottom: 1px solid var(--surface-border);
 }
 
-/* Sombra sutil cuando el header está pegado */
-.sticky-header::after {
+.sticky-header-global::after {
   content: '';
   position: absolute;
   bottom: -8px;
@@ -22,15 +21,14 @@
   pointer-events: none;
 }
 
-/* Responsive: en móviles apilar verticalmente */
 @media (max-width: 640px) {
-  .sticky-header .flex {
+  .sticky-header-global .flex {
     flex-direction: column;
     gap: 0.75rem;
     align-items: flex-start;
   }
 
-  .sticky-header .flex > div {
+  .sticky-header-global .flex > div {
     width: 100%;
     justify-content: space-between;
   }
