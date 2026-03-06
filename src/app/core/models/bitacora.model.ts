@@ -147,6 +147,7 @@ export interface ActividadesAprendizajeJson {
 }
 
 export interface ActividadItem {
+    nombre?: string;
     ra?: string;
     tema?: string;
     subtema?: string;
@@ -155,22 +156,20 @@ export interface ActividadItem {
     descripcion?: string;
 }
 
-/** Sección 6: Evaluación (seccion_id: 6) */
+/** Sección 6: Diseño de la evaluación (seccion_id: 6) */
 export interface ComoEvaluareJson {
-    programaSeleccionado?: 'pregrado' | 'posgrado';
-    dimensiones: EvaluacionDimensionItem[];
-    criteriosChecklist: CriterioChecklistItem[];
+    actividadesEvaluacion: EvaluacionActividadEntry[];
 }
 
-export interface EvaluacionDimensionItem {
-    dimensionNombre?: string;
-    resultadoAprendizaje?: string;
-    data?: Record<string, any>;
-}
-
-export interface CriterioChecklistItem {
-    titulo?: string;
-    preguntas: string[];
+export interface EvaluacionActividadEntry {
+    nombre?: string;
+    descripcionEvaluacion?: string;
+    tipoEvaluacion?: string | null;
+    momento?: string | null;
+    actores?: string | null;
+    medios?: string[];
+    tecnicas?: string[];
+    instrumentos?: string[];
 }
 
 /** Unión de todos los tipos JSON de sección */

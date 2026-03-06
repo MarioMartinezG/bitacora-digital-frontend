@@ -1,41 +1,30 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 // PrimeNG
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
-import { AccordionModule } from 'primeng/accordion';
 import { TagModule } from 'primeng/tag';
-import { RadioButtonModule } from 'primeng/radiobutton';
+import { MessageModule } from 'primeng/message';
+import { FieldsetModule } from 'primeng/fieldset';
+import { DividerModule } from 'primeng/divider';
+import { TooltipModule } from 'primeng/tooltip';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
 
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
-import { DimensionEvaluacionWidget } from './components/dimension-evaluacion/dimension-evaluacion.widget';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 
 // Models
-import { calcularEstadoAvance, EstadoAvance } from '../../../core/models';
-
-interface DimensionMeta {
-  nombre: string;
-  resultado: string;
-  icono: string;
-  iconoColor: string;
-}
-
-interface ChecklistPregunta {
-  texto: string;
-}
-
-interface ChecklistGrupo {
-  titulo: string;
-  preguntas: ChecklistPregunta[];
-}
+import { calcularEstadoAvance } from '../../../core/models';
+import { ActividadItem } from '../../../core/models/bitacora.model';
 
 @Component({
   selector: 'app-como-evaluare-component',
@@ -45,13 +34,17 @@ interface ChecklistGrupo {
     CardModule,
     ButtonModule,
     FluidModule,
-    AccordionModule,
     TagModule,
-    RadioButtonModule,
+    MessageModule,
+    FieldsetModule,
+    DividerModule,
+    TooltipModule,
+    MultiSelectModule,
+    SelectModule,
+    TextareaModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
-    BitacoraCommentButtonComponent,
-    DimensionEvaluacionWidget
+    BitacoraCommentButtonComponent
   ],
   templateUrl: './como-evaluare-component.html',
   styleUrl: './como-evaluare-component.css'
@@ -60,379 +53,269 @@ export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnIn
   private fb = inject(FormBuilder);
 
   protected seccionCodigo = 'evaluacion';
-
-  // Override personalizado de calculateProgress
   protected sectionsConfig: SectionConfig[] = [];
 
-  // Metadatos de display para las 6 dimensiones
-  dimensionMeta: DimensionMeta[] = [
-    {
-      nombre: 'Compromiso o valoración',
-      resultado: 'Desarrolla la capacidad de reconocer el valor del aprendizaje.',
-      icono: 'pi-bolt',
-      iconoColor: 'text-primary'
-    },
-    {
-      nombre: 'Dimensiones humanas del aprendizaje',
-      resultado: 'Reconoce la importancia del trabajo colaborativo y la empatía.',
-      icono: 'pi-users',
-      iconoColor: 'text-green-500'
-    },
-    {
-      nombre: 'Conocimiento Fundamental',
-      resultado: 'Comprende los fundamentos teóricos del curso.',
-      icono: 'pi-book',
-      iconoColor: 'text-orange-500'
-    },
-    {
-      nombre: 'Aplicación del aprendizaje',
-      resultado: 'Aplica los conocimientos adquiridos a contextos reales.',
-      icono: 'pi-cog',
-      iconoColor: 'text-cyan-600'
-    },
-    {
-      nombre: 'Integración',
-      resultado: 'Integra los saberes del curso con otras áreas del conocimiento.',
-      icono: 'pi-link',
-      iconoColor: 'text-indigo-500'
-    },
-    {
-      nombre: 'Aprender a aprender',
-      resultado: 'Desarrolla autonomía en su proceso de aprendizaje.',
-      icono: 'pi-compass',
-      iconoColor: 'text-purple-500'
-    }
-  ];
+  // Actividades cargadas desde el módulo de Actividades de Aprendizaje
+  actividadesList = signal<ActividadItem[]>([]);
+  actividadesLoaded = signal(false);
 
-  // Configuración estática del checklist
-  checklistConfig: ChecklistGrupo[] = [
+  // Almacena los datos guardados de evaluación hasta que las actividades cargan
+  private savedEvalData = new Map<string, any>();
+
+  // Mapa para mostrar label legible de metodología
+  readonly metodologiaLabels: Record<string, string> = {
+    'proyectos': 'Aprendizaje basado en proyectos',
+    'juegos': 'Aprendizaje basado en juegos',
+    'invertido': 'Aprendizaje invertido',
+    'evidencia': 'Aprendizaje basado en evidencia',
+    'dialogo': 'Diálogo reflexivo',
+    'cooperativo': 'Aprendizaje cooperativo',
+    'problemas': 'Aprendizaje basado en problemas',
+    'investigacion': 'Investigación - Acción',
+    'servicio': 'Aprendizaje a través del servicio',
+    'adaptativo': 'Aprendizaje adaptativo'
+  };
+
+  // Opciones de selects
+  mediosOpciones = [
     {
-      titulo: 'Definición de los criterios de evaluación',
-      preguntas: [
-        { texto: '¿Son observables y medibles?' },
-        { texto: '¿Son pertinentes?' },
-        { texto: '¿Tengo un plan de socialización con mis estudiantes?' }
+      label: 'Escritos',
+      items: [
+        { label: 'Carpeta o dossier / carpeta colaborativa', value: 'carpeta_dossier' },
+        { label: 'Control (Examen)', value: 'control_examen' },
+        { label: 'Cuaderno / cuaderno de notas / cuaderno de campo', value: 'cuaderno' },
+        { label: 'Cuestionario', value: 'cuestionario' },
+        { label: 'Diario reflexivo / diario de clase', value: 'diario' },
+        { label: 'Estudio de casos', value: 'estudio_casos' },
+        { label: 'Ensayo', value: 'ensayo' },
+        { label: 'Examen', value: 'examen' },
+        { label: 'Foro virtual', value: 'foro_virtual' },
+        { label: 'Memoria', value: 'memoria' },
+        { label: 'Monografía', value: 'monografia' },
+        { label: 'Informe', value: 'informe' },
+        { label: 'Portafolio / portafolio electrónico', value: 'portafolio' },
+        { label: 'Póster', value: 'poster' },
+        { label: 'Proyecto', value: 'proyecto' },
+        { label: 'Pruebas objetivas', value: 'pruebas_objetivas' },
+        { label: 'Recensión', value: 'recension' },
+        { label: 'Test diagnóstico', value: 'test_diagnostico' },
+        { label: 'Trabajo escrito', value: 'trabajo_escrito' }
       ]
     },
     {
-      titulo: 'Selección de los instrumentos de evaluación',
-      preguntas: [
-        { texto: '¿Están alineados con el resultado y la dimensión del aprendizaje?' },
-        { texto: '¿Son variados y consideran los estilos de aprendizaje?' },
-        { texto: '¿Establecen niveles de desempeño claros para los estudiantes?' }
+      label: 'Orales',
+      items: [
+        { label: 'Comunicación', value: 'comunicacion_oral' },
+        { label: 'Cuestionario oral', value: 'cuestionario_oral' },
+        { label: 'Debate / diálogo grupal', value: 'debate' },
+        { label: 'Exposición', value: 'exposicion' },
+        { label: 'Discusión grupal', value: 'discusion_grupal' },
+        { label: 'Mesa redonda', value: 'mesa_redonda' },
+        { label: 'Ponencia', value: 'ponencia' },
+        { label: 'Pregunta de clase', value: 'pregunta_clase' },
+        { label: 'Presentación oral', value: 'presentacion_oral' }
       ]
     },
     {
-      titulo: 'Participantes',
-      preguntas: [
-        { texto: '¿Existen actividades de auto, hetero y coevaluación con instrumentos específicos?' }
-      ]
-    },
-    {
-      titulo: 'Diálogo para la retroalimentación',
-      preguntas: [
-        { texto: '¿He planeado y socializado los momentos de retroalimentación?' },
-        { texto: '¿Se combinan la evaluación formativa con la sumativa?' }
-      ]
-    },
-    {
-      titulo: 'Calificación final (Numérica)',
-      preguntas: [
-        { texto: '¿Refleja el alcance de los resultados de aprendizaje?' },
-        { texto: '¿Corresponde a la escala institucional?' },
-        { texto: '¿Es flexible y contempla diferentes métodos de calificación?' }
+      label: 'Prácticos',
+      items: [
+        { label: 'Práctica supervisada', value: 'practica_supervisada' },
+        { label: 'Demostración / actuación / representación', value: 'demostracion' },
+        { label: 'Role playing', value: 'role_playing' }
       ]
     }
   ];
 
-  // Escalas de criterios según programa
-  criteriosPregrado = [
-    { valor: 5.0, etiqueta: 'Logro de resultados de aprendizaje excelente' },
-    { valor: 4.0, etiqueta: 'Logro de resultados de aprendizaje bueno' },
-    { valor: 3.0, etiqueta: 'Logro de resultados de aprendizaje mínimo aceptable' },
-    { valor: 2.0, etiqueta: 'Logro de resultados de aprendizaje bajo' },
-    { valor: 1.0, etiqueta: 'Logro de resultados de aprendizaje excesivamente bajo' },
-    { valor: 0.0, etiqueta: 'Logro de resultados de aprendizaje nulo' }
+  tecnicasOpciones = [
+    {
+      label: 'El alumno no interviene',
+      items: [
+        { label: 'Análisis documental', value: 'analisis_documental' },
+        { label: 'Análisis de producciones', value: 'analisis_producciones' },
+        { label: 'Observación directa del alumno', value: 'observacion_directa' },
+        { label: 'Observación del grupo', value: 'observacion_grupo' },
+        { label: 'Observación sistemática', value: 'observacion_sistematica' },
+        { label: 'Análisis de grabación de audio o video', value: 'analisis_audio_video' }
+      ]
+    },
+    {
+      label: 'El alumno participa',
+      items: [
+        { label: 'Autoevaluación (autorreflexión y/o análisis documental)', value: 'autoevaluacion' },
+        { label: 'Evaluación entre pares (análisis documental y/o observación)', value: 'coevaluacion' },
+        { label: 'Evaluación compartida o colaborativa (entrevista individual o grupal)', value: 'evaluacion_colaborativa' }
+      ]
+    }
   ];
 
-  criteriosPosgrado = [
-    { valor: 5.0, etiqueta: 'Logro de resultados de aprendizaje excelente' },
-    { valor: 4.0, etiqueta: 'Logro de resultados de aprendizaje bueno' },
-    { valor: 3.5, etiqueta: 'Logro de resultados de aprendizaje mínimo aceptable' },
-    { valor: 3.0, etiqueta: 'Logro de resultados de aprendizaje bajo' },
-    { valor: 2.0, etiqueta: 'Logro de resultados de aprendizaje bajo' },
-    { valor: 1.0, etiqueta: 'Logro de resultados de aprendizaje excesivamente bajo' },
-    { valor: 0.0, etiqueta: 'Logro de resultados de aprendizaje nulo' }
+  instrumentosOpciones = [
+    { label: 'Diario del profesor', value: 'diario_profesor' },
+    { label: 'Escala de comprobación', value: 'escala_comprobacion' },
+    { label: 'Escala de diferencial semántico', value: 'escala_diferencial' },
+    { label: 'Escala verbal o numérica', value: 'escala_verbal_numerica' },
+    { label: 'Escala descriptiva o rúbrica', value: 'escala_rubrica' },
+    { label: 'Escala de estimación', value: 'escala_estimacion' },
+    { label: 'Ficha de observación', value: 'ficha_observacion' },
+    { label: 'Lista de control', value: 'lista_control' },
+    { label: 'Matrices de decisión', value: 'matrices_decision' },
+    { label: 'Fichas de seguimiento individual o grupal', value: 'fichas_seguimiento' },
+    { label: 'Fichas de autoevaluación', value: 'fichas_autoevaluacion' },
+    { label: 'Fichas de evaluación entre iguales', value: 'fichas_entre_iguales' },
+    { label: 'Informe de expertos', value: 'informe_expertos' },
+    { label: 'Informe de autoevaluación', value: 'informe_autoevaluacion' }
   ];
 
-  // Getters
-  get dimensionesFormArray(): FormArray {
-    return this.form.get('dimensiones') as FormArray;
-  }
+  tipoEvaluacionOpciones = [
+    { label: 'Sumativa', value: 'sumativa' },
+    { label: 'Formativa', value: 'formativa' },
+    { label: 'Mixta', value: 'mixta' }
+  ];
 
-  get dimensionFormGroups(): FormGroup[] {
-    return this.dimensionesFormArray.controls as FormGroup[];
-  }
+  actoresOpciones = [
+    { label: 'Heteroevaluación', value: 'hetero' },
+    { label: 'Coevaluación', value: 'co' },
+    { label: 'Autoevaluación', value: 'auto' }
+  ];
 
-  get checklistFormArray(): FormArray {
-    return this.form.get('checklist') as FormArray;
+  momentosOpciones = [
+    { label: 'Inicial', value: 'inicial' },
+    { label: 'Media procesual', value: 'media' },
+    { label: 'Final', value: 'final' }
+  ];
+
+  get actividadesEvalArray(): FormArray {
+    return this.form.get('actividadesEvaluacion') as FormArray;
   }
 
   override ngOnInit(): void {
     super.ngOnInit();
-    this.setupProgramaListener();
+    this.loadActividades();
   }
 
   override ngOnDestroy(): void {
     super.ngOnDestroy();
   }
 
+  private loadActividades(): void {
+    this.bitacoraService.obtenerSeccion('actividades').subscribe({
+      next: (respuesta) => {
+        const actividades: ActividadItem[] = respuesta?.datos?.['actividades'] || [];
+        this.actividadesList.set(actividades);
+        this.buildActividadesFormArray(actividades);
+        this.actividadesLoaded.set(true);
+      },
+      error: () => {
+        this.actividadesLoaded.set(true);
+      }
+    });
+  }
+
+  private buildActividadesFormArray(actividades: ActividadItem[]): void {
+    const arr = this.actividadesEvalArray;
+    arr.clear({ emitEvent: false });
+    actividades.forEach(act => {
+      const saved = this.savedEvalData.get(act.nombre || '');
+      arr.push(this.createEvaluacionGroup(act.nombre || '', saved), { emitEvent: false });
+    });
+
+    this.cleanStaleEvalEntries();
+  }
+
+  private createEvaluacionGroup(nombre: string, saved?: any): FormGroup {
+    return this.fb.group({
+      nombre: [nombre],
+      descripcionEvaluacion: [saved?.descripcionEvaluacion || ''],
+      tipoEvaluacion: [saved?.tipoEvaluacion || null],
+      momento: [saved?.momento || null],
+      actores: [saved?.actores || null],
+      medios: [saved?.medios || []],
+      tecnicas: [saved?.tecnicas || []],
+      instrumentos: [saved?.instrumentos || []]
+    });
+  }
+
   protected initForm(): void {
     this.form = this.fb.group({
-      programaSeleccionado: [null],
-      dimensiones: this.fb.array(
-        this.dimensionMeta.map(dim => this.createDimensionGroup(dim))
-      ),
-      checklist: this.fb.array(
-        this.checklistConfig.map(grupo =>
-          this.fb.array(grupo.preguntas.map(() => this.fb.control(null)))
-        )
-      )
+      actividadesEvaluacion: this.fb.array([])
     });
   }
 
-  private createDimensionGroup(dim: DimensionMeta): FormGroup {
-    return this.fb.group({
-      dimensionNombre: [dim.nombre],
-      resultadoAprendizaje: [dim.resultado],
-      medios: [[]],
-      otroMedio: [false],
-      otroMedioTexto: [''],
-      tecnicas: [[]],
-      otraTecnica: [false],
-      otraTecnicaTexto: [''],
-      instrumentos: [[]],
-      otroInstrumento: [false],
-      otroInstrumentoTexto: [''],
-      tipoEvaluacion: [null],
-      otroTipoEvaluacion: [false],
-      otroTipoEvaluacionTexto: [''],
-      participantes: [null],
-      otrosParticipantes: [false],
-      otrosParticipantesTexto: [''],
-      momento: [null],
-      criteriosEvaluacion: this.fb.array([])
-    });
-  }
-
-  private setupProgramaListener(): void {
-    this.form.get('programaSeleccionado')?.valueChanges.subscribe(value => {
-      this.rebuildCriteriosEvaluacion(value);
-    });
-  }
-
-  private rebuildCriteriosEvaluacion(programa: 'pregrado' | 'posgrado' | null): void {
-    const base = programa === 'posgrado' ? this.criteriosPosgrado
-               : programa === 'pregrado' ? this.criteriosPregrado
-               : [];
-
-    this.dimensionesFormArray.controls.forEach(dimControl => {
-      const dimGroup = dimControl as FormGroup;
-      const criteriosArray = dimGroup.get('criteriosEvaluacion') as FormArray;
-
-      // Preservar descripciones existentes por índice
-      const existingDescriptions: string[] = [];
-      criteriosArray.controls.forEach(c => {
-        existingDescriptions.push((c as FormGroup).get('descripcion')?.value || '');
-      });
-
-      criteriosArray.clear();
-      base.forEach((c, i) => {
-        criteriosArray.push(this.fb.group({
-          valor: [c.valor],
-          etiqueta: [c.etiqueta],
-          descripcion: [existingDescriptions[i] || '']
-        }));
-      });
-    });
-  }
-
-  // Métodos para el template
-  seleccionarPrograma(tipo: 'pregrado' | 'posgrado'): void {
-    this.form.get('programaSeleccionado')?.setValue(tipo);
-  }
-
-  esProgramaSeleccionado(tipo: string): boolean {
-    return this.form.get('programaSeleccionado')?.value === tipo;
-  }
-
-  getChecklistGrupoArray(index: number): FormArray {
-    return this.checklistFormArray.at(index) as FormArray;
-  }
-
-  /**
-   * Override patchFormWithData para manejar FormArrays complejos
-   */
   protected override patchFormWithData(data: any): void {
-    // 1. Programa (dispara rebuild de criteriosEvaluacion)
-    if (data?.programaSeleccionado) {
-      this.form.get('programaSeleccionado')?.setValue(data.programaSeleccionado);
-    }
+    // Guardar datos de eval por nombre para cuando carguen las actividades
+    this.savedEvalData.clear();
+    (data?.actividadesEvaluacion || []).forEach((entry: any) => {
+      if (entry.nombre) this.savedEvalData.set(entry.nombre, entry);
+    });
 
-    // 2. Dimensiones
-    if (data?.dimensiones && Array.isArray(data.dimensiones)) {
-      data.dimensiones.forEach((dimData: any, index: number) => {
-        if (index < this.dimensionesFormArray.length) {
-          const dimGroup = this.dimensionesFormArray.at(index) as FormGroup;
-
-          // Patch campos simples
-          dimGroup.patchValue({
-            medios: dimData.medios || [],
-            otroMedio: dimData.otroMedio || false,
-            otroMedioTexto: dimData.otroMedioTexto || '',
-            tecnicas: dimData.tecnicas || [],
-            otraTecnica: dimData.otraTecnica || false,
-            otraTecnicaTexto: dimData.otraTecnicaTexto || '',
-            instrumentos: dimData.instrumentos || [],
-            otroInstrumento: dimData.otroInstrumento || false,
-            otroInstrumentoTexto: dimData.otroInstrumentoTexto || '',
-            tipoEvaluacion: dimData.tipoEvaluacion || null,
-            otroTipoEvaluacion: dimData.otroTipoEvaluacion || false,
-            otroTipoEvaluacionTexto: dimData.otroTipoEvaluacionTexto || '',
-            participantes: dimData.participantes || null,
-            otrosParticipantes: dimData.otrosParticipantes || false,
-            otrosParticipantesTexto: dimData.otrosParticipantesTexto || '',
-            momento: dimData.momento || null
-          }, { emitEvent: false });
-
-          // Patch criteriosEvaluacion descripciones
-          if (dimData.criteriosEvaluacion && Array.isArray(dimData.criteriosEvaluacion)) {
-            const criteriosArray = dimGroup.get('criteriosEvaluacion') as FormArray;
-            dimData.criteriosEvaluacion.forEach((c: any, j: number) => {
-              if (j < criteriosArray.length) {
-                criteriosArray.at(j).patchValue(
-                  { descripcion: c.descripcion || '' },
-                  { emitEvent: false }
-                );
-              }
-            });
-          }
-        }
-      });
-    }
-
-    // 3. Checklist
-    if (data?.checklist && Array.isArray(data.checklist)) {
-      data.checklist.forEach((grupo: any[], i: number) => {
-        if (i < this.checklistFormArray.length && Array.isArray(grupo)) {
-          const grupoArray = this.checklistFormArray.at(i) as FormArray;
-          grupo.forEach((respuesta: string | null, j: number) => {
-            if (j < grupoArray.length) {
-              grupoArray.at(j).setValue(respuesta, { emitEvent: false });
-            }
-          });
-        }
-      });
+    // Si las actividades ya cargaron, aplicar y verificar datos obsoletos
+    if (this.actividadesLoaded()) {
+      this.patchEvalFields();
+      this.cleanStaleEvalEntries();
     }
   }
 
-  /**
-   * Override calculateProgress:
-   * - programa: 1 campo
-   * - 6 dimensiones × 6 campos clave (medios, tecnicas, instrumentos, tipoEvaluacion, participantes, momento)
-   * - checklist: 12 preguntas
-   * Total: 49 campos
-   */
+  /** Fuerza un guardado si el backend tiene entradas de actividades que ya no existen */
+  private cleanStaleEvalEntries(): void {
+    const currentNames = new Set(this.actividadesList().map(a => a.nombre || ''));
+    const hasStaleEntries = [...this.savedEvalData.keys()].some(k => k && !currentNames.has(k));
+    if (hasStaleEntries) {
+      this.saveManually();
+    }
+  }
+
+  private patchEvalFields(): void {
+    this.actividadesEvalArray.controls.forEach(ctrl => {
+      const g = ctrl as FormGroup;
+      const nombre = g.get('nombre')?.value;
+      const saved = nombre ? this.savedEvalData.get(nombre) : null;
+      if (!saved) return;
+      g.patchValue({
+        descripcionEvaluacion: saved.descripcionEvaluacion || '',
+        tipoEvaluacion: saved.tipoEvaluacion || null,
+        momento: saved.momento || null,
+        actores: saved.actores || null,
+        medios: saved.medios || [],
+        tecnicas: saved.tecnicas || [],
+        instrumentos: saved.instrumentos || []
+      }, { emitEvent: false });
+    });
+  }
+
+  getMetodologiaLabel(value: string | undefined | null): string {
+    return value ? (this.metodologiaLabels[value] || value) : '';
+  }
+
   protected override calculateProgress(): void {
-    // Sección programa
-    const programaValue = this.form.get('programaSeleccionado')?.value;
-    const programaCompleted = programaValue ? 1 : 0;
+    const count = this.actividadesEvalArray.length;
+    let totalFields = 0;
+    let totalCompleted = 0;
 
-    // Secciones por dimensión
-    const dimensionSections = this.dimensionMeta.map((dim, index) => {
-      const group = this.dimensionesFormArray.at(index) as FormGroup;
-      let completed = 0;
-      const totalFields = 6;
-
-      const medios = group.get('medios')?.value;
-      if (medios && Array.isArray(medios) && medios.length > 0) completed++;
-
-      const tecnicas = group.get('tecnicas')?.value;
-      if (tecnicas && Array.isArray(tecnicas) && tecnicas.length > 0) completed++;
-
-      const instrumentos = group.get('instrumentos')?.value;
-      if (instrumentos && Array.isArray(instrumentos) && instrumentos.length > 0) completed++;
-
-      if (group.get('tipoEvaluacion')?.value) completed++;
-      if (group.get('participantes')?.value) completed++;
-      if (group.get('momento')?.value) completed++;
-
-      const percentage = Math.round((completed / totalFields) * 100);
-
-      return {
-        sectionName: dim.nombre,
-        completedFields: completed,
-        totalFields,
-        percentage,
-        estado: calcularEstadoAvance(percentage)
-      };
-    });
-
-    // Sección checklist
-    let checklistCompleted = 0;
-    let checklistTotal = 0;
-    this.checklistConfig.forEach((grupo, i) => {
-      const grupoArray = this.checklistFormArray.at(i) as FormArray;
-      grupo.preguntas.forEach((_p, j) => {
-        checklistTotal++;
-        if (grupoArray.at(j)?.value !== null) {
-          checklistCompleted++;
-        }
+    for (let i = 0; i < count; i++) {
+      const g = this.actividadesEvalArray.at(i) as FormGroup;
+      const simpleFields = ['descripcionEvaluacion', 'tipoEvaluacion', 'momento', 'actores'];
+      const arrayFields = ['medios', 'tecnicas', 'instrumentos'];
+      totalFields += simpleFields.length + arrayFields.length;
+      simpleFields.forEach(f => {
+        const val = g.get(f)?.value;
+        if (val !== null && val !== undefined && val !== '') totalCompleted++;
       });
-    });
-    const checklistPercentage = checklistTotal > 0
-      ? Math.round((checklistCompleted / checklistTotal) * 100) : 0;
+      arrayFields.forEach(f => {
+        const val = g.get(f)?.value;
+        if (Array.isArray(val) && val.length > 0) totalCompleted++;
+      });
+    }
 
-    const allSections = [
-      {
-        sectionName: 'programa',
-        completedFields: programaCompleted,
-        totalFields: 1,
-        percentage: programaCompleted * 100,
-        estado: calcularEstadoAvance(programaCompleted * 100)
-      },
-      ...dimensionSections,
-      {
-        sectionName: 'checklist',
-        completedFields: checklistCompleted,
-        totalFields: checklistTotal,
-        percentage: checklistPercentage,
-        estado: calcularEstadoAvance(checklistPercentage)
-      }
-    ];
-
-    const totalFields = allSections.reduce((sum, s) => sum + s.totalFields, 0);
-    const totalCompleted = allSections.reduce((sum, s) => sum + s.completedFields, 0);
     const totalPercentage = totalFields > 0 ? Math.round((totalCompleted / totalFields) * 100) : 0;
-
     this._progress.set({
-      sections: allSections,
+      sections: [{
+        sectionName: 'evaluacion',
+        completedFields: totalCompleted,
+        totalFields,
+        percentage: totalPercentage,
+        estado: calcularEstadoAvance(totalPercentage)
+      }],
       totalPercentage,
       estado: calcularEstadoAvance(totalPercentage)
     });
-  }
-
-  /**
-   * Obtiene el estado de progreso de un grupo del checklist
-   */
-  getChecklistGrupoEstado(grupoIndex: number): EstadoAvance {
-    const grupoArray = this.checklistFormArray.at(grupoIndex) as FormArray;
-    let completed = 0;
-    const total = grupoArray.length;
-    grupoArray.controls.forEach(c => {
-      if (c.value !== null) completed++;
-    });
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return calcularEstadoAvance(percentage);
   }
 }

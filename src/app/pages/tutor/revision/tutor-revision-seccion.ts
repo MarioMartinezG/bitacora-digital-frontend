@@ -6,6 +6,11 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AccordionModule } from 'primeng/accordion';
 import { MessageModule } from 'primeng/message';
+import { TableModule } from 'primeng/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
 import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
@@ -30,7 +35,7 @@ interface PanelView {
 @Component({
     selector: 'app-tutor-revision-seccion',
     standalone: true,
-    imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, CommentThreadComponent, EstadoTutorSelectorComponent],
+    imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent],
     template: `
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
@@ -77,11 +82,15 @@ interface PanelView {
                                                     @for (campo of panel.fields; track campo.key) {
                                                         <div class="flex flex-col gap-1">
                                                             <label class="font-medium text-sm text-surface-500">{{ campo.label }}</label>
-                                                            @if (campo.value) {
-                                                                <div class="p-3 bg-surface-ground rounded-lg border border-surface-border text-sm whitespace-pre-wrap">{{ campo.value }}</div>
-                                                            } @else {
-                                                                <div class="p-3 bg-surface-ground rounded-lg border border-surface-border text-sm text-surface-400 italic">—</div>
-                                                            }
+                                                            <textarea
+                                                                pTextarea
+                                                                [value]="campo.value || '—'"
+                                                                [autoResize]="true"
+                                                                rows="1"
+                                                                readonly
+                                                                class="w-full"
+                                                                style="resize: none;">
+                                                            </textarea>
                                                         </div>
                                                     }
                                                 </div>
@@ -90,32 +99,55 @@ interface PanelView {
 
                                         <!-- TABLE: array of objects -->
                                         @if (panel.displayType === 'table' && panel.rows && panel.columns) {
-                                            @if (panel.rows.length === 0) {
-                                                <p-message severity="info" styleClass="w-full">
-                                                    <span>El estudiante aún no ha diligenciado esta sección.</span>
-                                                </p-message>
-                                            } @else {
-                                                <div class="overflow-x-auto rounded-xl border border-surface-border shadow-sm">
-                                                    <table class="w-full border-collapse">
-                                                        <thead>
-                                                            <tr>
-                                                                @for (col of panel.columns; track col.key) {
-                                                                    <th class="text-left px-4 py-3 bg-surface-section font-semibold text-sm border-b-2 border-surface-border whitespace-nowrap">{{ col.label }}</th>
-                                                                }
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @for (row of panel.rows; track $index) {
-                                                                <tr class="border-b border-surface-border last:border-b-0 even:bg-surface-ground hover:bg-surface-section transition-colors duration-150">
-                                                                    @for (col of panel.columns; track col.key) {
-                                                                        <td class="px-4 py-3 text-sm align-top">{{ formatCellValue(row[col.key]) }}</td>
-                                                                    }
-                                                                </tr>
-                                                            }
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            }
+                                            <p-table
+                                                [value]="panel.rows"
+                                                [columns]="panel.columns"
+                                                [paginator]="panel.rows.length > 10"
+                                                [rows]="10"
+                                                [rowsPerPageOptions]="[5, 10, 25]"
+                                                [globalFilterFields]="getColumnKeys(panel)"
+                                                sortMode="multiple"
+                                                styleClass="p-datatable-sm p-datatable-striped"
+                                                #dt>
+                                                <ng-template pTemplate="caption">
+                                                    <div class="flex justify-end">
+                                                        <p-iconfield>
+                                                            <p-inputicon styleClass="pi pi-search" />
+                                                            <input
+                                                                pInputText
+                                                                type="text"
+                                                                (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                                                                placeholder="Buscar..." />
+                                                        </p-iconfield>
+                                                    </div>
+                                                </ng-template>
+                                                <ng-template pTemplate="header" let-columns>
+                                                    <tr>
+                                                        @for (col of columns; track col.key) {
+                                                            <th [pSortableColumn]="col.key" class="whitespace-nowrap">
+                                                                {{ col.label }}
+                                                                <p-sortIcon [field]="col.key" />
+                                                            </th>
+                                                        }
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template pTemplate="body" let-row let-columns="columns">
+                                                    <tr>
+                                                        @for (col of columns; track col.key) {
+                                                            <td class="align-top text-sm">{{ formatCellValue(row[col.key]) }}</td>
+                                                        }
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template pTemplate="emptymessage" let-columns>
+                                                    <tr>
+                                                        <td [attr.colspan]="columns.length" class="p-0">
+                                                            <p-message severity="info" styleClass="w-full">
+                                                                <span>El estudiante aún no ha diligenciado esta sección.</span>
+                                                            </p-message>
+                                                        </td>
+                                                    </tr>
+                                                </ng-template>
+                                            </p-table>
                                         }
 
                                         <!-- LIST: array of strings -->
@@ -223,10 +255,13 @@ export class TutorRevisionSeccion implements OnInit {
             procesados.add(panelKey);
         }
 
-        // Agregar paneles extra que existan en datos pero no en labels
-        for (const panelKey of Object.keys(datos)) {
-            if (procesados.has(panelKey)) continue;
-            this.procesarPanel(panelKey, datos[panelKey], seccionLabels, panelesResult);
+        // Agregar paneles extra solo si la sección no tiene labels definidos
+        // (evita mostrar campos obsoletos de versiones anteriores del formulario)
+        if (labelKeys.length === 0) {
+            for (const panelKey of Object.keys(datos)) {
+                if (procesados.has(panelKey)) continue;
+                this.procesarPanel(panelKey, datos[panelKey], seccionLabels, panelesResult);
+            }
         }
 
         this.paneles.set(panelesResult);
@@ -373,6 +408,10 @@ export class TutorRevisionSeccion implements OnInit {
         }
     }
 
+    getColumnKeys(panel: PanelView): string[] {
+        return panel.columns?.map(c => c.key) ?? [];
+    }
+
     /** Formatea cualquier valor para mostrarlo como texto legible */
     formatAnyValue(val: any): string {
         if (val === null || val === undefined || val === '') return '';
@@ -484,7 +523,7 @@ export class TutorRevisionSeccion implements OnInit {
             'ajustes': 'Ambientes Sanos y Seguros',
             'rap-rac': 'RAP y RAC',
             'actividades': 'Actividades de Aprendizaje',
-            'evaluacion': 'Cómo Evaluaré',
+            'evaluacion': 'Diseño de la evaluación',
             'secuencia': 'Secuencia del Curso',
             'bibliografia': 'Bibliografía'
         };
