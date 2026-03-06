@@ -74,6 +74,20 @@ export interface CaracterizaJson {
 
 /** Sección 2: Factores (seccion_id: 2) */
 export interface FactoresJson {
+    ecosistema: {
+        numEstudiantes?: number;
+        numDocentes?: number;
+        liderExito?: string;
+        liderFortalecimiento?: string;
+        unidadAdscrita?: string;
+        unidadesDicta?: string;
+        aspectosImportantes?: string;
+    };
+    resultadosAprendizaje: string[];
+    contenidos: {
+        topics?: { id: number; name: string }[];
+        subtopics?: { id: number; topicId: number; name: string }[];
+    };
     panel1: {
         pregunta1?: string;
         pregunta2?: string;

@@ -2,33 +2,263 @@
     <app-loading></app-loading>
 } @else {
     <p-fluid>
-        <p-card>
-            <!-- Header sticky con título e indicador de guardado -->
-            <div class="sticky-header">
-                <div class="flex items-center justify-between">
-                    <h4 class="m-0">Responda las siguientes preguntas:</h4>
-                    <div class="flex items-center gap-3">
-                        <app-save-status-indicator
-                            [saveState]="saveState"
-                            (onRetry)="retryOnError()">
-                        </app-save-status-indicator>
-                        <p-button
-                            label="Guardar"
-                            icon="pi pi-save"
-                            (onClick)="saveManually()"
-                            [disabled]="!saveState.isDirty"
-                            size="small">
-                        </p-button>
-                    </div>
+        <div class="sticky-header-global">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h3 class="m-0">Factores Situacionales</h3>
+                    <p-tag
+                        [severity]="getSeverity(progress().estado)"
+                        [value]="getLabel(progress().estado) + ' (' + progress().totalPercentage + '%)'">
+                    </p-tag>
+                </div>
+                <div class="flex items-center gap-3">
+                    <app-save-status-indicator
+                        [saveState]="saveState"
+                        (onRetry)="retryOnError()">
+                    </app-save-status-indicator>
+                    <p-button
+                        label="Guardar"
+                        icon="pi pi-save"
+                        (onClick)="saveManually()"
+                        [disabled]="!saveState.isDirty"
+                        size="small">
+                    </p-button>
                 </div>
             </div>
+        </div>
 
-            <p-accordion [value]="[]" [multiple]="true">
-                <form [formGroup]="form">
+        <form [formGroup]="form" (keydown.enter)="$event.preventDefault()" class="flex flex-col gap-4">
+
+            <!-- ===== CARD 1: ECOSISTEMA PARA EL ÉXITO ===== -->
+            <p-card class="w-full">
+                <p-fieldset legend="Ecosistema para el éxito académico" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('ecosistema'))"
+                                [value]="getLabel(getDisplayEstado('ecosistema'))"
+                                size="small">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="ecosistema"
+                                [badge]="comentariosCounts()['ecosistema'] || 0" />
+                        </div>
+                    </ng-template>
+
+                    <div class="flex flex-col gap-6">
+
+                        <p-message severity="info" styleClass="w-full" icon="pi pi-lightbulb">
+                            <span>
+                                Una de tus responsabilidades como docente es comprender a fondo las características del
+                                entorno de aprendizaje en el que tú y tus estudiantes compartirán; es tu deber asegurar
+                                que sea un espacio donde cada uno pueda explotar sus capacidades y alcanzar el resultado
+                                esperado, quizás superándolo.
+                                <br><br>
+                                Completa la información del <strong>ecosistema para el éxito académico</strong> de tus
+                                estudiantes y de los factores situacionales de tu curso.
+                            </span>
+                        </p-message>
+
+                        <div formGroupName="ecosistema" class="flex flex-col gap-6">
+
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex flex-col gap-2 w-full">
+                                    <label for="numEstudiantes">¿Cuántos estudiantes toman tu curso?</label>
+                                    <p-inputnumber
+                                        formControlName="numEstudiantes"
+                                        inputId="numEstudiantes"
+                                        [min]="1"
+                                        placeholder="Número de estudiantes"
+                                        class="w-full">
+                                    </p-inputnumber>
+                                </div>
+                                <div class="flex flex-col gap-2 w-full">
+                                    <label for="numDocentes">¿Cuántos docentes desarrollan este curso?</label>
+                                    <p-inputnumber
+                                        formControlName="numDocentes"
+                                        inputId="numDocentes"
+                                        [min]="1"
+                                        placeholder="Número de docentes"
+                                        class="w-full">
+                                    </p-inputnumber>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex flex-col gap-2 w-full">
+                                    <label for="liderExito">¿Cómo se llama el líder de Éxito estudiantil de tu programa?</label>
+                                    <input pInputText
+                                        formControlName="liderExito"
+                                        id="liderExito"
+                                        placeholder="Nombre del líder"
+                                        class="w-full" />
+                                </div>
+                                <div class="flex flex-col gap-2 w-full">
+                                    <label for="liderFortalecimiento">¿Cómo se llama el líder de Fortalecimiento curricular de tu programa?</label>
+                                    <input pInputText
+                                        formControlName="liderFortalecimiento"
+                                        id="liderFortalecimiento"
+                                        placeholder="Nombre del líder"
+                                        class="w-full" />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex flex-col gap-2 w-full">
+                                    <label for="unidadAdscrita">¿A qué unidad académica está adscrito tu curso?</label>
+                                    <input pInputText
+                                        formControlName="unidadAdscrita"
+                                        id="unidadAdscrita"
+                                        placeholder="Unidad académica"
+                                        class="w-full" />
+                                </div>
+                                <div class="flex flex-col gap-2 w-full">
+                                    <label for="unidadesDicta">¿En qué unidades académicas se dicta este curso?</label>
+                                    <input pInputText
+                                        formControlName="unidadesDicta"
+                                        id="unidadesDicta"
+                                        placeholder="Unidades académicas"
+                                        class="w-full" />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="aspectosImportantes">¿Qué aspectos importantes deben tener en cuenta tus estudiantes para culminar con éxito este curso?</label>
+                                <textarea pTextarea
+                                    formControlName="aspectosImportantes"
+                                    id="aspectosImportantes"
+                                    [autoResize]="true"
+                                    rows="3"
+                                    class="w-full"
+                                    placeholder="Describe los aspectos clave para el éxito en el curso...">
+                                </textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                </p-fieldset>
+            </p-card>
+
+            <!-- ===== CARD 2: OBSERVATORIO + RESULTADOS DE APRENDIZAJE ===== -->
+            <p-card class="w-full">
+                <p-fieldset legend="Resultados de Aprendizaje" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('resultadosAprendizaje'))"
+                                [value]="getLabel(getDisplayEstado('resultadosAprendizaje'))"
+                                size="small">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="resultadosAprendizaje"
+                                [badge]="comentariosCounts()['resultadosAprendizaje'] || 0" />
+                        </div>
+                    </ng-template>
+
+                    <div class="flex flex-col gap-6">
+
+                        <div class="flex flex-col gap-2">
+                            <p class="m-0">
+                                Para completar los apartados de esta actividad, consulta el
+                                <a href="https://www.unbosque.edu.co" target="_blank" rel="noopener noreferrer"
+                                    class="font-semibold underline">
+                                    Observatorio de Éxito Estudiantil
+                                </a>.
+                                Allí encontrarás información importante que te ayudará a entender las características
+                                de tus estudiantes.
+                            </p>
+                            <p-message severity="info" styleClass="w-full" icon="pi pi-info-circle">
+                                <span>
+                                    Revisa el enlace al observatorio de éxito estudiantil. Está en el aula virtual o aquí:
+                                    <a href="https://www.unbosque.edu.co" target="_blank" rel="noopener noreferrer"
+                                        class="font-semibold underline inline-flex items-center gap-1">
+                                        Observatorio de Éxito Estudiantil
+                                        <i class="pi pi-external-link text-xs"></i>
+                                    </a>
+                                </span>
+                            </p-message>
+                        </div>
+
+                        <!-- Lista de Resultados de Aprendizaje -->
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <p class="m-0 font-semibold text-sm">
+                                    ¿Cuál o cuáles son los resultados de aprendizaje de tu curso?
+                                </p>
+                                <p-button
+                                    label="Agregar resultado"
+                                    icon="pi pi-plus"
+                                    size="small"
+                                    severity="secondary"
+                                    (onClick)="addRA()">
+                                </p-button>
+                            </div>
+
+                            @if (raArray.length === 0) {
+                                <p-message severity="secondary" styleClass="w-full" icon="pi pi-list">
+                                    <span>Aún no has agregado resultados de aprendizaje. Haz clic en <strong>Agregar resultado</strong> para comenzar.</span>
+                                </p-message>
+                            }
+
+                            <div formArrayName="resultadosAprendizaje" class="flex flex-col gap-3">
+                                @for (control of raArray.controls; track $index) {
+                                    <div class="flex gap-3 items-start">
+                                        <span class="pt-2 font-semibold text-sm min-w-6 text-right">{{ $index + 1 }}.</span>
+                                        <textarea pTextarea
+                                            [formControlName]="$index"
+                                            [autoResize]="true"
+                                            rows="2"
+                                            class="flex-1"
+                                            placeholder="Describe el resultado de aprendizaje...">
+                                        </textarea>
+                                        <p-button
+                                            icon="pi pi-trash"
+                                            severity="danger"
+                                            [outlined]="true"
+                                            [rounded]="true"
+                                            size="small"
+                                            pTooltip="Eliminar resultado"
+                                            tooltipPosition="top"
+                                            (onClick)="removeRA($index)">
+                                        </p-button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </p-fieldset>
+            </p-card>
+
+            <!-- ===== CARD 3: CONTENIDOS DE LA ASIGNATURA ===== -->
+            <p-card class="w-full">
+                <p-fieldset legend="Contenidos de la asignatura" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('contenidos'))"
+                                [value]="getLabel(getDisplayEstado('contenidos'))"
+                                size="small">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="contenidos"
+                                [badge]="comentariosCounts()['contenidos'] || 0" />
+                        </div>
+                    </ng-template>
+
+                    <app-contentwidget></app-contentwidget>
+                </p-fieldset>
+            </p-card>
+
+            <!-- ===== ACCORDION: FACTORES SITUACIONALES ===== -->
+            <p-card>
+                <p-accordion [value]="[]" [multiple]="true">
                     <p-accordion-panel value="0">
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
-                                <span>a. Contexto Específico de la situación de Enseñanza/Aprendizaje.</span>
+                                <span>Contexto Específico de la situación de Enseñanza/Aprendizaje.</span>
                                 <div class="flex items-center gap-2">
                                     <p-tag
                                         [severity]="getSeverity(getDisplayEstado('panel1'))"
@@ -77,16 +307,14 @@
                                 <div class="flex flex-col md:flex-row gap-6">
                                     <div class="flex flex-wrap gap-2 w-full">
                                         <label for="pregunta_5">5. ¿Este tema es principalmente teórico, práctico o una
-                                            combinación de
-                                            ambos?</label>
+                                            combinación de ambos?</label>
                                         <p-select id="pregunta_5" formControlName="pregunta5" [options]="pregunta5Options"
                                             optionLabel="name" placeholder="Seleccione una opción"
                                             class="w-full"></p-select>
                                     </div>
                                     <div class="flex flex-wrap gap-2 w-full">
                                         <label for="pregunta_6">6. ¿Tu curso es de fundamentación, disciplinar, de
-                                            profundización,
-                                            electivo?</label>
+                                            profundización, electivo?</label>
                                         <p-select id="pregunta_6" formControlName="pregunta6" [options]="pregunta6Options"
                                             optionLabel="name" placeholder="Seleccione una opción"
                                             class="w-full"></p-select>
@@ -95,9 +323,7 @@
 
                                 <div class="flex flex-col gap-2">
                                     <label for="pregunta_7">7. ¿Tu curso requiere actualización permanente, o es una
-                                        temática
-                                        estable
-                                        que cambia poco?</label>
+                                        temática estable que cambia poco?</label>
                                     <p-select id="pregunta_7" formControlName="pregunta7" [options]="pregunta7Options"
                                         optionLabel="name" placeholder="Seleccione una opción" class="w-full"></p-select>
                                 </div>
@@ -107,7 +333,7 @@
                                     <p-select id="pregunta_8" formControlName="pregunta8" [options]="pregunta8Options"
                                         optionLabel="name" placeholder="Seleccione una opción" class="w-full"></p-select>
                                     <label>¿Cuáles son?</label>
-                                    <textarea pTextarea formControlName="pregunta8" id="pregunta_8" rows="2"
+                                    <textarea pTextarea formControlName="pregunta8" id="pregunta_8_detalle" rows="2"
                                         class="w-full"></textarea>
                                 </div>
 
@@ -117,8 +343,8 @@
                                         optionValue="code" optionLabel="name" placeholder="Seleccione una opción"
                                         class="w-full"></p-select>
                                     @if (form.get('panel1.pregunta9')?.value === 'si'){
-                                        <label>¿Cuál</label>
-                                        <textarea pTextarea formControlName="detallePregunta9" id="pregunta_9" rows="2"
+                                        <label>¿Cuál?</label>
+                                        <textarea pTextarea formControlName="detallePregunta9" id="pregunta_9_detalle" rows="2"
                                             class="w-full"></textarea>
                                     }
                                 </div>
@@ -129,7 +355,7 @@
                     <p-accordion-panel value="1">
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
-                                <span>b. Características de los estudiantes</span>
+                                <span>¿Cuáles son las característias de los estudiantes?</span>
                                 <div class="flex items-center gap-2">
                                     <p-tag
                                         [severity]="getSeverity(getDisplayEstado('panel2'))"
@@ -147,16 +373,14 @@
                             <div formGroupName="panel2" class="flex flex-col gap-6">
                                 <div class="flex flex-col gap-2">
                                     <label for="pregunta_10">10. ¿Cuáles son las características biopsicosociales,
-                                        culturales,
-                                        académicas y económicas de tus estudiantes?</label>
+                                        culturales, académicas y económicas de tus estudiantes?</label>
                                     <textarea pTextarea formControlName="pregunta10" id="pregunta_10" rows="2"
                                         class="w-full"></textarea>
                                 </div>
 
                                 <div class="flex flex-col gap-2">
                                     <label for="pregunta_11">11. ¿Qué conocimiento previo, experiencias y predisposiciones
-                                        iniciales
-                                        suelen tener los estudiantes sobre el tema?</label>
+                                        iniciales suelen tener los estudiantes sobre el tema?</label>
                                     <textarea pTextarea formControlName="pregunta11" id="pregunta_11" rows="2"
                                         class="w-full"></textarea>
                                 </div>
@@ -170,9 +394,7 @@
 
                                 <div class="flex flex-col gap-2">
                                     <label for="pregunta_13">13. ¿Conoces las características de diversidad de los
-                                        estudiantes
-                                        que
-                                        integrarán tu curso?</label>
+                                        estudiantes que integrarán tu curso?</label>
                                     <textarea pTextarea formControlName="pregunta13" id="pregunta_13" rows="2"
                                         class="w-full"></textarea>
                                 </div>
@@ -183,7 +405,7 @@
                     <p-accordion-panel value="2">
                         <p-accordion-header>
                             <div class="flex items-center justify-between w-full">
-                                <span>c. Tus características como docente</span>
+                                <span>¿Cuáles son tus característias como docente?</span>
                                 <div class="flex items-center gap-2">
                                     <p-tag
                                         [severity]="getSeverity(getDisplayEstado('panel3'))"
@@ -201,9 +423,7 @@
                             <div formGroupName="panel3" class="flex flex-col gap-6">
                                 <div class="flex flex-col gap-2">
                                     <label for="pregunta_14">14. ¿Qué experiencia docente tienes en la enseñanza de este
-                                        curso o
-                                        de
-                                        temas relacionados?</label>
+                                        curso o de temas relacionados?</label>
                                     <textarea pTextarea formControlName="pregunta14" id="pregunta_14" rows="2"
                                         class="w-full"></textarea>
                                 </div>
@@ -215,8 +435,8 @@
                                 </div>
 
                                 <div class="flex flex-col gap-2">
-                                    <label for="pregunta_16">16. ¿Qué resultados has obtenido en la evaluación de este curso
-                                        anteriormente?</label>
+                                    <label for="pregunta_16">16. ¿Qué resultados has obtenido en la evaluación de este
+                                        curso anteriormente?</label>
                                     <textarea pTextarea formControlName="pregunta16" id="pregunta_16" rows="2"
                                         class="w-full"></textarea>
                                 </div>
@@ -229,8 +449,9 @@
                             </div>
                         </p-accordion-content>
                     </p-accordion-panel>
-                </form>
-            </p-accordion>
-        </p-card>
+                </p-accordion>
+            </p-card>
+
+        </form>
     </p-fluid>
 }

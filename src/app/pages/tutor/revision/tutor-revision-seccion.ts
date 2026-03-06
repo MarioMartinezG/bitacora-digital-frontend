@@ -69,7 +69,7 @@ interface PanelView {
                                         <!-- FIELDS: key-value pairs -->
                                         @if (panel.displayType === 'fields' && panel.fields) {
                                             @if (panelSinContenido(panel)) {
-                                                <p-message severity="secondary" icon="pi pi-info-circle" styleClass="w-full">
+                                                <p-message severity="info" styleClass="w-full">
                                                     <span>El estudiante aún no ha diligenciado esta sección.</span>
                                                 </p-message>
                                             } @else {
@@ -91,7 +91,7 @@ interface PanelView {
                                         <!-- TABLE: array of objects -->
                                         @if (panel.displayType === 'table' && panel.rows && panel.columns) {
                                             @if (panel.rows.length === 0) {
-                                                <p-message severity="secondary" icon="pi pi-info-circle" styleClass="w-full">
+                                                <p-message severity="info" styleClass="w-full">
                                                     <span>El estudiante aún no ha diligenciado esta sección.</span>
                                                 </p-message>
                                             } @else {
@@ -121,7 +121,7 @@ interface PanelView {
                                         <!-- LIST: array of strings -->
                                         @if (panel.displayType === 'list') {
                                             @if (!panel.listItems || panel.listItems.length === 0) {
-                                                <p-message severity="secondary" icon="pi pi-info-circle" styleClass="w-full">
+                                                <p-message severity="info" styleClass="w-full">
                                                     <span>El estudiante aún no ha diligenciado esta sección.</span>
                                                 </p-message>
                                             } @else {

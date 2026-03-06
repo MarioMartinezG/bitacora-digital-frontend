@@ -83,8 +83,34 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
     },
 
     'factores': {
+        'ecosistema': {
+            panelLabel: 'Ecosistema para el éxito académico',
+            displayType: 'fields',
+            fields: {
+                'numEstudiantes': '¿Cuántos estudiantes toman tu curso?',
+                'numDocentes': '¿Cuántos docentes desarrollan este curso?',
+                'liderExito': '¿Cómo se llama el líder de Éxito estudiantil de tu programa?',
+                'liderFortalecimiento': '¿Cómo se llama el líder de Fortalecimiento curricular de tu programa?',
+                'unidadAdscrita': '¿A qué unidad académica está adscrito tu curso?',
+                'unidadesDicta': '¿En qué unidades académicas se dicta este curso?',
+                'aspectosImportantes': '¿Qué aspectos importantes deben tener en cuenta tus estudiantes para culminar con éxito este curso?'
+            }
+        },
+        'resultadosAprendizaje': {
+            panelLabel: 'Resultados de Aprendizaje',
+            displayType: 'list',
+            infoLabel: '¿Cuál o cuáles son los resultados de aprendizaje de tu curso?'
+        },
+        'contenidos': {
+            panelLabel: 'Contenidos de la asignatura',
+            displayType: 'table',
+            columns: [
+                { key: 'tema', label: 'Módulo/Unidad/Tema' },
+                { key: 'subtema', label: 'Subtema' }
+            ]
+        },
         'panel1': {
-            panelLabel: 'a. Contexto Específico de la situación de Enseñanza/Aprendizaje',
+            panelLabel: 'Contexto Específico de la situación de Enseñanza/Aprendizaje',
             displayType: 'fields',
             fields: {
                 'pregunta1': '1. ¿El curso hace parte de un programa de pregrado, o posgrado?',
@@ -100,7 +126,7 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
             }
         },
         'panel2': {
-            panelLabel: 'b. Características de los estudiantes',
+            panelLabel: '¿Cuáles son las característias de los estudiantes?',
             displayType: 'fields',
             fields: {
                 'pregunta10': '10. ¿Cuáles son las características biopsicosociales, culturales, académicas y económicas de tus estudiantes?',
@@ -110,7 +136,7 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
             }
         },
         'panel3': {
-            panelLabel: 'c. Tus características como docente',
+            panelLabel: '¿Cuáles son tus característias como docente?',
             displayType: 'fields',
             fields: {
                 'pregunta14': '14. ¿Qué experiencia docente tienes en la enseñanza de este curso o de temas relacionados?',
