@@ -143,12 +143,14 @@ export interface RapRacJson {
 
 /** Sección 5: Actividades de Aprendizaje (seccion_id: 5) */
 export interface ActividadesAprendizajeJson {
-    dimensiones: ActividadDimensionItem[];
+    actividades: ActividadItem[];
 }
 
-export interface ActividadDimensionItem {
+export interface ActividadItem {
+    ra?: string;
+    tema?: string;
+    subtema?: string;
     dimension?: string;
-    resultado?: string;
     metodologia?: string;
     descripcion?: string;
 }
