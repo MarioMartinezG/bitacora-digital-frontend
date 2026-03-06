@@ -23,7 +23,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
     'ajustes': 'Ambientes Sanos y seguros',
     'rap-rac': 'RAP y RAC',
     'actividades': 'Actividades de Aprendizaje',
-    'como-evaluare': 'Cómo Evaluaré',
+    'evaluacion': 'Diseño de la evaluación',
     'secuencia': 'Secuencia del Curso',
     'bibliografia': 'Bibliografía'
 };

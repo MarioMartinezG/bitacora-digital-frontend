@@ -6,6 +6,11 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AccordionModule } from 'primeng/accordion';
 import { MessageModule } from 'primeng/message';
+import { TableModule } from 'primeng/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
 import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
@@ -33,7 +38,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
   'ajustes': 'Ambientes Sanos y Seguros',
   'rap-rac': 'RAP y RAC',
   'actividades': 'Actividades de Aprendizaje',
-  'como-evaluare': 'Cómo Evaluaré',
+  'evaluacion': 'Diseño de la evaluación',
   'secuencia': 'Secuencia del Curso',
   'bibliografia': 'Bibliografía'
 };
@@ -42,7 +47,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
   selector: 'app-bitacora-seccion-view',
   templateUrl: './bitacora-seccion-view.html',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, CommentThreadComponent, EstadoTutorSelectorComponent]
+  imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent]
 })
 export class BitacoraSeccionView implements OnInit {
   private route = inject(ActivatedRoute);
@@ -117,10 +122,13 @@ export class BitacoraSeccionView implements OnInit {
       procesados.add(panelKey);
     }
 
-    // Agregar paneles extra que existan en datos pero no en labels
-    for (const panelKey of Object.keys(datos)) {
-      if (procesados.has(panelKey)) continue;
-      this.procesarPanel(panelKey, datos[panelKey], seccionLabels, panelesResult);
+    // Agregar paneles extra solo si la sección no tiene labels definidos
+    // (evita mostrar campos obsoletos de versiones anteriores del formulario)
+    if (labelKeys.length === 0) {
+      for (const panelKey of Object.keys(datos)) {
+        if (procesados.has(panelKey)) continue;
+        this.procesarPanel(panelKey, datos[panelKey], seccionLabels, panelesResult);
+      }
     }
 
     this.paneles.set(panelesResult);
@@ -254,6 +262,10 @@ export class BitacoraSeccionView implements OnInit {
       return estadoTutor.estado as EstadoAvance;
     }
     return this.getEstadoEstudiante(panel);
+  }
+
+  getColumnKeys(panel: PanelView): string[] {
+    return panel.columns?.map(c => c.key) ?? [];
   }
 
   formatAnyValue(val: any): string {

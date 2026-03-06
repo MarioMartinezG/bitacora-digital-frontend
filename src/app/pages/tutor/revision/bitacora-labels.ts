@@ -26,7 +26,7 @@ export const SELECT_VALUE_LABELS: Record<string, string> = {
     'lectura': 'Lectura de material',
     'video': 'Video educativo',
     'taller': 'Taller práctico',
-    'debate': 'Debate grupal',
+    'debate': 'Debate / diálogo grupal',
     'exposicion': 'Exposición',
     'colaborativo': 'Trabajo colaborativo',
     'evaluacion': 'Evaluación',
@@ -50,6 +50,74 @@ export const SELECT_VALUE_LABELS: Record<string, string> = {
     // Factores pregunta9
     'si': 'Sí',
     'no': 'No',
+    // Evaluacion - tipo
+    'sumativa': 'Sumativa',
+    'formativa': 'Formativa',
+    'mixta': 'Mixta',
+    // Evaluacion - actores
+    'hetero': 'Heteroevaluación',
+    'co': 'Coevaluación',
+    'auto': 'Autoevaluación',
+    // Evaluacion - momento
+    'inicial': 'Inicial',
+    'media': 'Media procesual',
+    'final': 'Final',
+    // Evaluacion - medios escritos
+    'carpeta_dossier': 'Carpeta o dossier / carpeta colaborativa',
+    'control_examen': 'Control (Examen)',
+    'cuaderno': 'Cuaderno / cuaderno de notas / cuaderno de campo',
+    'cuestionario': 'Cuestionario',
+    'diario': 'Diario reflexivo / diario de clase',
+    'estudio_casos': 'Estudio de casos',
+    'ensayo': 'Ensayo',
+    'examen': 'Examen',
+    'foro_virtual': 'Foro virtual',
+    'memoria': 'Memoria',
+    'monografia': 'Monografía',
+    'informe': 'Informe',
+    'portafolio': 'Portafolio / portafolio electrónico',
+    'poster': 'Póster',
+    'pruebas_objetivas': 'Pruebas objetivas',
+    'recension': 'Recensión',
+    'test_diagnostico': 'Test diagnóstico',
+    'trabajo_escrito': 'Trabajo escrito',
+    // Evaluacion - medios orales
+    'comunicacion_oral': 'Comunicación oral',
+    'cuestionario_oral': 'Cuestionario oral',
+    'discusion_grupal': 'Discusión grupal',
+    'mesa_redonda': 'Mesa redonda',
+    'ponencia': 'Ponencia',
+    'pregunta_clase': 'Pregunta de clase',
+    'presentacion_oral': 'Presentación oral',
+    // Evaluacion - medios prácticos
+    'practica_supervisada': 'Práctica supervisada',
+    'demostracion': 'Demostración / actuación / representación',
+    'role_playing': 'Role playing',
+    // Evaluacion - técnicas
+    'analisis_documental': 'Análisis documental',
+    'analisis_producciones': 'Análisis de producciones',
+    'observacion_directa': 'Observación directa del alumno',
+    'observacion_grupo': 'Observación del grupo',
+    'observacion_sistematica': 'Observación sistemática',
+    'analisis_audio_video': 'Análisis de grabación de audio o video',
+    'autoevaluacion': 'Autoevaluación',
+    'coevaluacion': 'Evaluación entre pares',
+    'evaluacion_colaborativa': 'Evaluación compartida o colaborativa',
+    // Evaluacion - instrumentos
+    'diario_profesor': 'Diario del profesor',
+    'escala_comprobacion': 'Escala de comprobación',
+    'escala_diferencial': 'Escala de diferencial semántico',
+    'escala_verbal_numerica': 'Escala verbal o numérica',
+    'escala_rubrica': 'Escala descriptiva o rúbrica',
+    'escala_estimacion': 'Escala de estimación',
+    'ficha_observacion': 'Ficha de observación',
+    'lista_control': 'Lista de control',
+    'matrices_decision': 'Matrices de decisión',
+    'fichas_seguimiento': 'Fichas de seguimiento individual o grupal',
+    'fichas_autoevaluacion': 'Fichas de autoevaluación',
+    'fichas_entre_iguales': 'Fichas de evaluación entre iguales',
+    'informe_expertos': 'Informe de expertos',
+    'informe_autoevaluacion': 'Informe de autoevaluación',
     // Evaluacion - programaSeleccionado
     'pregrado': 'Pregrado',
     'posgrado': 'Posgrado',
@@ -199,156 +267,19 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
     },
 
     'evaluacion': {
-        'programa': {
-            panelLabel: 'Programa',
-            displayType: 'fields',
-            fields: {
-                'programaSeleccionado': '¿Tu asignatura es de pregrado o posgrado?'
-            }
-        },
-        'Compromiso o valoración': {
-            panelLabel: 'Compromiso o valoración',
-            displayType: 'fields',
-            fields: {
-                'medios': 'Medios de evaluación',
-                'otroMedioTexto': 'Otro medio',
-                'tecnicas': 'Técnicas',
-                'otraTecnicaTexto': 'Otra técnica',
-                'instrumentos': 'Instrumentos',
-                'otroInstrumentoTexto': 'Otro instrumento',
-                'tipoEvaluacion': 'Tipo de evaluación',
-                'otroTipoEvaluacionTexto': 'Otro tipo',
-                'participantes': 'Participantes',
-                'otrosParticipantesTexto': 'Otros participantes',
-                'momento': 'Momento'
-            }
-        },
-        'Dimensiones humanas del aprendizaje': {
-            panelLabel: 'Dimensiones humanas del aprendizaje',
-            displayType: 'fields',
-            fields: {
-                'medios': 'Medios de evaluación',
-                'otroMedioTexto': 'Otro medio',
-                'tecnicas': 'Técnicas',
-                'otraTecnicaTexto': 'Otra técnica',
-                'instrumentos': 'Instrumentos',
-                'otroInstrumentoTexto': 'Otro instrumento',
-                'tipoEvaluacion': 'Tipo de evaluación',
-                'otroTipoEvaluacionTexto': 'Otro tipo',
-                'participantes': 'Participantes',
-                'otrosParticipantesTexto': 'Otros participantes',
-                'momento': 'Momento'
-            }
-        },
-        'Conocimiento Fundamental': {
-            panelLabel: 'Conocimiento Fundamental',
-            displayType: 'fields',
-            fields: {
-                'medios': 'Medios de evaluación',
-                'otroMedioTexto': 'Otro medio',
-                'tecnicas': 'Técnicas',
-                'otraTecnicaTexto': 'Otra técnica',
-                'instrumentos': 'Instrumentos',
-                'otroInstrumentoTexto': 'Otro instrumento',
-                'tipoEvaluacion': 'Tipo de evaluación',
-                'otroTipoEvaluacionTexto': 'Otro tipo',
-                'participantes': 'Participantes',
-                'otrosParticipantesTexto': 'Otros participantes',
-                'momento': 'Momento'
-            }
-        },
-        'Aplicación del aprendizaje': {
-            panelLabel: 'Aplicación del aprendizaje',
-            displayType: 'fields',
-            fields: {
-                'medios': 'Medios de evaluación',
-                'otroMedioTexto': 'Otro medio',
-                'tecnicas': 'Técnicas',
-                'otraTecnicaTexto': 'Otra técnica',
-                'instrumentos': 'Instrumentos',
-                'otroInstrumentoTexto': 'Otro instrumento',
-                'tipoEvaluacion': 'Tipo de evaluación',
-                'otroTipoEvaluacionTexto': 'Otro tipo',
-                'participantes': 'Participantes',
-                'otrosParticipantesTexto': 'Otros participantes',
-                'momento': 'Momento'
-            }
-        },
-        'Integración': {
-            panelLabel: 'Integración',
-            displayType: 'fields',
-            fields: {
-                'medios': 'Medios de evaluación',
-                'otroMedioTexto': 'Otro medio',
-                'tecnicas': 'Técnicas',
-                'otraTecnicaTexto': 'Otra técnica',
-                'instrumentos': 'Instrumentos',
-                'otroInstrumentoTexto': 'Otro instrumento',
-                'tipoEvaluacion': 'Tipo de evaluación',
-                'otroTipoEvaluacionTexto': 'Otro tipo',
-                'participantes': 'Participantes',
-                'otrosParticipantesTexto': 'Otros participantes',
-                'momento': 'Momento'
-            }
-        },
-        'Aprender a aprender': {
-            panelLabel: 'Aprender a aprender',
-            displayType: 'fields',
-            fields: {
-                'medios': 'Medios de evaluación',
-                'otroMedioTexto': 'Otro medio',
-                'tecnicas': 'Técnicas',
-                'otraTecnicaTexto': 'Otra técnica',
-                'instrumentos': 'Instrumentos',
-                'otroInstrumentoTexto': 'Otro instrumento',
-                'tipoEvaluacion': 'Tipo de evaluación',
-                'otroTipoEvaluacionTexto': 'Otro tipo',
-                'participantes': 'Participantes',
-                'otrosParticipantesTexto': 'Otros participantes',
-                'momento': 'Momento'
-            }
-        },
-        'Definición de los criterios de evaluación': {
-            panelLabel: 'Definición de los criterios de evaluación',
-            displayType: 'fields',
-            fields: {
-                'criterio_0': '¿Son observables y medibles?',
-                'criterio_1': '¿Son pertinentes?',
-                'criterio_2': '¿Tengo un plan de socialización con mis estudiantes?'
-            }
-        },
-        'Selección de los instrumentos de evaluación': {
-            panelLabel: 'Selección de los instrumentos de evaluación',
-            displayType: 'fields',
-            fields: {
-                'criterio_0': '¿Están alineados con el resultado y la dimensión del aprendizaje?',
-                'criterio_1': '¿Son variados y consideran los estilos de aprendizaje?',
-                'criterio_2': '¿Establecen niveles de desempeño claros para los estudiantes?'
-            }
-        },
-        'Participantes': {
-            panelLabel: 'Participantes',
-            displayType: 'fields',
-            fields: {
-                'criterio_0': '¿Existen actividades de auto, hetero y coevaluación con instrumentos específicos?'
-            }
-        },
-        'Diálogo para la retroalimentación': {
-            panelLabel: 'Diálogo para la retroalimentación',
-            displayType: 'fields',
-            fields: {
-                'criterio_0': '¿He planeado y socializado los momentos de retroalimentación?',
-                'criterio_1': '¿Se combinan la evaluación formativa con la sumativa?'
-            }
-        },
-        'Calificación final (Numérica)': {
-            panelLabel: 'Calificación final (Numérica)',
-            displayType: 'fields',
-            fields: {
-                'criterio_0': '¿Refleja el alcance de los resultados de aprendizaje?',
-                'criterio_1': '¿Corresponde a la escala institucional?',
-                'criterio_2': '¿Es flexible y contempla diferentes métodos de calificación?'
-            }
+        'actividadesEvaluacion': {
+            panelLabel: 'Diseño de la evaluación — Actividades',
+            displayType: 'table',
+            columns: [
+                { key: 'nombre', label: 'Actividad' },
+                { key: 'descripcionEvaluacion', label: 'Descripción de evaluación' },
+                { key: 'tipoEvaluacion', label: 'Tipo de evaluación' },
+                { key: 'momento', label: 'Momento' },
+                { key: 'actores', label: 'Actores' },
+                { key: 'medios', label: 'Medios' },
+                { key: 'tecnicas', label: 'Técnicas' },
+                { key: 'instrumentos', label: 'Instrumentos' }
+            ]
         }
     },
 
