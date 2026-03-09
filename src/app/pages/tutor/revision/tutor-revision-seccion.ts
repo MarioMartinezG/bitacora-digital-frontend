@@ -30,6 +30,12 @@ interface PanelView {
     columns?: { key: string; label: string }[];
     listItems?: string[];
     infoText?: string;
+    /** Clave de subsección unificada para comentarios (varios paneles pueden compartir hilo) */
+    comentarioKey?: string;
+    /** Si es true, no se muestra el botón de comentarios en este panel */
+    ocultarComentario?: boolean;
+    /** Si es true, no se muestra el selector de estado del tutor en este panel */
+    ocultarEstado?: boolean;
 }
 
 @Component({
@@ -57,14 +63,18 @@ interface PanelView {
                                     <div class="flex items-center justify-between w-full gap-2">
                                         <span>{{ panel.label }}</span>
                                         <div class="flex items-center gap-2">
-                                            <div (click)="$event.stopPropagation()">
-                                                <app-estado-tutor-selector
-                                                    [estudianteId]="estudianteId"
-                                                    [seccionCodigo]="seccionCodigo"
-                                                    [subseccionCodigo]="panel.key"
-                                                    [estadoActual]="getEstadoInicial(panel)" />
-                                            </div>
-                                            <p-button icon="pi pi-comments" [rounded]="true" [text]="true" severity="secondary" [badge]="getComentarioCount(panel.key)" badgeSeverity="info" (onClick)="abrirComentarios(panel.key); $event.stopPropagation()" />
+                                            @if (!panel.ocultarEstado) {
+                                                <div (click)="$event.stopPropagation()">
+                                                    <app-estado-tutor-selector
+                                                        [estudianteId]="estudianteId"
+                                                        [seccionCodigo]="seccionCodigo"
+                                                        [subseccionCodigo]="panel.key"
+                                                        [estadoActual]="getEstadoInicial(panel)" />
+                                                </div>
+                                            }
+                                            @if (!panel.ocultarComentario) {
+                                                <p-button icon="pi pi-comments" [rounded]="true" [text]="true" severity="secondary" [badge]="getComentarioCount(panel.comentarioKey || panel.key)" badgeSeverity="info" (onClick)="abrirComentarios(panel.comentarioKey || panel.key); $event.stopPropagation()" />
+                                            }
                                         </div>
                                     </div>
                                 </p-accordion-header>
@@ -272,7 +282,7 @@ export class TutorRevisionSeccion implements OnInit {
         const panelLabel = meta?.panelLabel || panelKey;
         const displayType = meta?.displayType || this.inferDisplayType(panelData);
 
-        const panel: PanelView = { key: panelKey, label: panelLabel, displayType };
+        const panel: PanelView = { key: panelKey, label: panelLabel, displayType, comentarioKey: meta?.comentarioKey, ocultarComentario: meta?.ocultarComentario, ocultarEstado: meta?.ocultarEstado };
 
         switch (displayType) {
             case 'table':
@@ -339,13 +349,20 @@ export class TutorRevisionSeccion implements OnInit {
     /** Construye la lista de campos con sus valores formateados.
      *  Siempre incluye los campos definidos en meta, aunque el estudiante no los haya llenado. */
     private buildFieldViews(panelKey: string, panelData: any, meta?: PanelMeta): { key: string; label: string; value: string }[] {
-        const safeData = (typeof panelData === 'object' && panelData !== null && !Array.isArray(panelData))
-            ? panelData : {};
-
         const fieldLabels = meta?.fields || {};
-        const result: { key: string; label: string; value: string }[] = [];
-
         const metaKeys = Object.keys(fieldLabels);
+
+        let safeData: Record<string, any>;
+        if (typeof panelData === 'object' && panelData !== null && !Array.isArray(panelData)) {
+            safeData = panelData;
+        } else if (metaKeys.length === 1 && (typeof panelData === 'string' || typeof panelData === 'number')) {
+            // Valor escalar: se mapea directamente al único campo definido en meta
+            safeData = { [metaKeys[0]]: panelData };
+        } else {
+            safeData = {};
+        }
+
+        const result: { key: string; label: string; value: string }[] = [];
 
         if (metaKeys.length > 0) {
             // Campos definidos en meta: siempre se muestran aunque estén vacíos
@@ -525,7 +542,8 @@ export class TutorRevisionSeccion implements OnInit {
             'actividades': 'Actividades de Aprendizaje',
             'evaluacion': 'Diseño de la evaluación',
             'secuencia': 'Secuencia del Curso',
-            'bibliografia': 'Bibliografía'
+            'bibliografia': 'Bibliografía',
+            'calificacion': 'Calificación'
         };
         return nombres[codigo] || codigo;
     }

@@ -10,6 +10,12 @@ export interface PanelMeta {
     fields?: Record<string, string>;
     columns?: { key: string; label: string }[];
     infoLabel?: string;
+    /** Clave de subsección para comentarios. Si se define, varios paneles comparten el mismo hilo. */
+    comentarioKey?: string;
+    /** Si es true, no se muestra el botón de comentarios en este panel. */
+    ocultarComentario?: boolean;
+    /** Si es true, no se muestra el selector de estado del tutor en este panel. */
+    ocultarEstado?: boolean;
 }
 
 export type SeccionLabelsMap = Record<string, Record<string, PanelMeta>>;
@@ -308,6 +314,34 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
                 { key: 'editorial', label: 'Editorial' },
                 { key: 'url', label: 'URL' }
             ]
+        }
+    },
+
+    'calificacion': {
+        'nivel': {
+            panelLabel: 'Tipo de programa',
+            displayType: 'fields',
+            fields: {
+                'nivel': 'Pregrado / Posgrado'
+            },
+            comentarioKey: 'calificacion',
+            ocultarComentario: true,
+            ocultarEstado: true
+        },
+        'resultados': {
+            panelLabel: 'Escala de calificación por resultado de aprendizaje',
+            displayType: 'table',
+            columns: [
+                { key: 'nombreRA', label: 'Resultado de Aprendizaje' },
+                { key: 'v5_0', label: '5.0' },
+                { key: 'v4_0', label: '4.0' },
+                { key: 'v3_5', label: '3.5 (Posgrado)' },
+                { key: 'v3_0', label: '3.0' },
+                { key: 'v2_0', label: '2.0' },
+                { key: 'v1_0', label: '1.0' },
+                { key: 'v0_0', label: '0.0' }
+            ],
+            comentarioKey: 'calificacion'
         }
     }
 };

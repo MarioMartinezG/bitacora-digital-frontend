@@ -9,6 +9,7 @@ import { ActividadesAprendizajeComponent } from './actividades-aprendizaje-compo
 import { ComoEvaluareComponent } from './como-evaluare-component/como-evaluare-component';
 import { SecuenciaCursoComponent } from './secuencia-curso-component/secuencia-curso-component';
 import { BibliografiaComponent } from './bibliografia-component/bibliografia-component';
+import { CalificacionComponent } from './calificacion-component/calificacion-component';
 
 export default [
     { path: 'caracteriza-asignatura', component: CaracterizaComponent },
@@ -19,5 +20,6 @@ export default [
     { path: 'como-evaluare', component: ComoEvaluareComponent },
     { path: 'secuencia-curso', component: SecuenciaCursoComponent },
     { path: 'bibliografia', component: BibliografiaComponent },
+    { path: 'calificacion', component: CalificacionComponent },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
