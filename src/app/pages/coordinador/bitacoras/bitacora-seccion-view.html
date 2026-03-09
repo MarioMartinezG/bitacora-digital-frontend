@@ -18,7 +18,7 @@
               <div class="flex items-center justify-between w-full gap-2">
                 <span>{{ panel.label }}</span>
                 <div class="flex items-center gap-2">
-                  @if (esTambienTutor) {
+                  @if (esTambienTutor && !panel.ocultarEstado) {
                     <div (click)="$event.stopPropagation()">
                       <app-estado-tutor-selector
                         [estudianteId]="estudianteId"
@@ -27,15 +27,17 @@
                         [estadoActual]="getEstadoInicial(panel)" />
                     </div>
                   }
-                  <p-button
-                    icon="pi pi-comments"
-                    [rounded]="true"
-                    [text]="true"
-                    severity="secondary"
-                    [badge]="getComentarioCount(panel.key)"
-                    badgeSeverity="info"
-                    (onClick)="abrirComentarios(panel.key); $event.stopPropagation()"
-                  />
+                  @if (!panel.ocultarComentario) {
+                    <p-button
+                      icon="pi pi-comments"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="secondary"
+                      [badge]="getComentarioCount(panel.comentarioKey || panel.key)"
+                      badgeSeverity="info"
+                      (onClick)="abrirComentarios(panel.comentarioKey || panel.key); $event.stopPropagation()"
+                    />
+                  }
                 </div>
               </div>
             </p-accordion-header>

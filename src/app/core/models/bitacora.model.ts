@@ -172,6 +172,23 @@ export interface EvaluacionActividadEntry {
     instrumentos?: string[];
 }
 
+/** Sección 7+: Escala de Calificación */
+export interface CalificacionJson {
+    nivel: 'pregrado' | 'posgrado' | '';
+    resultados: CalificacionRAEntry[];
+}
+
+export interface CalificacionRAEntry {
+    nombreRA: string;
+    v5_0: string;
+    v4_0: string;
+    v3_5: string;
+    v3_0: string;
+    v2_0: string;
+    v1_0: string;
+    v0_0: string;
+}
+
 /** Unión de todos los tipos JSON de sección */
 export type SeccionJsonData =
     | CaracterizaJson
@@ -179,4 +196,5 @@ export type SeccionJsonData =
     | AjustesRazonablesJson
     | RapRacJson
     | ActividadesAprendizajeJson
-    | ComoEvaluareJson;
+    | ComoEvaluareJson
+    | CalificacionJson;

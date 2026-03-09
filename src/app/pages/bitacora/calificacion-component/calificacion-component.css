@@ -1,0 +1,216 @@
+/* ====== STICKY HEADER ====== */
+.sticky-header-global {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--surface-ground);
+  padding: 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.sticky-header-global::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .sticky-header-global .flex {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .sticky-header-global .flex > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ====== FILA COMPACTA DE NIVEL ====== */
+.nivel-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.nivel-row :global(.nivel-select) {
+  width: 14rem;
+  flex-shrink: 0;
+}
+
+.nivel-hint {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .nivel-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nivel-row :global(.nivel-select) {
+    width: 100%;
+  }
+
+  .nivel-hint {
+    display: none;
+  }
+}
+
+/* ====== CARD DEL RESULTADO DE APRENDIZAJE ====== */
+.ra-calificacion-card {
+  border: 1.5px solid var(--surface-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  background: var(--surface-card);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Badge numerado del RA */
+.ra-badge {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--primary-color-text, white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* ====== TABLA DE ESCALA ====== */
+.escala-table {
+  border: 1px solid var(--surface-border);
+  border-radius: 0.625rem;
+  overflow: hidden;
+}
+
+.escala-header {
+  display: flex;
+  background: var(--surface-ground);
+  border-bottom: 1.5px solid var(--surface-border);
+  padding: 0.625rem 0.875rem;
+  gap: 1rem;
+}
+
+.escala-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 0.875rem;
+  border-bottom: 1px solid var(--surface-border);
+  transition: background 0.15s ease;
+}
+
+.escala-row:last-child {
+  border-bottom: none;
+}
+
+.escala-row:hover {
+  background: var(--surface-hover);
+}
+
+/* Columna de valoración */
+.escala-col-valoracion {
+  width: 10rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.escala-header .escala-col-valoracion {
+  padding-top: 0;
+}
+
+/* Columna de descriptor */
+.escala-col-descriptor {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+}
+
+.escala-row .escala-col-descriptor {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* Chip de valoración numérica — base */
+.valoracion-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+
+/* Verde — calificaciones altas (5.0, 4.0) */
+.valoracion-chip--alta {
+  background: color-mix(in srgb, #22c55e 12%, transparent);
+  color: #15803d;
+  border-color: color-mix(in srgb, #22c55e 30%, transparent);
+}
+
+/* Naranja — calificaciones medias (3.5, 3.0) */
+.valoracion-chip--media {
+  background: color-mix(in srgb, #f97316 12%, transparent);
+  color: #c2410c;
+  border-color: color-mix(in srgb, #f97316 30%, transparent);
+}
+
+/* Rojo — calificaciones bajas (2.0, 1.0, 0.0) */
+.valoracion-chip--baja {
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  color: #b91c1c;
+  border-color: color-mix(in srgb, #ef4444 30%, transparent);
+}
+
+@media (max-width: 640px) {
+  .escala-header {
+    display: none;
+  }
+
+  .escala-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .escala-col-valoracion {
+    width: auto;
+    padding-top: 0;
+  }
+}
