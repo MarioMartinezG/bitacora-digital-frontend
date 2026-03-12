@@ -32,7 +32,7 @@
         <div class="flex flex-col gap-4">
 
             <!-- ===== CARD 1: INSTRUCCIONES ===== -->
-            <p-card class="w-full">
+            <div class="card">
                 <p-fieldset legend="Instrucciones" [toggleable]="true">
                     <div class="flex flex-col gap-4">
 
@@ -64,10 +64,10 @@
 
                     </div>
                 </p-fieldset>
-            </p-card>
+            </div>
 
             <!-- ===== CARD 2: PLANIFICACIÓN (CARD-PICKER + FORMULARIO) ===== -->
-            <p-card class="w-full">
+            <div class="card">
                 <p-fieldset legend="Planifica tus actividades de aprendizaje" [toggleable]="true">
                     <ng-template pTemplate="header">
                         <div class="flex items-center gap-2">
@@ -364,7 +364,7 @@
                         </div>
                     }
                 </p-fieldset>
-            </p-card>
+            </div>
 
         </div>
     </p-fluid>

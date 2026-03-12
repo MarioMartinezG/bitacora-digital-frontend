@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -28,7 +27,6 @@ interface FiltroOpcion {
         CommonModule,
         FormsModule,
         ButtonModule,
-        CardModule,
         TagModule,
         DividerModule,
         SkeletonModule,

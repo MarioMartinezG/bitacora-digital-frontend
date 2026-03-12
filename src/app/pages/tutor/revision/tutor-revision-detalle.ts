@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ProgressBarModule } from 'primeng/progressbar';
@@ -32,7 +31,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
 @Component({
     selector: 'app-tutor-revision-detalle',
     standalone: true,
-    imports: [CommonModule, CardModule, ButtonModule, TagModule, ProgressBarModule],
+    imports: [CommonModule, ButtonModule, TagModule, ProgressBarModule],
     template: `
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
@@ -44,7 +43,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
             <div class="grid grid-cols-12 gap-4">
                 @for (seccion of secciones(); track seccion.codigo) {
                     <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                        <p-card [style]="{cursor: 'pointer'}" (click)="verSeccion(seccion.codigo)">
+                        <div class="card cursor-pointer" (click)="verSeccion(seccion.codigo)">
                             <div class="flex flex-col gap-3">
                                 <div class="flex items-center justify-between">
                                     <span class="font-semibold text-sm">{{ seccion.nombre }}</span>
@@ -55,7 +54,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
                                     <p-button icon="pi pi-eye" label="Revisar" size="small" [text]="true" />
                                 </div>
                             </div>
-                        </p-card>
+                        </div>
                     </div>
                 }
             </div>

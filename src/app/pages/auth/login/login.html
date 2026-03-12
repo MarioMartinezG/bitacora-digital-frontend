@@ -1,14 +1,13 @@
 <app-floating-configurator />
 <app-loading></app-loading>
+<p-toast />
+
 <form [formGroup]="loginForm" (ngSubmit)="login()">
-    <div
-        class="login-background flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
+    <div class="login-background flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
         <div class="flex flex-col items-center justify-center">
-            <div
-                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+            <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
                 <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
                     <div class="text-center mb-8">
-                        <!-- ACA VA EL LOGO A COLOCAR -->
                         <div class="flex flex-col items-center justify-center mb-4">
                             <img src="Logo_de_la_Universidad_El_Bosque.png" alt="logo_UEB" width="150" height="170">
                         </div>
@@ -27,14 +26,74 @@
                         <label for="password1"
                             class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Contraseña</label>
                         <p-password id="password1" formControlName="password" placeholder="Contraseña"
-                            [toggleMask]="true" styleClass="mb-8" [fluid]="true" [feedback]="false"></p-password>
+                            [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"></p-password>
+
+                        <!-- Enlace olvidé mi contraseña -->
+                        <div class="flex justify-end mb-6">
+                            <button type="button"
+                                class="text-sm text-primary cursor-pointer bg-transparent border-none p-0 hover:underline"
+                                (click)="abrirRecuperacion()">
+                                ¿Olvidaste tu contraseña?
+                            </button>
+                        </div>
 
                         <p-button type="submit" label="Ingresar" styleClass="w-full"
                             [disabled]="loginForm.invalid"></p-button>
-                        <p-toast />
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </form>
+
+<!-- Dialog: Recuperar contraseña -->
+<p-dialog
+    header="Recuperar contraseña"
+    [visible]="dialogRecuperar()"
+    (visibleChange)="dialogRecuperar.set($event)"
+    [modal]="true"
+    [style]="{ width: '420px' }"
+    [draggable]="false"
+    [closable]="true">
+
+    @if (!recuperacionEnviada()) {
+        <div class="flex flex-col gap-4">
+            <p class="text-surface-600 dark:text-surface-400 text-sm m-0">
+                Ingresa tu correo electrónico registrado y te enviaremos una contraseña temporal para acceder.
+            </p>
+
+            <div [formGroup]="recuperarForm">
+                <label class="block font-medium mb-2">Correo electrónico</label>
+                <input pInputText type="email" formControlName="correo"
+                       placeholder="correo@ejemplo.com" class="w-full" />
+                @if (isCorreoInvalid()) {
+                    <small class="text-red-500">Ingresa un correo electrónico válido</small>
+                }
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <p-button label="Cancelar" severity="secondary" [outlined]="true" (click)="cerrarRecuperacion()" />
+            <p-button label="Enviar contraseña temporal" icon="pi pi-send"
+                      [loading]="enviandoRecuperacion()"
+                      (click)="enviarRecuperacion()" />
+        </ng-template>
+    } @else {
+        <div class="flex flex-col items-center gap-4 py-4">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="pi pi-check-circle text-green-500 text-4xl"></i>
+            </div>
+            <div class="text-center">
+                <p class="font-semibold text-lg mb-2">¡Solicitud enviada!</p>
+                <p class="text-surface-600 dark:text-surface-400 text-sm">
+                    Si el correo está registrado en el sistema, recibirás una contraseña temporal en tu bandeja de entrada.
+                    Revisa también tu carpeta de spam.
+                </p>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <p-button label="Cerrar" (click)="cerrarRecuperacion()" />
+        </ng-template>
+    }
+</p-dialog>

@@ -10,7 +10,7 @@
       <i class="pi pi-spin pi-spinner text-4xl"></i>
     </div>
   } @else {
-    <p-card>
+    <div class="card">
       <p-accordion [value]="panelValues" [multiple]="true">
         @for (panel of paneles(); track panel.key) {
           <p-accordion-panel [value]="panel.key">
@@ -146,7 +146,7 @@
           </p-accordion-panel>
         }
       </p-accordion>
-    </p-card>
+    </div>
   }
 </div>
 

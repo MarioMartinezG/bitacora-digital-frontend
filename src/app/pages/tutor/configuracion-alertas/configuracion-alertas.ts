@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
@@ -20,7 +19,7 @@ interface ConfigItem {
 @Component({
     selector: 'app-configuracion-alertas',
     standalone: true,
-    imports: [CommonModule, FormsModule, CardModule, ButtonModule, InputNumberModule, InputTextModule, ToggleSwitchModule, DividerModule, TagModule],
+    imports: [CommonModule, FormsModule, ButtonModule, InputNumberModule, InputTextModule, ToggleSwitchModule, DividerModule, TagModule],
     template: `
         <div class="flex flex-col gap-4">
             <!-- Header -->
@@ -35,7 +34,7 @@ interface ConfigItem {
                 </div>
             } @else {
                 <!-- Canales de notificaci&oacute;n -->
-                <p-card>
+                <div class="card">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="pi pi-send text-primary"></i>
                         <h4 class="m-0">Canales de notificaci&oacute;n</h4>
@@ -73,10 +72,10 @@ interface ConfigItem {
                             <p-toggleswitch [(ngModel)]="websocketHabilitado" (onChange)="marcarDirty('WEBSOCKET_HABILITADO')" />
                         </div>
                     </div>
-                </p-card>
+                </div>
 
                 <!-- Umbrales y reglas -->
-                <p-card>
+                <div class="card">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="pi pi-sliders-h text-primary"></i>
                         <h4 class="m-0">Umbrales y reglas</h4>
@@ -124,10 +123,10 @@ interface ConfigItem {
                             </div>
                         </div>
                     </div>
-                </p-card>
+                </div>
 
                 <!-- Programaci&oacute;n -->
-                <p-card>
+                <div class="card">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="pi pi-clock text-primary"></i>
                         <h4 class="m-0">Programaci&oacute;n</h4>
@@ -151,7 +150,7 @@ interface ConfigItem {
                             <span class="text-sm text-surface-400">Formato 24h (ej: 08:00)</span>
                         </div>
                     </div>
-                </p-card>
+                </div>
 
                 <!-- Bot&oacute;n guardar -->
                 <div class="flex justify-end">

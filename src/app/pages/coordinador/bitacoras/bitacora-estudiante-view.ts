@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ProgressBar } from 'primeng/progressbar';
@@ -36,7 +35,7 @@ const SECCIONES_BITACORA: { codigo: string; nombre: string }[] = [
   selector: 'app-bitacora-estudiante-view',
   templateUrl: './bitacora-estudiante-view.html',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, TagModule, ProgressBar, SkeletonModule, ToastModule],
+  imports: [CommonModule, ButtonModule, TagModule, ProgressBar, SkeletonModule, ToastModule],
   providers: [MessageService]
 })
 export class BitacoraEstudianteView implements OnInit {

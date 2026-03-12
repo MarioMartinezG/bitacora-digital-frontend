@@ -31,7 +31,7 @@
     <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
         <!-- Identificacion de la asignatura -->
         <div class="flex mt-4">
-            <p-card class="w-full">
+            <div class="card">
                 <p-fieldset legend="Identificación de la asignatura" [toggleable]="true">
                     <ng-template pTemplate="header">
                         <div class="flex items-center gap-2">
@@ -210,12 +210,12 @@
                         }
                     </div>
                 </p-fieldset>
-            </p-card>
+            </div>
         </div>
 
         <!-- Justificacion -->
         <div class="flex mt-8">
-            <p-card class="w-full">
+            <div class="card">
                 <p-fieldset legend="Justificación" [toggleable]="true">
                     <ng-template pTemplate="header">
                         <div class="flex items-center gap-2">
@@ -235,7 +235,7 @@
                         [formGroup]="justificacionFormGroup">
                     </app-justificationwidget>
                 </p-fieldset>
-            </p-card>
+            </div>
         </div>
     </form>
 </p-fluid>

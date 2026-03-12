@@ -7,6 +7,7 @@ export interface Usuario {
   roles: number[];
   rolesNombres?: string[];
   activo: boolean;
+  graduado?: boolean;
   fechaCreacion: string;
   ultimoAcceso?: string;
 }
@@ -24,4 +25,17 @@ export interface UpdateUsuarioRequest {
   contrasena?: string;
   roles?: number[];
   activo?: boolean;
+}
+
+export interface ImportarUsuariosResponse {
+  totalProcesados: number;
+  creados: number;
+  errores: number;
+  detalleErrores: ErrorFilaDTO[];
+}
+
+export interface ErrorFilaDTO {
+  fila: number;
+  correo: string;
+  error: string;
 }

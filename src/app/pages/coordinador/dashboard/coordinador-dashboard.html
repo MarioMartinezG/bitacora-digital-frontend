@@ -8,13 +8,13 @@
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
     @if (loading()) {
       @for (_ of [1,2,3,4]; track $index) {
-        <p-card>
+        <div class="card">
           <p-skeleton height="4rem" />
-        </p-card>
+        </div>
       }
     } @else {
       @for (card of statsCards(); track card.label) {
-        <p-card>
+        <div class="card">
           <div class="flex items-center justify-between">
             <div>
               <span class="text-sm text-surface-500">{{ card.label }}</span>
@@ -32,7 +32,7 @@
               <i [class]="card.icon" class="text-2xl"></i>
             </div>
           </div>
-        </p-card>
+        </div>
       }
     }
   </div>
@@ -41,7 +41,8 @@
   <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
     <!-- Bar Chart -->
     <div class="xl:col-span-8">
-      <p-card header="Progreso por sección">
+      <div class="card">
+        <div class="font-semibold text-xl mb-4">Progreso por sección</div>
         @if (loading()) {
           <p-skeleton height="20rem" />
         } @else if (chartData()) {
@@ -49,12 +50,13 @@
             <p-chart type="bar" [data]="chartData()!" [options]="chartOptions" height="100%" />
           </div>
         }
-      </p-card>
+      </div>
     </div>
 
     <!-- Alerts Panel -->
     <div class="xl:col-span-4">
-      <p-card header="Alertas">
+      <div class="card">
+        <div class="font-semibold text-xl mb-4">Alertas</div>
         @if (loading()) {
           @for (_ of [1,2,3]; track $index) {
             <div class="mb-4">
@@ -97,12 +99,13 @@
             }
           </div>
         }
-      </p-card>
+      </div>
     </div>
   </div>
 
   <!-- Row 3: Progress Bars by Section -->
-  <p-card header="Completitud por sección">
+  <div class="card">
+    <div class="font-semibold text-xl mb-4">Completitud por sección</div>
     @if (loading()) {
       @for (_ of [1,2,3,4]; track $index) {
         <div class="mb-4">
@@ -129,5 +132,5 @@
         }
       </div>
     }
-  </p-card>
+  </div>
 </div>

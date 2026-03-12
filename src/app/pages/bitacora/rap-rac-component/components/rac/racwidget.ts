@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 // PrimeNG
-import { CardModule } from 'primeng/card';
 import { TextareaModule } from 'primeng/textarea';
 
 @Component({
@@ -12,7 +11,6 @@ import { TextareaModule } from 'primeng/textarea';
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        CardModule,
         TextareaModule
     ],
     templateUrl: './racwidget.html',

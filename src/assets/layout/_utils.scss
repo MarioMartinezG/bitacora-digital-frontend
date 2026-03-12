@@ -16,6 +16,11 @@
     }
 }
 
+.p-card {
+    border-radius: var(--content-border-radius) !important;
+    overflow: hidden !important;
+}
+
 .p-toast {
     &.p-toast-top-right,
     &.p-toast-top-left,

@@ -8,7 +8,6 @@ import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
-import { CardModule } from 'primeng/card';
 import { BaseHttpService } from '../../../core/services/base-http.service';
 import { LoginService } from '../../../core/services/login.service';
 
@@ -27,14 +26,10 @@ interface SolicitudSesion {
 @Component({
     selector: 'app-tutor-solicitudes-sesion',
     standalone: true,
-    imports: [CommonModule, FormsModule, TableModule, ButtonModule, TagModule, DialogModule, TextareaModule, SelectModule, CardModule],
+    imports: [CommonModule, FormsModule, TableModule, ButtonModule, TagModule, DialogModule, TextareaModule, SelectModule],
     template: `
-        <p-card>
-            <ng-template pTemplate="header">
-                <div class="flex items-center justify-between p-4">
-                    <h3 class="m-0">Solicitudes de Sesión</h3>
-                </div>
-            </ng-template>
+        <div class="card">
+            <div class="font-semibold text-xl mb-4">Solicitudes de Sesión</div>
             <p-table [value]="solicitudes()" [paginator]="true" [rows]="10" [loading]="cargando()">
                 <ng-template pTemplate="header">
                     <tr>
@@ -72,7 +67,7 @@ interface SolicitudSesion {
                     </tr>
                 </ng-template>
             </p-table>
-        </p-card>
+        </div>
 
         <p-dialog header="Rechazar solicitud" [(visible)]="dialogVisible" [style]="{width: '25rem'}">
             <div class="flex flex-col gap-3">
