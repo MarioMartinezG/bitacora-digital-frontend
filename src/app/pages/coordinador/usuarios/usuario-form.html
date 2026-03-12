@@ -1,6 +1,7 @@
 <p-toast />
 
-<p-card [header]="titulo">
+<div class="card">
+  <div class="font-semibold text-xl mb-4">{{ titulo }}</div>
   <form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.escape)="cancelar()">
     <div class="flex flex-col gap-6">
 
@@ -22,22 +23,27 @@
         }
       </div>
 
-      <div>
-        <label for="contrasena" class="block font-bold mb-2">
-          Contraseña
-          @if (isEditMode()) {
+      @if (isEditMode()) {
+        <div>
+          <label for="contrasena" class="block font-bold mb-2">
+            Nueva contraseña
             <span class="font-normal text-gray-500">(dejar vacío para mantener la actual)</span>
-          }
-        </label>
-        <p-password id="contrasena" formControlName="contrasena"
-                    [toggleMask]="true" [feedback]="!isEditMode()"
-                    placeholder="Ingrese la contraseña"
-                    styleClass="w-full"
-                    [inputStyleClass]="'w-full'" />
-        @if (isFieldInvalid('contrasena')) {
-          <small class="text-red-500">La contraseña es obligatoria (mínimo 6 caracteres)</small>
-        }
-      </div>
+          </label>
+          <p-password id="contrasena" formControlName="contrasena"
+                      [toggleMask]="true" [feedback]="true"
+                      placeholder="Ingrese nueva contraseña (opcional)"
+                      styleClass="w-full"
+                      [inputStyleClass]="'w-full'" />
+        </div>
+      } @else {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+          <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
+          <div>
+            <p class="font-medium text-blue-800 mb-1">Contraseña por defecto</p>
+            <p class="text-sm text-blue-700 m-0">El usuario será creado con la contraseña temporal <strong>Unbosque</strong>. Se le enviará un correo con sus credenciales y se le solicitará cambiarla en su primer inicio de sesión.</p>
+          </div>
+        </div>
+      }
 
       <div>
         <label for="roles" class="block font-bold mb-2">Roles</label>
@@ -60,4 +66,4 @@
       </div>
     </div>
   </form>
-</p-card>
+</div>

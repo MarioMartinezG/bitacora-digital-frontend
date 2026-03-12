@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AccordionModule } from 'primeng/accordion';
@@ -41,7 +40,7 @@ interface PanelView {
 @Component({
     selector: 'app-tutor-revision-seccion',
     standalone: true,
-    imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent],
+    imports: [CommonModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent],
     template: `
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
@@ -55,7 +54,7 @@ interface PanelView {
                     <i class="pi pi-spin pi-spinner text-4xl"></i>
                 </div>
             } @else {
-                <p-card>
+                <div class="card">
                     <p-accordion [value]="panelValues" [multiple]="true">
                         @for (panel of paneles(); track panel.key) {
                             <p-accordion-panel [value]="panel.key">
@@ -184,7 +183,7 @@ interface PanelView {
                             </p-accordion-panel>
                         }
                     </p-accordion>
-                </p-card>
+                </div>
             }
         </div>
 

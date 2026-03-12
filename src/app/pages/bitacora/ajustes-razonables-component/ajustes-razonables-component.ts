@@ -6,7 +6,6 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
-import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 
 // Componentes
@@ -25,7 +24,6 @@ import { SectionProgress, calcularEstadoAvance } from '../../../core/models';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CardModule,
     TableModule,
     SelectModule,
     TextareaModule,

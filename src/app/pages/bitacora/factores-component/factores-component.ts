@@ -4,7 +4,6 @@ import { Subscription } from 'rxjs';
 import { SectionProgress, calcularEstadoAvance } from '../../../core/models';
 
 // PrimeNG
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -34,7 +33,6 @@ import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.co
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CardModule,
     ButtonModule,
     FluidModule,
     InputNumberModule,

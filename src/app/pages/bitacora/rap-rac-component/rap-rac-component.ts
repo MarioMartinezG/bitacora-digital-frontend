@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule } from '@angular
 
 // PrimeNG
 import { AccordionModule } from 'primeng/accordion';
-import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 
@@ -26,7 +25,6 @@ import { calcularEstadoAvance } from '../../../core/models';
     imports: [
         ReactiveFormsModule,
         AccordionModule,
-        CardModule,
         TagModule,
         ButtonModule,
         LoadingComponent,

@@ -2,7 +2,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
@@ -17,7 +16,6 @@ import { AsignaturasService } from '../../../core/services/asignaturas.service';
   imports: [
     CommonModule,
     ButtonModule,
-    CardModule,
     TagModule,
     SkeletonModule,
     ToastModule

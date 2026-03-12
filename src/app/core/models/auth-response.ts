@@ -13,6 +13,7 @@ export interface AuthSuccessResponse {
   refresh_token: string;
   expires_in: number; // segundos
   user: User;
+  requiere_cambio_clave: boolean;
 }
 
 export interface AuthErrorResponse {

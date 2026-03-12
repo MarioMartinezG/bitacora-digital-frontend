@@ -8,7 +8,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { CardModule } from 'primeng/card';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
 import { EstudianteProgresoResumenDTO } from '../../../core/models/estudiante-progreso.model';
 import { getSeverityByEstado, getLabelByEstado } from '../../../core/models';
@@ -16,14 +15,10 @@ import { getSeverityByEstado, getLabelByEstado } from '../../../core/models';
 @Component({
     selector: 'app-tutor-revision',
     standalone: true,
-    imports: [CommonModule, TableModule, ButtonModule, TagModule, InputTextModule, ProgressBarModule, IconFieldModule, InputIconModule, CardModule],
+    imports: [CommonModule, TableModule, ButtonModule, TagModule, InputTextModule, ProgressBarModule, IconFieldModule, InputIconModule],
     template: `
-        <p-card>
-            <ng-template pTemplate="header">
-                <div class="flex items-center justify-between p-4">
-                    <h3 class="m-0">Revisión de Respuestas</h3>
-                </div>
-            </ng-template>
+        <div class="card">
+            <div class="font-semibold text-xl mb-4">Revisión de Respuestas</div>
             <p-table
                 [value]="estudiantes()"
                 [paginator]="true"
@@ -69,7 +64,7 @@ import { getSeverityByEstado, getLabelByEstado } from '../../../core/models';
                     </tr>
                 </ng-template>
             </p-table>
-        </p-card>
+        </div>
     `
 })
 export class TutorRevision implements OnInit {

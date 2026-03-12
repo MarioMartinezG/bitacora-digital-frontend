@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 // PrimeNG
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
 import { TagModule } from 'primeng/tag';
@@ -31,7 +30,6 @@ import { ActividadItem } from '../../../core/models/bitacora.model';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CardModule,
     ButtonModule,
     FluidModule,
     TagModule,

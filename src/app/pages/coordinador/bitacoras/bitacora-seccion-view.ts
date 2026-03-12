@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { AccordionModule } from 'primeng/accordion';
@@ -54,7 +53,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
   selector: 'app-bitacora-seccion-view',
   templateUrl: './bitacora-seccion-view.html',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent]
+  imports: [CommonModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent]
 })
 export class BitacoraSeccionView implements OnInit {
   private route = inject(ActivatedRoute);

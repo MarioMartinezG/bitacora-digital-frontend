@@ -77,6 +77,14 @@ export class LoginService extends BaseHttpService {
     );
   }
 
+  cambiarClave(claveActual: string, claveNueva: string): Observable<{ message: string }> {
+    return this.put<{ message: string }>('/api/auth/cambiar-clave', { claveActual, claveNueva });
+  }
+
+  recuperarClave(correo: string): Observable<{ message: string }> {
+    return this.post<{ message: string }>('/api/auth/recuperar-clave', { correo });
+  }
+
   clearAuthData(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.refreshTokenKey);

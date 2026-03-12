@@ -7,7 +7,6 @@ import { FluidModule } from 'primeng/fluid';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
-import { CardModule } from 'primeng/card';
 import { FieldsetModule } from 'primeng/fieldset';
 import { TagModule } from 'primeng/tag';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
@@ -39,7 +38,6 @@ import { calcularEstadoAvance } from '../../../core/models';
         FluidModule,
         ButtonModule,
         SelectModule,
-        CardModule,
         FieldsetModule,
         TagModule,
         AutoCompleteModule,

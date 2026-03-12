@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // PrimeNG
-import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -28,7 +27,6 @@ import { calcularEstadoAvance } from '../../../core/models';
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    CardModule,
     ButtonModule,
     FluidModule,
     MultiSelectModule,

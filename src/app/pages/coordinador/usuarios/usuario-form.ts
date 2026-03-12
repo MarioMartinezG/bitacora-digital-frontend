@@ -6,7 +6,6 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { UserRole, ROLE_LABELS } from '../../../core/models/role.model';
@@ -23,7 +22,6 @@ import { UsuariosService } from '../../../core/services/usuarios.service';
     InputTextModule,
     PasswordModule,
     MultiSelectModule,
-    CardModule,
     ToastModule
   ],
   providers: [MessageService]
@@ -64,7 +62,7 @@ export class UsuarioForm implements OnInit {
     this.form = this.fb.group({
       nombre: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
-      contrasena: ['', [Validators.required, Validators.minLength(6)]],
+      contrasena: [''],
       roles: [[] as number[], Validators.required]
     });
   }
@@ -78,8 +76,6 @@ export class UsuarioForm implements OnInit {
           correo: usuario.correo,
           roles: usuario.roles
         });
-        this.form.get('contrasena')?.clearValidators();
-        this.form.get('contrasena')?.updateValueAndValidity();
         this.cargando.set(false);
       },
       error: () => {

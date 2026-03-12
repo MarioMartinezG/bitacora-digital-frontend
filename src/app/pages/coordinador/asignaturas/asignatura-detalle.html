@@ -13,28 +13,26 @@
   </div>
 
   @if (cargando()) {
-    <p-card>
+    <div class="card">
       <div class="flex flex-col gap-4">
         <p-skeleton height="2rem" width="60%" />
         <p-skeleton height="1.5rem" width="40%" />
         <p-skeleton height="4rem" />
         <p-skeleton height="1.5rem" width="30%" />
       </div>
-    </p-card>
+    </div>
   } @else if (asignatura()) {
-    <p-card>
-      <ng-template #header>
-        <div class="flex items-center justify-between px-4 pt-4">
-          <div>
-            <span class="font-mono text-lg font-bold text-primary">{{ asignatura()!.codigo }}</span>
-            <h3 class="m-0 mt-1">{{ asignatura()!.nombre }}</h3>
-          </div>
-          <p-tag
-            [value]="asignatura()!.activa ? 'Activa' : 'Inactiva'"
-            [severity]="getEstadoSeverity(asignatura()!.activa)"
-          />
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <span class="font-mono text-lg font-bold text-primary">{{ asignatura()!.codigo }}</span>
+          <h3 class="m-0 mt-1">{{ asignatura()!.nombre }}</h3>
         </div>
-      </ng-template>
+        <p-tag
+          [value]="asignatura()!.activa ? 'Activa' : 'Inactiva'"
+          [severity]="getEstadoSeverity(asignatura()!.activa)"
+        />
+      </div>
 
       <div class="flex flex-col gap-4">
         @if (asignatura()!.descripcion) {
@@ -76,17 +74,15 @@
         </div>
       </div>
 
-      <ng-template #footer>
-        <div class="flex justify-end gap-3">
-          <p-button
-            label="Editar"
-            icon="pi pi-pencil"
-            severity="warn"
-            [outlined]="true"
-            (onClick)="editar()"
-          />
-        </div>
-      </ng-template>
-    </p-card>
+      <div class="flex justify-end gap-3 mt-4">
+        <p-button
+          label="Editar"
+          icon="pi pi-pencil"
+          severity="warn"
+          [outlined]="true"
+          (onClick)="editar()"
+        />
+      </div>
+    </div>
   }
 </div>

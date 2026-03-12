@@ -2,7 +2,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -18,7 +17,6 @@ import { UsuariosService } from '../../../core/services/usuarios.service';
   imports: [
     CommonModule,
     ButtonModule,
-    CardModule,
     TagModule,
     ToastModule,
     ConfirmDialogModule

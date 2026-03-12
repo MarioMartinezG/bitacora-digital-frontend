@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -19,7 +18,6 @@ import { AsignaturasService } from '../../../core/services/asignaturas.service';
     ReactiveFormsModule,
     ButtonModule,
     InputTextModule,
-    CardModule,
     SkeletonModule,
     ToastModule
   ],

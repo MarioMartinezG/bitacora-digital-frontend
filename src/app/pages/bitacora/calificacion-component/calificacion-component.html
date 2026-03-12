@@ -31,7 +31,7 @@
             </div>
 
             <!-- ===== INTRO ===== -->
-            <p-card class="w-full">
+            <div class="card">
                 <div class="flex items-start gap-3">
                     <i class="pi pi-info-circle text-primary text-xl mt-0.5 flex-shrink-0"></i>
                     <p class="m-0 text-sm leading-relaxed">
@@ -40,11 +40,11 @@
                         los criterios que el estudiante debe cumplir para obtener esa nota.
                     </p>
                 </div>
-            </p-card>
+            </div>
 
             <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
 
-                <p-card class="w-full">
+                <div class="card">
 
                     <!-- ===== TIPO DE PROGRAMA (fila compacta) ===== -->
                     <div class="nivel-row">
@@ -172,7 +172,7 @@
                         }
                     </p-fieldset>
 
-                </p-card>
+                </div>
 
             </form>
 
