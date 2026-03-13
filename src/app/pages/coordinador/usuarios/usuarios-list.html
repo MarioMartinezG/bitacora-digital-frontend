@@ -411,7 +411,7 @@ María López,maria&#64;mail.com,1;2</code>
       </div>
     </div>
     <ng-template pTemplate="footer">
-      <p-button label="Cancelar" severity="secondary" [outlined]="true" (click)="cerrarDialogImportar()" />
+      <p-button label="Cerrar" severity="secondary" [outlined]="true" (click)="cerrarDialogImportar()" />
       <p-button label="Importar" icon="pi pi-upload" [disabled]="!archivoSeleccionado()" [loading]="importando()" (click)="importarCsv()" />
     </ng-template>
   } @else {

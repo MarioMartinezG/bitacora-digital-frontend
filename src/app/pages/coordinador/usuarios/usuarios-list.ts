@@ -297,8 +297,11 @@ export class UsuariosList implements OnInit {
     const link = document.createElement('a');
     link.href = url;
     link.download = 'plantilla_usuarios.csv';
+    link.style.display = 'none';
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 
   abrirDialogImportar(): void {
