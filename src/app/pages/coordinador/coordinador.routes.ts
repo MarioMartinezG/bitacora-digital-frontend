@@ -47,6 +47,10 @@ export default [
     loadComponent: () => import('./asignaturas/asignaturas-list').then(m => m.AsignaturasList)
   },
   {
+    path: 'asignaciones',
+    loadComponent: () => import('./asignaciones/asignaciones-list').then(m => m.AsignacionesList)
+  },
+  {
     path: 'asignaturas/nueva',
     loadComponent: () => import('./asignaturas/asignatura-form').then(m => m.AsignaturaForm)
   },

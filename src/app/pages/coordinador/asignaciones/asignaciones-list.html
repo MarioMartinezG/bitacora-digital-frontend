@@ -1,0 +1,259 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="flex flex-col gap-4 p-4">
+
+  <!-- Card: Header + Stats -->
+  <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 p-5 flex flex-col gap-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 m-0">Asignación de tutores</h2>
+        <p class="text-surface-500 text-sm mt-1 m-0">Gestiona la distribución de estudiantes entre los tutores del curso</p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <p-button label="Asignación aleatoria" icon="pi pi-shuffle" severity="warn"
+          [loading]="procesando()" [disabled]="cargando()" (click)="confirmarAsignacionAleatoria()" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+        @if (cargando()) { <p-skeleton height="2rem" styleClass="mb-2" /><p-skeleton height="1rem" width="60%" styleClass="mx-auto" /> }
+        @else { <div class="text-3xl font-bold text-blue-600">{{ totalAsignados() }}</div><div class="text-sm text-blue-700 mt-1">Asignados</div> }
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+        @if (cargando()) { <p-skeleton height="2rem" styleClass="mb-2" /><p-skeleton height="1rem" width="60%" styleClass="mx-auto" /> }
+        @else { <div class="text-3xl font-bold text-amber-600">{{ estudiantesSinTutor().length }}</div><div class="text-sm text-amber-700 mt-1">Sin tutor</div> }
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+        @if (cargando()) { <p-skeleton height="2rem" styleClass="mb-2" /><p-skeleton height="1rem" width="60%" styleClass="mx-auto" /> }
+        @else { <div class="text-3xl font-bold text-green-600">{{ totalTutores() }}</div><div class="text-sm text-green-700 mt-1">Tutores activos</div> }
+      </div>
+      <div class="bg-surface-50 border border-surface-200 rounded-xl p-4 text-center">
+        @if (cargando()) { <p-skeleton height="2rem" styleClass="mb-2" /><p-skeleton height="1rem" width="60%" styleClass="mx-auto" /> }
+        @else { <div class="text-3xl font-bold text-surface-600">{{ promedioCarga() }}</div><div class="text-sm text-surface-500 mt-1">Promedio por tutor</div> }
+      </div>
+    </div>
+
+    @if (!cargando() && estudiantesSinTutor().length > 0) {
+      <div class="flex items-center gap-3 bg-amber-50 border border-amber-300 rounded-lg px-4 py-3">
+        <i class="pi pi-exclamation-triangle text-amber-500 text-lg"></i>
+        <p class="text-sm text-amber-800 m-0">
+          <strong>{{ estudiantesSinTutor().length }} estudiante(s)</strong> sin tutor asignado.
+          Usa <strong>Asignación aleatoria</strong> o asigna individualmente desde la tabla inferior.
+        </p>
+      </div>
+    }
+  </div>
+
+  <!-- Card: Tutores -->
+  <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 overflow-hidden">
+    <div class="px-5 py-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div class="flex-1">
+        <h3 class="text-base font-semibold text-surface-900 dark:text-surface-0 m-0">Distribución por tutor</h3>
+        <span class="text-xs text-surface-400">Promedio: {{ promedioCarga() }} estudiantes/tutor</span>
+      </div>
+      <p-iconfield style="width: 220px">
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" placeholder="Buscar tutor..."
+               [ngModel]="busquedaTutores()" (ngModelChange)="busquedaTutores.set($event)" class="w-full" />
+      </p-iconfield>
+    </div>
+
+    @if (cargando()) {
+      <div class="p-5 flex flex-col gap-3">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="3.5rem" /> }
+      </div>
+    } @else {
+      <p-table [value]="resumenTutoresFiltrados()" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th style="width: 3rem"></th>
+            <th>Tutor</th>
+            <th style="width: 130px" class="text-center">Total asignados</th>
+            <th style="width: 120px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <button type="button" class="p-row-toggler p-link" (click)="toggleRow(row.tutorId)">
+                <i [class]="expandedRowKeys[row.tutorId] ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+              </button>
+            </td>
+            <td>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold text-xs flex-shrink-0">
+                  {{ getIniciales(row.nombre) }}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-medium text-sm text-surface-900 dark:text-surface-0 m-0">{{ row.nombre }}</p>
+                  <p class="text-xs text-surface-400 m-0">{{ row.correo }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="text-lg font-bold text-surface-700 dark:text-surface-300">{{ row.total }}</span>
+            </td>
+            <td class="text-center">
+              <p-button label="Gestionar" icon="pi pi-pencil" severity="secondary"
+                        [outlined]="true" size="small" (click)="abrirGestionTutor(row.tutorId)" />
+            </td>
+          </tr>
+          @if (expandedRowKeys[row.tutorId]) {
+            <tr>
+              <td colspan="5" class="bg-surface-50 dark:bg-surface-800 px-6 py-3">
+                @if (row.estudiantes.length === 0) {
+                  <p class="text-surface-400 text-sm m-0 italic">Este tutor no tiene estudiantes asignados.</p>
+                } @else {
+                  <div class="flex flex-wrap gap-2">
+                    @for (a of row.estudiantes; track a.id) {
+                      <div class="flex items-center gap-1 bg-white dark:bg-surface-700 border border-surface-200 dark:border-surface-600 rounded-full pl-3 pr-1 py-1">
+                        <span class="text-sm text-surface-700 dark:text-surface-300">{{ a.nombreEstudiante }}</span>
+                        <button class="w-5 h-5 rounded-full flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 bg-transparent border-none cursor-pointer"
+                                [pTooltip]="'Remover'" (click)="confirmarRemover(a)">
+                          <i class="pi pi-times text-xs"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr><td colspan="5" class="text-center text-surface-400 py-8">No hay tutores activos registrados</td></tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+
+  <!-- Card: Estudiantes sin tutor -->
+  <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 overflow-hidden">
+    <div class="px-5 py-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div class="flex items-center gap-2 flex-1">
+        <h3 class="text-base font-semibold text-surface-900 dark:text-surface-0 m-0">Estudiantes sin tutor asignado</h3>
+        @if (!cargando()) {
+          <p-tag [value]="estudiantesSinTutor().length + ''"
+                 [severity]="estudiantesSinTutor().length > 0 ? 'warn' : 'success'" />
+        }
+      </div>
+      @if (!cargando() && estudiantesSinTutor().length > 0) {
+        <p-iconfield style="width: 220px">
+          <p-inputicon styleClass="pi pi-search" />
+          <input pInputText type="text" placeholder="Buscar estudiante..."
+                 [ngModel]="busquedaEstudiantes()" (ngModelChange)="busquedaEstudiantes.set($event)" class="w-full" />
+        </p-iconfield>
+      }
+    </div>
+
+    @if (cargando()) {
+      <div class="p-5 flex flex-col gap-3">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="3rem" /> }
+      </div>
+    } @else if (estudiantesSinTutor().length === 0) {
+      <div class="flex flex-col items-center justify-center py-10 text-center">
+        <i class="pi pi-check-circle text-4xl text-green-400 mb-3"></i>
+        <p class="text-surface-500 font-medium m-0">Todos los estudiantes tienen tutor asignado</p>
+      </div>
+    } @else {
+      <p-table [value]="estudiantesSinTutorFiltrados()" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Estudiante</th>
+            <th>Correo</th>
+            <th style="width: 120px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-estudiante>
+          <tr>
+            <td>
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-surface-200 dark:bg-surface-700 flex items-center justify-center text-surface-600 dark:text-surface-300 font-bold text-xs flex-shrink-0">
+                  {{ getIniciales(estudiante.nombre) }}
+                </div>
+                <span class="font-medium text-sm">{{ estudiante.nombre }}</span>
+              </div>
+            </td>
+            <td class="text-sm text-surface-500">{{ estudiante.correo }}</td>
+            <td class="text-center">
+              <p-button label="Asignar" icon="pi pi-user-plus" size="small"
+                        (click)="abrirAsignarEstudiante(estudiante)" />
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+</div>
+
+<!-- Dialog: Gestionar tutor con PickList -->
+<p-dialog header="Gestionar estudiantes del tutor" [visible]="dialogPicklistVisible()"
+  (visibleChange)="dialogPicklistVisible.set($event)" [modal]="true" [style]="{ width: '820px' }"
+  [draggable]="false" [closable]="!guardando()">
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label class="block font-medium text-sm mb-2">Tutor</label>
+      <p-select [options]="tutoresOptions()" [(ngModel)]="tutorPicklistId"
+        optionLabel="label" optionValue="value"
+        placeholder="Selecciona un tutor"
+        [filter]="true" filterPlaceholder="Buscar..." styleClass="w-full"
+        appendTo="body" (onChange)="onTutorPicklistChange()" />
+    </div>
+    @if (tutorPicklistId) {
+      <p-pickList [source]="picklistSource" [target]="picklistTarget"
+        sourceHeader="Sin tutor asignado" targetHeader="Asignados a este tutor"
+        [filterBy]="'nombre'" sourceFilterPlaceholder="Buscar..." targetFilterPlaceholder="Buscar..."
+        [responsive]="true" [showSourceControls]="false" [showTargetControls]="false" breakpoint="768px">
+        <ng-template #item let-item>
+          <div class="flex flex-col py-1">
+            <span class="font-medium text-sm">{{ item.nombre }}</span>
+            <span class="text-xs text-surface-400">{{ item.correo }}</span>
+          </div>
+        </ng-template>
+      </p-pickList>
+    } @else {
+      <div class="flex items-center justify-center py-8 text-surface-400 border border-dashed border-surface-300 rounded-lg">
+        <p class="m-0 text-sm">Selecciona un tutor para gestionar sus estudiantes</p>
+      </div>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cerrar" severity="secondary" [outlined]="true" [disabled]="guardando()" (click)="dialogPicklistVisible.set(false)" />
+    <p-button label="Guardar cambios" icon="pi pi-check" [loading]="guardando()"
+              [disabled]="!tutorPicklistId" (click)="guardarAsignacionManual()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog: Asignar estudiante rápido -->
+<p-dialog header="Asignar tutor" [visible]="dialogAsignarVisible()"
+  (visibleChange)="dialogAsignarVisible.set($event)" [modal]="true" [style]="{ width: '400px' }"
+  [draggable]="false" [closable]="!asignandoRapido()">
+  <div class="flex flex-col gap-4 pt-2">
+    @if (estudianteParaAsignar) {
+      <div class="flex items-center gap-3 bg-surface-50 border border-surface-200 rounded-lg px-4 py-3">
+        <div class="w-8 h-8 rounded-full bg-surface-200 flex items-center justify-center font-bold text-xs text-surface-600 flex-shrink-0">
+          {{ getIniciales(estudianteParaAsignar.nombre) }}
+        </div>
+        <div>
+          <p class="font-medium text-sm m-0">{{ estudianteParaAsignar.nombre }}</p>
+          <p class="text-xs text-surface-400 m-0">{{ estudianteParaAsignar.correo }}</p>
+        </div>
+      </div>
+    }
+    <div>
+      <label class="block font-medium text-sm mb-2">Asignar a tutor</label>
+      <p-select [options]="tutoresOptions()" [(ngModel)]="tutorRapidoId"
+        optionLabel="label" optionValue="value"
+        placeholder="Selecciona un tutor"
+        [filter]="true" filterPlaceholder="Buscar tutor..."
+        styleClass="w-full" appendTo="body" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cerrar" severity="secondary" [outlined]="true" [disabled]="asignandoRapido()" (click)="dialogAsignarVisible.set(false)" />
+    <p-button label="Asignar" icon="pi pi-check" [loading]="asignandoRapido()"
+              [disabled]="!tutorRapidoId" (click)="confirmarAsignarEstudiante()" />
+  </ng-template>
+</p-dialog>

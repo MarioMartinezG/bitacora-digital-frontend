@@ -14,3 +14,4 @@ export * from './estudiante-progreso.model';
 export * from './usuario.model';
 export * from './asignatura.model';
 export * from './estadisticas.model';
+export * from './tutor-estudiante.model';
