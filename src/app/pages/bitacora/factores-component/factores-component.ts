@@ -70,7 +70,7 @@ export class FactoresComponent extends BaseBitacoraComponent implements OnInit, 
     {
       name: 'panel1',
       formGroupName: 'panel1',
-      fields: ['pregunta1', 'pregunta2', 'pregunta3', 'pregunta4', 'pregunta5', 'pregunta6', 'pregunta7', 'pregunta8', 'pregunta9']
+      fields: ['pregunta1', 'pregunta2', 'pregunta4', 'pregunta5', 'pregunta6', 'pregunta7', 'pregunta8', 'pregunta9']
     },
     {
       name: 'panel2',
@@ -80,7 +80,7 @@ export class FactoresComponent extends BaseBitacoraComponent implements OnInit, 
     {
       name: 'panel3',
       formGroupName: 'panel3',
-      fields: ['pregunta14', 'pregunta15', 'pregunta16', 'pregunta17']
+      fields: ['pregunta14', 'pregunta15', 'pregunta16', 'pregunta17', 'pregunta18']
     }
   ];
 
@@ -118,11 +118,6 @@ export class FactoresComponent extends BaseBitacoraComponent implements OnInit, 
   pregunta7Options = [
     { name: 'Requiere actualización permanente', code: 'actualizacion' },
     { name: 'Es una temática estable', code: 'estable' },
-  ];
-
-  pregunta8Options = [
-    { name: 'Prerrequisitos', code: 'prerrequisitos' },
-    { name: 'Correquisitos', code: 'correquisitos' },
   ];
 
   YesNoOptions = [
@@ -164,12 +159,11 @@ export class FactoresComponent extends BaseBitacoraComponent implements OnInit, 
       panel1: this.fb.group({
         pregunta1: ['', Validators.required],
         pregunta2: ['', Validators.required],
-        pregunta3: ['', Validators.required],
         pregunta4: ['', Validators.required],
         pregunta5: ['', Validators.required],
         pregunta6: ['', Validators.required],
         pregunta7: ['', Validators.required],
-        pregunta8: ['', Validators.required],
+        pregunta8: [''],
         pregunta9: ['', Validators.required],
         detallePregunta9: ['']
       }),
@@ -184,6 +178,7 @@ export class FactoresComponent extends BaseBitacoraComponent implements OnInit, 
         pregunta15: ['', Validators.required],
         pregunta16: ['', Validators.required],
         pregunta17: ['', Validators.required],
+        pregunta18: ['', Validators.required],
       })
     });
   }
