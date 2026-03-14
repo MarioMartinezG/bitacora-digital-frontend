@@ -130,6 +130,19 @@ export const SELECT_VALUE_LABELS: Record<string, string> = {
 };
 
 export const BITACORA_LABELS: SeccionLabelsMap = {
+    'observar': {
+        'situaciones': {
+            panelLabel: 'Categorización de situaciones',
+            displayType: 'table',
+            columns: [
+                { key: 'situacion', label: 'Situación' },
+                { key: 'cat1', label: 'Proceso académico habitual que puedo resolver en mi clase' },
+                { key: 'cat2', label: 'Posible señal de alerta. Debo informar al líder' },
+                { key: 'cat3', label: 'Información insuficiente. (Necesito observar más)' }
+            ]
+        }
+    },
+
     'caracteriza': {
         'datosBasicos': {
             panelLabel: 'Identificación de la asignatura',

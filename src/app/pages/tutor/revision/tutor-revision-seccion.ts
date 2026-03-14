@@ -534,6 +534,7 @@ export class TutorRevisionSeccion implements OnInit {
 
     private getNombreSeccion(codigo: string): string {
         const nombres: Record<string, string> = {
+            'observar': 'Observar, registrar y actuar de manera oportuna',
             'caracteriza': 'Identificación de tu curso',
             'factores': 'Factores Situacionales',
             'ajustes': 'Ambientes Sanos y Seguros',
