@@ -1,0 +1,135 @@
+/* =========================================
+   Sticky Header
+   ========================================= */
+.sticky-header-global {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--p-surface-ground);
+  padding: 0.75rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--p-surface-border);
+}
+
+/* =========================================
+   Tabla de categorización
+   ========================================= */
+.observar-table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--p-surface-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Encabezado */
+.observar-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  background-color: var(--p-surface-100);
+  border-bottom: 2px solid var(--p-surface-border);
+}
+
+.observar-header > div {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--p-text-muted-color);
+  border-right: 1px solid var(--p-surface-border);
+}
+
+.observar-header > div:last-child {
+  border-right: none;
+}
+
+/* Filas */
+.observar-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--p-surface-border);
+  transition: background-color 0.15s;
+}
+
+.observar-row:last-child {
+  border-bottom: none;
+}
+
+.observar-row:hover {
+  background-color: var(--p-surface-50);
+}
+
+/* Columna de situación */
+.observar-col-situacion {
+  padding: 1rem;
+  border-right: 1px solid var(--p-surface-border);
+}
+
+/* Columnas de categoría */
+.observar-col-cat {
+  padding: 1rem;
+  border-right: 1px solid var(--p-surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.observar-col-cat:last-child {
+  border-right: none;
+}
+
+/* Badge de número */
+.situacion-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  min-width: 1.6rem;
+  border-radius: 50%;
+  background-color: var(--p-primary-color);
+  color: var(--p-primary-contrast-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Texto de justificación */
+.justificacion-text {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  font-style: italic;
+  padding-left: 2.1rem;
+  line-height: 1.5;
+}
+
+/* =========================================
+   Responsive
+   ========================================= */
+@media (max-width: 768px) {
+  .observar-header,
+  .observar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .observar-header > div,
+  .observar-col-situacion,
+  .observar-col-cat {
+    border-right: none;
+    border-bottom: 1px solid var(--p-surface-border);
+  }
+
+  .observar-col-cat {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .observar-col-cat::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.78rem;
+    min-width: 8rem;
+    color: var(--p-text-muted-color);
+  }
+}

@@ -172,6 +172,19 @@ export interface EvaluacionActividadEntry {
     instrumentos?: string[];
 }
 
+/** Sección "Observar, registrar y actuar de manera oportuna" */
+export interface ObservarJson {
+    situaciones: ObservarSituacionEntry[];
+}
+
+export interface ObservarSituacionEntry {
+    id: number;
+    situacion: string;
+    cat1: string;
+    cat2: string;
+    cat3: string;
+}
+
 /** Sección 7+: Escala de Calificación */
 export interface CalificacionJson {
     nivel: 'pregrado' | 'posgrado' | '';
@@ -191,6 +204,7 @@ export interface CalificacionRAEntry {
 
 /** Unión de todos los tipos JSON de sección */
 export type SeccionJsonData =
+    | ObservarJson
     | CaracterizaJson
     | FactoresJson
     | AjustesRazonablesJson

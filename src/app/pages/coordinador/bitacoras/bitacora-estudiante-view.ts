@@ -20,6 +20,7 @@ interface SeccionInfo {
 }
 
 const SECCIONES_BITACORA: { codigo: string; nombre: string }[] = [
+  { codigo: 'observar', nombre: 'Observar, registrar y actuar de manera oportuna' },
   { codigo: 'caracteriza', nombre: 'Identificación de tu curso' },
   { codigo: 'factores', nombre: 'Factores Situacionales' },
   { codigo: 'ajustes', nombre: 'Ambientes Sanos y Seguros' },

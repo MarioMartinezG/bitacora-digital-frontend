@@ -1,0 +1,95 @@
+<div class="sticky-header-global">
+  <div class="flex items-center justify-between flex-wrap gap-2">
+    <div class="flex items-center gap-3">
+      <h2 class="m-0 text-xl font-bold">Observar, registrar y actuar de manera oportuna</h2>
+      <p-tag
+        [value]="getLabel(progress().estado)"
+        [severity]="getSeverity(progress().estado)" />
+    </div>
+    <div class="flex items-center gap-2">
+      <app-save-status-indicator [saveState]="saveState" />
+      <p-button
+        label="Guardar"
+        icon="pi pi-save"
+        size="small"
+        (onClick)="saveManually()"
+        [loading]="saveState.status === 'saving'" />
+    </div>
+  </div>
+</div>
+
+@if (isLoading()) {
+  <app-loading />
+} @else {
+  <!-- Instrucciones -->
+  <div class="card mb-4">
+    <p class="m-0 text-sm leading-relaxed">
+      En el ejercicio docente, la identificación oportuna de señales de alerta en los estudiantes es un
+      elemento clave para favorecer su permanencia, bienestar y éxito académico. Estas señales pueden
+      manifestarse a través de cambios en el rendimiento académico, dificultades en la participación,
+      ausencias recurrentes, desmotivación, problemas emocionales o comportamientos que afectan el
+      proceso de aprendizaje. Reconocerlas adecuadamente te permitirá prevenirlas y corregirlas desde
+      el ámbito de la clase o informar de aquellas que requieren la activación de rutas de apoyo
+      especializadas.
+    </p>
+    <p-divider />
+    <p class="m-0 text-sm leading-relaxed">
+      <strong>Lee y analiza</strong> las situaciones que se proponen en la primera columna, revisa su
+      justificación y categorízalas según su complejidad para el manejo y atención.
+    </p>
+  </div>
+
+  <!-- Tabla de clasificación -->
+  <p-fieldset [toggleable]="true" [collapsed]="false">
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between w-full gap-2">
+        <span class="font-semibold">Categorización de situaciones</span>
+        <div (click)="$event.stopPropagation()">
+          <app-bitacora-comment-button
+            [seccionCodigo]="seccionCodigo"
+            subseccionCodigo="observar"
+            [badge]="comentariosCounts()['observar'] || 0" />
+        </div>
+      </div>
+    </ng-template>
+
+    <div class="observar-table" [formGroup]="form">
+      <!-- Encabezado -->
+      <div class="observar-header">
+        <div class="observar-col-situacion">Situación</div>
+        @for (cat of CATEGORIAS; track cat.key) {
+          <div class="observar-col-cat">{{ cat.label }}</div>
+        }
+      </div>
+
+      <!-- Filas -->
+      <div formArrayName="situaciones">
+        @for (situacion of SITUACIONES; track situacion.id; let i = $index) {
+          <div class="observar-row" [formGroupName]="i">
+            <!-- Situación + justificación -->
+            <div class="observar-col-situacion">
+              <div class="flex items-start gap-2 mb-2">
+                <span class="situacion-badge">{{ situacion.id }}</span>
+                <span class="font-medium">{{ situacion.situacion }}</span>
+              </div>
+              <p class="justificacion-text m-0">{{ situacion.justificacion }}</p>
+            </div>
+
+            <!-- Selectores de categoría -->
+            @for (cat of CATEGORIAS; track cat.key) {
+              <div class="observar-col-cat">
+                <p-select
+                  [formControlName]="cat.key"
+                  [options]="SI_NO_OPTIONS"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Seleccionar"
+                  styleClass="w-full" />
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </p-fieldset>
+}

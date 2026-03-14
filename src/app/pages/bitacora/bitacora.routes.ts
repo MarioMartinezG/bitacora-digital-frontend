@@ -10,8 +10,10 @@ import { ComoEvaluareComponent } from './como-evaluare-component/como-evaluare-c
 import { SecuenciaCursoComponent } from './secuencia-curso-component/secuencia-curso-component';
 import { BibliografiaComponent } from './bibliografia-component/bibliografia-component';
 import { CalificacionComponent } from './calificacion-component/calificacion-component';
+import { ObservarComponent } from './observar-component/observar-component';
 
 export default [
+    { path: 'observar-registrar', component: ObservarComponent },
     { path: 'caracteriza-asignatura', component: CaracterizaComponent },
     { path: 'factores-situacionales', component: FactoresComponent },
     { path: 'ajustes-razonables', component: AjustesRazonablesComponent },
