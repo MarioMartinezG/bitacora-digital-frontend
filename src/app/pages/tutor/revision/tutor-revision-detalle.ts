@@ -24,9 +24,9 @@ const SECCIONES_NOMBRES: Record<string, string> = {
     'rap-rac': 'RAP y RAC',
     'actividades': 'Actividades de Aprendizaje',
     'evaluacion': 'Diseño de la evaluación',
-    'secuencia': 'Secuencia del Curso',
-    'bibliografia': 'Bibliografía',
-    'calificacion': 'Calificación'
+    'secuencia': 'Secuencia y cronograma',
+    'calificacion': 'Calificación',
+    'bibliografia': 'Bibliografía'
 };
 
 @Component({

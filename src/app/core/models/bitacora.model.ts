@@ -59,13 +59,16 @@ export interface EstadoSeccion {
 /** Sección 1: Identificación de tu curso (seccion_id: 1) */
 export interface CaracterizaJson {
     datosBasicos: {
-        programa?: string;
+        programa?: string | { code: string; name: string };
         nombreAsignatura?: string;
-        tipoAsignatura?: string;
-        semestre?: string;
-        creditos?: number;
-        horasPresenciales?: number;
-        horasIndependientes?: number;
+        tipoAsignatura?: string | { code: string; name: string };
+        semestre?: string | number;
+        periodoAcademico?: string | { code: string; name: string };
+        prerequisito?: boolean;
+        materiaPrerequisito?: string;
+        numeroCreditos?: number;
+        horasDirecto?: number;
+        horasIndependiente?: number;
     };
     justificacion: {
         respuesta?: string;

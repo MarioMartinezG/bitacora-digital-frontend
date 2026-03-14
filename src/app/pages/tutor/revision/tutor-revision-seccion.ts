@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -10,6 +11,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { KnobModule } from 'primeng/knob';
+import { ChartModule } from 'primeng/chart';
 import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
 import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
@@ -18,6 +21,7 @@ import { ComentarioSubseccionService } from '../../../core/services/comentario-s
 import { EstadoTutorSubseccionDTO } from '../../../core/models/estado-tutor-subseccion.model';
 import { getSeverityByEstado, getLabelByEstado, EstadoAvance } from '../../../core/models';
 import { BITACORA_LABELS, SELECT_VALUE_LABELS, PanelMeta } from './bitacora-labels';
+import { CaracterizaJson } from '../../../core/models/bitacora.model';
 
 /** Vista de un panel para renderizar */
 interface PanelView {
@@ -40,7 +44,7 @@ interface PanelView {
 @Component({
     selector: 'app-tutor-revision-seccion',
     standalone: true,
-    imports: [CommonModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent],
+    imports: [CommonModule, FormsModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, KnobModule, ChartModule, CommentThreadComponent, EstadoTutorSelectorComponent],
     template: `
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
@@ -54,6 +58,160 @@ interface PanelView {
                     <i class="pi pi-spin pi-spinner text-4xl"></i>
                 </div>
             } @else {
+
+                <!-- Cards de distribución de horas (solo para sección secuencia) -->
+                @if (seccionCodigo === 'secuencia') {
+                    @if (!secuenciaCaracterizaCargada()) {
+                        <div class="flex justify-center p-4 mb-4">
+                            <i class="pi pi-spin pi-spinner text-2xl text-surface-400"></i>
+                        </div>
+                    } @else if (!secuenciaDatosHorasDisponibles()) {
+                        <p-message severity="warn" styleClass="w-full mb-4">
+                            <span>
+                                El estudiante aún no ha diligenciado las horas en
+                                <strong>Identificación de tu curso</strong>. Las cards de distribución
+                                estarán disponibles cuando complete ese módulo.
+                            </span>
+                        </p-message>
+                    } @else {
+                        <div class="grid grid-cols-12 gap-4 mb-4">
+
+                            <!-- Distribución de horas -->
+                            <div class="col-span-12 lg:col-span-6">
+                                <div class="card h-full">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="font-semibold text-lg">Distribución de horas</span>
+                                        <div class="flex items-center justify-center bg-blue-100 rounded-border"
+                                            style="width: 2.5rem; height: 2.5rem;">
+                                            <i class="pi pi-clock text-blue-500 text-xl"></i>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-12 gap-4">
+                                        <div class="col-span-12 md:col-span-5">
+                                            <table>
+                                                <tr class="border-bottom-1 surface-border">
+                                                    <td class="py-2 pr-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="pi pi-bookmark text-blue-500"></i>
+                                                            <span class="text-color-secondary">Créditos</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2 font-semibold">{{ secuenciaNumeroCreditos() ?? '—' }}</td>
+                                                </tr>
+                                                <tr class="border-bottom-1 surface-border">
+                                                    <td class="py-2 pr-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="pi pi-clock text-gray-500"></i>
+                                                            <span class="text-color-secondary">Horas totales</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2 font-semibold">{{ secuenciaTotalHoras() }}</td>
+                                                </tr>
+                                                <tr class="border-bottom-1 surface-border">
+                                                    <td class="py-2 pr-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="pi pi-check-circle text-green-500"></i>
+                                                            <span class="text-color-secondary">Horas asignadas</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2 font-semibold"
+                                                        [class.text-green-500]="!secuenciaHorasExcedidas()"
+                                                        [class.text-red-500]="secuenciaHorasExcedidas()">
+                                                        {{ secuenciaHorasAsignadas() }}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-2 pr-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="pi pi-hourglass text-primary"></i>
+                                                            <span class="font-medium">Horas disponibles</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2 font-bold text-xl"
+                                                        [class.text-primary]="!secuenciaHorasExcedidas()"
+                                                        [class.text-red-500]="secuenciaHorasExcedidas()">
+                                                        {{ secuenciaHorasExcedidas()
+                                                            ? '-' + (secuenciaHorasAsignadas() - secuenciaTotalHoras())
+                                                            : secuenciaHorasDisponibles() }}
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                                            <p-knob [ngModel]="secuenciaPorcentaje()" [readonly]="true"
+                                                [min]="0" [max]="100" valueTemplate="{value}%" [size]="150">
+                                            </p-knob>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Distribución por tipo de trabajo -->
+                            <div class="col-span-12 lg:col-span-6">
+                                <div class="card h-full">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="font-semibold text-lg">Distribución por tipo de trabajo</span>
+                                        <div class="flex items-center justify-center bg-orange-100 rounded-border"
+                                            style="width: 2.5rem; height: 2.5rem;">
+                                            <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-color-secondary text-xs mt-0 mb-3">
+                                        Valores de referencia definidos en Identificación de tu curso
+                                    </p>
+                                    <div class="grid grid-cols-12 gap-4">
+                                        <div class="col-span-12 md:col-span-5">
+                                            <table>
+                                                <tr class="border-bottom-1 surface-border">
+                                                    <td class="py-2 pr-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="pi pi-home text-green-500"></i>
+                                                            <span class="text-color-secondary">Trabajo independiente</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2 font-semibold text-green-500">
+                                                        {{ secuenciaHorasIndependiente() }} hrs
+                                                    </td>
+                                                </tr>
+                                                <tr class="border-bottom-1 surface-border">
+                                                    <td class="py-2 pr-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="pi pi-users text-orange-500"></i>
+                                                            <span class="text-color-secondary">Acompañamiento directo</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2 font-semibold text-orange-500">
+                                                        {{ secuenciaHorasDirecto() }} hrs
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-2 pr-3">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="pi pi-calculator text-primary"></i>
+                                                            <span class="font-medium">Total disponible</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-2 font-bold text-xl text-primary">
+                                                        {{ secuenciaTotalHoras() }} hrs
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                                            @if (secuenciaChartData()) {
+                                                <p-chart type="doughnut" [data]="secuenciaChartData()"
+                                                    [options]="secuenciaChartOptions" width="150" height="150">
+                                                </p-chart>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                }
+
                 <div class="card">
                     <p-accordion [value]="panelValues" [multiple]="true">
                         @for (panel of paneles(); track panel.key) {
@@ -216,6 +374,21 @@ export class TutorRevisionSeccion implements OnInit {
     getSeverity = getSeverityByEstado;
     getLabel = getLabelByEstado;
 
+    // Datos extra para sección secuencia (signals para reactividad asíncrona)
+    secuenciaNumeroCreditos = signal<number | null>(null);
+    secuenciaHorasDirecto   = signal<number>(0);
+    secuenciaHorasIndependiente = signal<number>(0);
+    secuenciaHorasAsignadas = signal<number>(0);
+    secuenciaPorcentaje     = signal<number>(0);
+    secuenciaChartData      = signal<any>(null);
+    secuenciaCaracterizaCargada = signal(false);
+    secuenciaChartOptions   = { cutout: '60%', plugins: { legend: { display: false } } };
+
+    secuenciaTotalHoras     = computed(() => this.secuenciaHorasDirecto() + this.secuenciaHorasIndependiente());
+    secuenciaHorasDisponibles = computed(() => Math.max(this.secuenciaTotalHoras() - this.secuenciaHorasAsignadas(), 0));
+    secuenciaHorasExcedidas = computed(() => this.secuenciaTotalHoras() > 0 && this.secuenciaHorasAsignadas() > this.secuenciaTotalHoras());
+    secuenciaDatosHorasDisponibles = computed(() => this.secuenciaTotalHoras() > 0);
+
     ngOnInit(): void {
         this.estudianteId = Number(this.route.snapshot.paramMap.get('estudianteId'));
         this.seccionCodigo = this.route.snapshot.paramMap.get('seccionCodigo') || '';
@@ -227,6 +400,9 @@ export class TutorRevisionSeccion implements OnInit {
         this.tutorReviewService.obtenerRespuestasEstudiante(this.estudianteId, this.seccionCodigo).subscribe({
             next: (respuesta) => {
                 this.construirPaneles(respuesta?.datos || {});
+                if (this.seccionCodigo === 'secuencia') {
+                    this.calcularHorasAsignadas(respuesta?.datos);
+                }
                 this.cargando.set(false);
             },
             error: () => {
@@ -235,12 +411,49 @@ export class TutorRevisionSeccion implements OnInit {
             }
         });
 
+        if (this.seccionCodigo === 'secuencia') {
+            this.tutorReviewService.obtenerRespuestasEstudiante(this.estudianteId, 'caracteriza').subscribe({
+                next: (respuesta) => {
+                    const db = (respuesta?.datos as CaracterizaJson | undefined)?.datosBasicos;
+                    this.secuenciaNumeroCreditos.set(db?.numeroCreditos ?? null);
+                    this.secuenciaHorasDirecto.set(db?.horasDirecto ?? 0);
+                    this.secuenciaHorasIndependiente.set(db?.horasIndependiente ?? 0);
+                    this.actualizarChartSecuencia();
+                    this.secuenciaCaracterizaCargada.set(true);
+                },
+                error: () => this.secuenciaCaracterizaCargada.set(true)
+            });
+        }
+
         this.estadoTutorService.obtenerEstadosPorSeccion(this.estudianteId, this.seccionCodigo).subscribe({
             next: (estados) => this.estadosTutor.set(estados)
         });
 
         this.comentarioService.obtenerConteoPorSeccion(this.estudianteId, this.seccionCodigo).subscribe({
             next: (conteo) => this.comentariosCounts.set(conteo)
+        });
+    }
+
+    private calcularHorasAsignadas(datos: any): void {
+        const filas: any[] = Array.isArray(datos?.secuenciaCurso) ? datos.secuenciaCurso : [];
+        const asignadas = filas.reduce((sum, f) => sum + (Number(f.horas) || 0), 0);
+        this.secuenciaHorasAsignadas.set(asignadas);
+        // El porcentaje se recalcula en actualizarChartSecuencia cuando llegan las horas de referencia
+    }
+
+    private actualizarChartSecuencia(): void {
+        const directo      = this.secuenciaHorasDirecto();
+        const independiente = this.secuenciaHorasIndependiente();
+        const total        = directo + independiente;
+        const asignadas    = this.secuenciaHorasAsignadas();
+        this.secuenciaPorcentaje.set(total > 0 ? Math.min(Math.round((asignadas / total) * 100), 100) : 0);
+        this.secuenciaChartData.set({
+            labels: ['Trabajo independiente', 'Acompañamiento directo'],
+            datasets: [{
+                data: [independiente, directo],
+                backgroundColor: ['#22c55e', '#f97316'],
+                hoverBackgroundColor: ['#16a34a', '#ea580c']
+            }]
         });
     }
 
@@ -541,7 +754,7 @@ export class TutorRevisionSeccion implements OnInit {
             'rap-rac': 'RAP y RAC',
             'actividades': 'Actividades de Aprendizaje',
             'evaluacion': 'Diseño de la evaluación',
-            'secuencia': 'Secuencia del Curso',
+            'secuencia': 'Secuencia y cronograma',
             'bibliografia': 'Bibliografía',
             'calificacion': 'Calificación'
         };

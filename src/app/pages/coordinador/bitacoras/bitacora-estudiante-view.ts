@@ -27,9 +27,9 @@ const SECCIONES_BITACORA: { codigo: string; nombre: string }[] = [
   { codigo: 'rap-rac', nombre: 'RAP y RAC' },
   { codigo: 'actividades', nombre: 'Actividades de Aprendizaje' },
   { codigo: 'evaluacion', nombre: 'Diseño de la evaluación' },
-  { codigo: 'secuencia', nombre: 'Secuencia del Curso' },
-  { codigo: 'bibliografia', nombre: 'Bibliografía' },
-  { codigo: 'calificacion', nombre: 'Calificación' }
+  { codigo: 'secuencia', nombre: 'Secuencia y cronograma' },
+  { codigo: 'calificacion', nombre: 'Calificación' },
+  { codigo: 'bibliografia', nombre: 'Bibliografía' }
 ];
 
 @Component({
