@@ -200,36 +200,36 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
             panelLabel: 'Contexto Específico de la situación de Enseñanza/Aprendizaje',
             displayType: 'fields',
             fields: {
-                'pregunta1': '1. ¿El curso hace parte de un programa de pregrado, o posgrado?',
-                'pregunta2': '2. ¿Tu curso es de inicio, mitad o final de programa?',
-                'pregunta3': '3. ¿Cuántos estudiantes hay en tu aula?',
-                'pregunta4': '4. ¿El curso es presencial, virtual, híbrido?',
-                'pregunta5': '5. ¿Este tema es principalmente teórico, práctico o una combinación de ambos?',
-                'pregunta6': '6. ¿Tu curso es de fundamentación, disciplinar, de profundización, electivo?',
-                'pregunta7': '7. ¿Tu curso requiere actualización permanente, o es una temática estable que cambia poco?',
-                'pregunta8': '8. ¿Tu curso tiene prerrequisitos o correquisitos?',
-                'pregunta9': '9. ¿Tu curso es prerrequisito de otro?',
-                'detallePregunta9': '¿Cuál?'
+                'pregunta1': '¿El curso hace parte de un programa de pregrado, o posgrado?',
+                'pregunta2': '¿Tu curso es de inicio, mitad o final de programa?',
+                'pregunta4': '¿El curso es presencial, virtual, híbrido?',
+                'pregunta5': '¿Este tema es principalmente teórico, práctico o una combinación de ambos?',
+                'pregunta6': '¿Tu curso es de fundamentación, disciplinar, de profundización, electivo?',
+                'pregunta7': '¿Tu curso requiere actualización permanente?, o ¿es una temática estable que cambia poco?',
+                'pregunta8': '¿Tu curso tiene prerrequisitos o correquisitos?, ¿Cuáles son?',
+                'pregunta9': '¿Tu curso es prerrequisito de otro?, ¿Cuál?',
+                'detallePregunta9': '¿Cuál curso?'
             }
         },
         'panel2': {
-            panelLabel: '¿Cuáles son las característias de los estudiantes?',
+            panelLabel: '¿Cuáles son las características de los estudiantes?',
             displayType: 'fields',
             fields: {
-                'pregunta10': '10. ¿Cuáles son las características biopsicosociales, culturales, académicas y económicas de tus estudiantes?',
-                'pregunta11': '11. ¿Qué conocimiento previo, experiencias y predisposiciones iniciales suelen tener los estudiantes sobre el tema?',
-                'pregunta12': '12. ¿Cuáles son los estilos preferidos de aprendizaje de tus estudiantes?',
-                'pregunta13': '13. ¿Conoces las características de diversidad de los estudiantes que integrarán tu curso?'
+                'pregunta10': '¿Cuáles son las características biopsicosociales, culturales, académicas y económicas de tus estudiantes?',
+                'pregunta11': '¿Qué conocimiento previo, experiencias y predisposiciones iniciales suelen tener los estudiantes sobre el tema?',
+                'pregunta12': '¿Cuáles son los estilos preferidos de aprendizaje de tus estudiantes?',
+                'pregunta13': '¿Conoces las características de diversidad de los estudiantes que integrarán tu curso?'
             }
         },
         'panel3': {
-            panelLabel: '¿Cuáles son tus característias como docente?',
+            panelLabel: '¿Cuáles son tus características como docente?',
             displayType: 'fields',
             fields: {
-                'pregunta14': '14. ¿Qué experiencia docente tienes en la enseñanza de este curso o de temas relacionados?',
-                'pregunta15': '15. ¿Qué te motiva a enseñar este tema en particular?',
-                'pregunta16': '16. ¿Qué resultados has obtenido en la evaluación de este curso anteriormente?',
-                'pregunta17': '17. ¿Cómo describes tu estilo de enseñanza?'
+                'pregunta14': '¿Qué experiencia docente tienes en la enseñanza de este curso o de temas relacionados?',
+                'pregunta15': '¿Qué te motiva a enseñar este tema en particular?',
+                'pregunta16': '¿Qué resultados has obtenido en la evaluación de este curso anteriormente?',
+                'pregunta17': '¿Cómo describes tu estilo de enseñanza?',
+                'pregunta18': '¿Qué esperas de tus estudiantes en este curso?'
             }
         }
     },

@@ -91,7 +91,6 @@ export interface FactoresJson {
     panel1: {
         pregunta1?: string;
         pregunta2?: string;
-        pregunta3?: string;
         pregunta4?: string;
         pregunta5?: string;
         pregunta6?: string;
@@ -111,6 +110,7 @@ export interface FactoresJson {
         pregunta15?: string;
         pregunta16?: string;
         pregunta17?: string;
+        pregunta18?: string;
     };
 }
 
