@@ -26,6 +26,17 @@
   overflow-x: auto;
 }
 
+/* Fila con horas excedidas: resaltado sutil en rojo */
+.fila-excedida {
+  background-color: color-mix(in srgb, var(--p-red-500) 6%, transparent);
+}
+
+/* Fila de totales */
+.horas-total-row {
+  background-color: var(--p-surface-100);
+  border-top: 2px solid var(--p-surface-border);
+}
+
 /* Responsive: en móviles apilar verticalmente */
 @media (max-width: 640px) {
   .sticky-header .flex {

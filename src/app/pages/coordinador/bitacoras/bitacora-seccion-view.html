@@ -10,6 +10,154 @@
       <i class="pi pi-spin pi-spinner text-4xl"></i>
     </div>
   } @else {
+
+    <!-- Cards de distribución de horas (solo sección secuencia) -->
+    @if (seccionCodigo === 'secuencia') {
+      @if (!secuenciaCaracterizaCargada()) {
+        <div class="flex justify-center p-4 mb-4">
+          <i class="pi pi-spin pi-spinner text-2xl text-surface-400"></i>
+        </div>
+      } @else if (!secuenciaDatosHorasDisponibles()) {
+        <p-message severity="warn" styleClass="w-full mb-4">
+          <span>
+            El estudiante aún no ha diligenciado las horas en
+            <strong>Identificación de tu curso</strong>. Las cards de distribución
+            estarán disponibles cuando complete ese módulo.
+          </span>
+        </p-message>
+      } @else {
+        <div class="grid grid-cols-12 gap-4 mb-4">
+
+          <!-- Distribución de horas -->
+          <div class="col-span-12 lg:col-span-6">
+            <div class="card h-full">
+              <div class="flex items-center justify-between mb-4">
+                <span class="font-semibold text-lg">Distribución de horas</span>
+                <div class="flex items-center justify-center bg-blue-100 rounded-border"
+                  style="width: 2.5rem; height: 2.5rem;">
+                  <i class="pi pi-clock text-blue-500 text-xl"></i>
+                </div>
+              </div>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-5">
+                  <table>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-bookmark text-blue-500"></i>
+                          <span class="text-color-secondary">Créditos</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold">{{ secuenciaNumeroCreditos() ?? '—' }}</td>
+                    </tr>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-clock text-gray-500"></i>
+                          <span class="text-color-secondary">Horas totales</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold">{{ secuenciaTotalHoras() }}</td>
+                    </tr>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-check-circle text-green-500"></i>
+                          <span class="text-color-secondary">Horas asignadas</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold"
+                        [class.text-green-500]="!secuenciaHorasExcedidas()"
+                        [class.text-red-500]="secuenciaHorasExcedidas()">
+                        {{ secuenciaHorasAsignadas() }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-hourglass text-primary"></i>
+                          <span class="font-medium">Horas disponibles</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-bold text-xl"
+                        [class.text-primary]="!secuenciaHorasExcedidas()"
+                        [class.text-red-500]="secuenciaHorasExcedidas()">
+                        {{ secuenciaHorasExcedidas()
+                          ? '-' + (secuenciaHorasAsignadas() - secuenciaTotalHoras())
+                          : secuenciaHorasDisponibles() }}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                  <p-knob [ngModel]="secuenciaPorcentaje()" [readonly]="true"
+                    [min]="0" [max]="100" valueTemplate="{value}%" [size]="150">
+                  </p-knob>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Distribución por tipo de trabajo -->
+          <div class="col-span-12 lg:col-span-6">
+            <div class="card h-full">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-lg">Distribución por tipo de trabajo</span>
+                <div class="flex items-center justify-center bg-orange-100 rounded-border"
+                  style="width: 2.5rem; height: 2.5rem;">
+                  <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
+                </div>
+              </div>
+              <p class="text-color-secondary text-xs mt-0 mb-3">
+                Valores de referencia definidos en Identificación de tu curso
+              </p>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-5">
+                  <table>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-home text-green-500"></i>
+                          <span class="text-color-secondary">Trabajo independiente</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold text-green-500">{{ secuenciaHorasIndependiente() }} hrs</td>
+                    </tr>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-users text-orange-500"></i>
+                          <span class="text-color-secondary">Acompañamiento directo</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold text-orange-500">{{ secuenciaHorasDirecto() }} hrs</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calculator text-primary"></i>
+                          <span class="font-medium">Total disponible</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-bold text-xl text-primary">{{ secuenciaTotalHoras() }} hrs</td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                  @if (secuenciaChartData()) {
+                    <p-chart type="doughnut" [data]="secuenciaChartData()"
+                      [options]="secuenciaChartOptions" width="150" height="150">
+                    </p-chart>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      }
+    }
+
     <div class="card">
       <p-accordion [value]="panelValues" [multiple]="true">
         @for (panel of paneles(); track panel.key) {

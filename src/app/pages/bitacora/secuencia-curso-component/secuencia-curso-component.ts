@@ -1,16 +1,15 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
-import { MultiSelectModule } from 'primeng/multiselect';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TextareaModule } from 'primeng/textarea';
 import { KnobModule } from 'primeng/knob';
 import { TagModule } from 'primeng/tag';
-import { SelectModule } from 'primeng/select';
 import { ChartModule } from 'primeng/chart';
+import { MessageModule } from 'primeng/message';
 
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
@@ -20,6 +19,7 @@ import { BitacoraCommentButtonComponent } from '../../../shared/components/bitac
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 import { calcularEstadoAvance } from '../../../core/models';
+import { CaracterizaJson } from '../../../core/models/bitacora.model';
 
 @Component({
   selector: 'app-secuencia-curso-component',
@@ -29,13 +29,12 @@ import { calcularEstadoAvance } from '../../../core/models';
     FormsModule,
     ButtonModule,
     FluidModule,
-    MultiSelectModule,
     InputNumberModule,
     TextareaModule,
     KnobModule,
     TagModule,
-    SelectModule,
     ChartModule,
+    MessageModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
     BitacoraCommentButtonComponent
@@ -49,40 +48,29 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
   protected seccionCodigo = 'secuencia';
   protected sectionsConfig: SectionConfig[] = [];
 
-  // Datos base
-  creditosAsignatura = 3;
-  horasTotales = this.creditosAsignatura * 48;
+  // Datos cargados desde "Identificación de tu curso"
+  numeroCreditos = signal<number | null>(null);
+  horasDirectoCat  = signal<number | null>(null);
+  horasIndependienteCat = signal<number | null>(null);
+  caracterizaCargada = signal(false);
 
-  // Horas calculadas
-  horasUsadas = 0;
-  horasDisponibles = this.horasTotales;
+  /** Total de horas del curso (directo + independiente desde Identificación) */
+  horasTotalesDisponibles = computed(() =>
+    (this.horasDirectoCat() ?? 0) + (this.horasIndependienteCat() ?? 0)
+  );
+
+  /** True si hay horas disponibles para planear */
+  datosHorasDisponibles = computed(() => this.horasTotalesDisponibles() > 0);
+
+  // Horas calculadas desde la tabla
   horasAsignadas = 0;
+  horasDisponibles = 0;
   porcentajeHorasAsignadas = 0;
-  horasAsync = 0;
-  horasSync = 0;
+  horasExcedidas = false;
 
-  // Chart
+  // Chart de referencia: directo vs independiente (valores de caracteriza)
   chartData: any;
   chartOptions: any;
-
-  // Opciones
-  tiposActividad = [
-    { label: 'Asíncrona', value: 'async' },
-    { label: 'Síncrona', value: 'sync' }
-  ];
-
-  actividadesOpciones = [
-    { label: 'Lectura de material', value: 'lectura' },
-    { label: 'Video educativo', value: 'video' },
-    { label: 'Taller práctico', value: 'taller' },
-    { label: 'Debate grupal', value: 'debate' },
-    { label: 'Exposición', value: 'exposicion' },
-    { label: 'Trabajo colaborativo', value: 'colaborativo' },
-    { label: 'Evaluación', value: 'evaluacion' },
-    { label: 'Foro de discusión', value: 'foro' },
-    { label: 'Estudio de caso', value: 'caso' },
-    { label: 'Proyecto', value: 'proyecto' }
-  ];
 
   get secuenciaFormArray(): FormArray {
     return this.form.get('secuenciaCurso') as FormArray;
@@ -90,11 +78,29 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
 
   override ngOnInit(): void {
     super.ngOnInit();
+    this.cargarDatosCaracteriza();
     this.inicializarChart();
   }
 
   override ngOnDestroy(): void {
     super.ngOnDestroy();
+  }
+
+  private cargarDatosCaracteriza(): void {
+    this.bitacoraService.obtenerSeccion('caracteriza').subscribe({
+      next: (respuesta) => {
+        const db = (respuesta?.datos as CaracterizaJson | undefined)?.datosBasicos;
+        this.numeroCreditos.set(db?.numeroCreditos ?? null);
+        this.horasDirectoCat.set(db?.horasDirecto ?? null);
+        this.horasIndependienteCat.set(db?.horasIndependiente ?? null);
+        this.caracterizaCargada.set(true);
+        this.actualizarChart();
+        this.recalcularHoras();
+      },
+      error: () => {
+        this.caracterizaCargada.set(true);
+      }
+    });
   }
 
   protected initForm(): void {
@@ -103,9 +109,6 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
     });
   }
 
-  /**
-   * Override setupProgressTracking para incluir recálculo de horas
-   */
   protected override setupProgressTracking(): void {
     this.form.valueChanges.subscribe(() => {
       this.recalcularHoras();
@@ -114,13 +117,7 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
   }
 
   agregarFila(): void {
-    this.secuenciaFormArray.push(this.fb.group({
-      modulo: [''],
-      actividades: [[]],
-      descripcion: [''],
-      tipo: [null],
-      horas: [0]
-    }));
+    this.secuenciaFormArray.push(this.crearFilaGroup({}));
     this.recalcularHoras();
     this.calculateProgress();
   }
@@ -131,101 +128,84 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
     this.calculateProgress();
   }
 
-  /**
-   * Override patchFormWithData para cargar filas en el FormArray
-   */
+  private crearFilaGroup(fila: any): FormGroup {
+    return this.fb.group({
+      // Backward-compat: 'modulo' → 'unidad', 'descripcion' → 'producto'
+      unidad:           [fila.unidad           || fila.modulo      || ''],
+      temas:            [fila.temas            || ''],
+      actividadesAsync: [fila.actividadesAsync || ''],
+      producto:         [fila.producto         || fila.descripcion || ''],
+      evidencia:        [fila.evidencia        || ''],
+      horas:            [fila.horas            || 0]
+    });
+  }
+
   protected override patchFormWithData(data: any): void {
     if (data?.secuenciaCurso && Array.isArray(data.secuenciaCurso)) {
-      const formArray = this.secuenciaFormArray;
-      formArray.clear();
-      data.secuenciaCurso.forEach((fila: any) => {
-        formArray.push(this.fb.group({
-          modulo: [fila.modulo || ''],
-          actividades: [fila.actividades || []],
-          descripcion: [fila.descripcion || ''],
-          tipo: [fila.tipo || null],
-          horas: [fila.horas || 0]
-        }));
-      });
+      const fa = this.secuenciaFormArray;
+      fa.clear();
+      data.secuenciaCurso.forEach((fila: any) => fa.push(this.crearFilaGroup(fila)));
     }
     this.recalcularHoras();
   }
 
-  /**
-   * Progreso binario: tiene al menos 1 fila = completado, 0 filas = sin_avances
-   */
   protected override calculateProgress(): void {
-    const hasRows = this.secuenciaFormArray.length > 0;
-    const percentage = hasRows ? 100 : 0;
+    const filas = this.secuenciaFormArray.controls;
+    const total = filas.length;
+    const completas = filas.filter(fila => {
+      const v = fila.value;
+      return v.unidad?.trim() &&
+             v.temas?.trim() &&
+             v.actividadesAsync?.trim() &&
+             v.producto?.trim() &&
+             v.evidencia?.trim() &&
+             (Number(v.horas) > 0);
+    }).length;
+
+    const percentage = total > 0 ? Math.round((completas / total) * 100) : 0;
 
     this._progress.set({
-      sections: [
-        {
-          sectionName: 'secuencia',
-          completedFields: hasRows ? 1 : 0,
-          totalFields: 1,
-          percentage,
-          estado: calcularEstadoAvance(percentage)
-        }
-      ],
+      sections: [{
+        sectionName: 'secuencia',
+        completedFields: completas,
+        totalFields: total,
+        percentage,
+        estado: calcularEstadoAvance(percentage)
+      }],
       totalPercentage: percentage,
       estado: calcularEstadoAvance(percentage)
     });
   }
 
-  // --- Cálculos de horas ---
-
   inicializarChart(): void {
-    this.chartData = {
-      labels: ['Independiente', 'Directo'],
-      datasets: [
-        {
-          data: [this.horasAsync, this.horasSync],
-          backgroundColor: ['#22c55e', '#f97316'],
-          hoverBackgroundColor: ['#16a34a', '#ea580c']
-        }
-      ]
-    };
-
     this.chartOptions = {
       cutout: '60%',
-      plugins: {
-        legend: { display: false }
-      }
+      plugins: { legend: { display: false } }
     };
-  }
-
-  recalcularHoras(): void {
-    const filas = this.secuenciaFormArray.value;
-
-    this.horasAsync = filas
-      .filter((f: any) => f.tipo === 'async')
-      .reduce((total: number, f: any) => total + (f.horas || 0), 0);
-
-    this.horasSync = filas
-      .filter((f: any) => f.tipo === 'sync')
-      .reduce((total: number, f: any) => total + (f.horas || 0), 0);
-
-    this.horasAsignadas = this.horasAsync + this.horasSync;
-    this.horasDisponibles = Math.max(this.horasTotales - this.horasAsignadas, 0);
-
-    this.porcentajeHorasAsignadas = this.horasTotales > 0
-      ? Math.round((this.horasAsignadas / this.horasTotales) * 100)
-      : 0;
-
     this.actualizarChart();
   }
 
+  recalcularHoras(): void {
+    const filas = this.secuenciaFormArray.value as any[];
+    this.horasAsignadas = filas.reduce((sum, f) => sum + (Number(f.horas) || 0), 0);
+    const total = this.horasTotalesDisponibles();
+    this.horasDisponibles = Math.max(total - this.horasAsignadas, 0);
+    this.porcentajeHorasAsignadas = total > 0
+      ? Math.min(Math.round((this.horasAsignadas / total) * 100), 100)
+      : 0;
+    this.horasExcedidas = total > 0 && this.horasAsignadas > total;
+  }
+
   actualizarChart(): void {
+    const directo       = this.horasDirectoCat()      ?? 0;
+    const independiente = this.horasIndependienteCat() ?? 0;
     this.chartData = {
-      labels: ['Independiente', 'Directo'],
-      datasets: [
-        {
-          data: [this.horasAsync, this.horasSync],
-          backgroundColor: ['#22c55e', '#f97316'],
-          hoverBackgroundColor: ['#16a34a', '#ea580c']
-        }
-      ]
+      labels: ['Trabajo independiente', 'Acompañamiento directo'],
+      datasets: [{
+        data: [independiente, directo],
+        backgroundColor: ['#22c55e', '#f97316'],
+        hoverBackgroundColor: ['#16a34a', '#ea580c']
+      }]
     };
   }
 }

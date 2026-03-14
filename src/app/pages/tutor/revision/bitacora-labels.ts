@@ -304,13 +304,14 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
 
     'secuencia': {
         'secuenciaCurso': {
-            panelLabel: 'Secuencia del curso',
+            panelLabel: 'Secuencia y cronograma',
             displayType: 'table',
             columns: [
-                { key: 'modulo', label: 'Módulos / Temas' },
-                { key: 'actividades', label: 'Actividades' },
-                { key: 'descripcion', label: 'Descripción' },
-                { key: 'tipo', label: 'Tipo' },
+                { key: 'unidad', label: 'Unidad / Módulo' },
+                { key: 'temas', label: 'Temas' },
+                { key: 'actividadesAsync', label: 'Actividades independientes de aprendizaje: Asincrónico' },
+                { key: 'producto', label: 'Producto de la actividad / ¿Qué se espera del estudiante?' },
+                { key: 'evidencia', label: 'Evidencia' },
                 { key: 'horas', label: 'Horas' }
             ]
         }

@@ -2,132 +2,172 @@
     <app-loading></app-loading>
 } @else {
     <p-fluid>
+
+        <!-- Mensaje si no hay datos de horas en Identificación del curso -->
+        @if (caracterizaCargada() && !datosHorasDisponibles()) {
+            <p-message severity="warn" styleClass="w-full mb-4">
+                <span>
+                    Para planear la secuencia y cronograma, primero debes diligenciar los campos
+                    <strong>Horas de trabajo directo</strong> y <strong>Horas de trabajo independiente</strong>
+                    en el módulo <strong>Identificación de tu curso</strong>.
+                </span>
+            </p-message>
+        }
+
         <!-- Summary cards -->
-        <div class="grid grid-cols-12 gap-4 mb-5">
+        @if (datosHorasDisponibles()) {
+            <div class="grid grid-cols-12 gap-4 mb-5">
 
-            <!-- TARJETA 1: Resumen de horas -->
-            <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
-                <div class="card h-full">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="font-semibold text-lg">Distribución de horas</span>
-                        <div class="flex items-center justify-center bg-blue-100 rounded-border"
-                            style="width: 2.5rem; height: 2.5rem;">
-                            <i class="pi pi-clock text-blue-500 text-xl"></i>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12 md:col-span-5">
-                            <table>
-                                <tr class="border-bottom-1 surface-border">
-                                    <td class="py-2 pr-3">
-                                        <div class="flex items-center gap-2">
-                                            <i class="pi pi-bookmark text-blue-500"></i>
-                                            <span class="text-color-secondary">Créditos de la asignatura</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-2 font-semibold">{{ creditosAsignatura }}</td>
-                                </tr>
-                                <tr class="border-bottom-1 surface-border">
-                                    <td class="py-2 pr-3">
-                                        <div class="flex items-center gap-2">
-                                            <i class="pi pi-clock text-gray-500"></i>
-                                            <span class="text-color-secondary">Horas totales del curso</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-2 font-semibold">{{ horasTotales }}</td>
-                                </tr>
-                                <tr class="border-bottom-1 surface-border">
-                                    <td class="py-2 pr-3">
-                                        <div class="flex items-center gap-2">
-                                            <i class="pi pi-check-circle text-green-500"></i>
-                                            <span class="text-color-secondary">Horas asignadas</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-2 font-semibold text-green-500">{{ horasAsignadas }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="py-2 pr-3">
-                                        <div class="flex items-center gap-2">
-                                            <i class="pi pi-hourglass text-primary"></i>
-                                            <span class="font-medium">Horas disponibles</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-2 font-bold text-xl text-primary">{{ horasDisponibles }}</td>
-                                </tr>
-                            </table>
+                <!-- TARJETA 1: Distribución de horas -->
+                <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
+                    <div class="card h-full">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-semibold text-lg">Distribución de horas</span>
+                            <div class="flex items-center justify-center bg-blue-100 rounded-border"
+                                style="width: 2.5rem; height: 2.5rem;">
+                                <i class="pi pi-clock text-blue-500 text-xl"></i>
+                            </div>
                         </div>
 
-                        <div class="col-span-12 md:col-span-7 flex items-center justify-center">
-                            <p-knob [(ngModel)]="porcentajeHorasAsignadas" [readonly]="true" [min]="0" [max]="100"
-                                valueTemplate="{value}%" [size]="150">
-                            </p-knob>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 md:col-span-5">
+                                <table>
+                                    <tr class="border-bottom-1 surface-border">
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-bookmark text-blue-500"></i>
+                                                <span class="text-color-secondary">Créditos</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-semibold">
+                                            {{ numeroCreditos() ?? '—' }}
+                                        </td>
+                                    </tr>
+                                    <tr class="border-bottom-1 surface-border">
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-clock text-gray-500"></i>
+                                                <span class="text-color-secondary">Horas totales</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-semibold">{{ horasTotalesDisponibles() }}</td>
+                                    </tr>
+                                    <tr class="border-bottom-1 surface-border">
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-check-circle text-green-500"></i>
+                                                <span class="text-color-secondary">Horas asignadas</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-semibold"
+                                            [class.text-green-500]="!horasExcedidas"
+                                            [class.text-red-500]="horasExcedidas">
+                                            {{ horasAsignadas }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-hourglass text-primary"></i>
+                                                <span class="font-medium">Horas disponibles</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-bold text-xl"
+                                            [class.text-primary]="!horasExcedidas"
+                                            [class.text-red-500]="horasExcedidas">
+                                            {{ horasExcedidas ? '-' + (horasAsignadas - horasTotalesDisponibles()) : horasDisponibles }}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
 
-            <!-- TARJETA 2: Distribución por tipo de actividad -->
-            <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
-                <div class="card h-full">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="font-semibold text-lg">Distribución por tipo</span>
-                        <div class="flex items-center justify-center bg-orange-100 rounded-border"
-                            style="width: 2.5rem; height: 2.5rem;">
-                            <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12 md:col-span-5">
-                            <table>
-                                <tr class="border-bottom-1 surface-border">
-                                    <td class="py-2 pr-3">
-                                        <div class="flex items-center gap-2">
-                                            <i class="pi pi-home text-green-500"></i>
-                                            <span class="text-color-secondary">Trabajo independiente</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-2 font-semibold text-green-500">{{ horasAsync }} hrs</td>
-                                </tr>
-                                <tr class="border-bottom-1 surface-border">
-                                    <td class="py-2 pr-3">
-                                        <div class="flex items-center gap-2">
-                                            <i class="pi pi-users text-orange-500"></i>
-                                            <span class="text-color-secondary">Acompañamiento directo</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-2 font-semibold text-orange-500">{{ horasSync }} hrs</td>
-                                </tr>
-                                <tr>
-                                    <td class="py-2 pr-3">
-                                        <div class="flex items-center gap-2">
-                                            <i class="pi pi-calculator text-primary"></i>
-                                            <span class="font-medium">Total asignado</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-2 font-bold text-xl text-primary">{{ horasAsignadas }} hrs</td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <div class="col-span-12 md:col-span-7 flex flex-column items-center justify-center">
-                            @if (horasAsignadas > 0) {
-                                <p-chart type="doughnut" [data]="chartData" [options]="chartOptions"
-                                    width="150" height="150">
-                                </p-chart>
-                            } @else {
-                                <div class="flex flex-column items-center gap-2 text-color-secondary">
-                                    <i class="pi pi-chart-pie text-4xl"></i>
-                                    <span class="text-sm">Sin horas asignadas</span>
-                                </div>
-                            }
+                            <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                                <p-knob [(ngModel)]="porcentajeHorasAsignadas" [readonly]="true"
+                                    [min]="0" [max]="100" valueTemplate="{value}%" [size]="150">
+                                </p-knob>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-        </div>
+                <!-- TARJETA 2: Distribución por tipo de trabajo (valores de referencia) -->
+                <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
+                    <div class="card h-full">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-semibold text-lg">Distribución por tipo de trabajo</span>
+                            <div class="flex items-center justify-center bg-orange-100 rounded-border"
+                                style="width: 2.5rem; height: 2.5rem;">
+                                <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-color-secondary text-xs mt-0 mb-3">
+                            Valores de referencia definidos en Identificación de tu curso
+                        </p>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 md:col-span-5">
+                                <table>
+                                    <tr class="border-bottom-1 surface-border">
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-home text-green-500"></i>
+                                                <span class="text-color-secondary">Trabajo independiente</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-semibold text-green-500">
+                                            {{ horasIndependienteCat() }} hrs
+                                        </td>
+                                    </tr>
+                                    <tr class="border-bottom-1 surface-border">
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-users text-orange-500"></i>
+                                                <span class="text-color-secondary">Acompañamiento directo</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-semibold text-orange-500">
+                                            {{ horasDirectoCat() }} hrs
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-calculator text-primary"></i>
+                                                <span class="font-medium">Total disponible</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-bold text-xl text-primary">
+                                            {{ horasTotalesDisponibles() }} hrs
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="col-span-12 md:col-span-7 flex flex-column items-center justify-center">
+                                @if ((horasDirectoCat() ?? 0) + (horasIndependienteCat() ?? 0) > 0) {
+                                    <p-chart type="doughnut" [data]="chartData" [options]="chartOptions"
+                                        width="150" height="150">
+                                    </p-chart>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+
+        <!-- Alerta de horas excedidas -->
+        @if (horasExcedidas) {
+            <p-message severity="error" styleClass="w-full mb-4">
+                <span>
+                    Las horas asignadas en la secuencia
+                    (<strong>{{ horasAsignadas }} hrs</strong>) superan las horas disponibles
+                    (<strong>{{ horasTotalesDisponibles() }} hrs</strong>). Ajusta las horas de las
+                    actividades para no superar el límite de trabajo directo e independiente.
+                </span>
+            </p-message>
+        }
 
         <!-- Main table card -->
         <div class="card">
@@ -137,9 +177,9 @@
                     <div class="flex items-center gap-3">
                         <i class="pi pi-calendar text-primary text-2xl"></i>
                         <div>
-                            <h3 class="m-0 text-lg font-semibold">Secuencia del curso</h3>
+                            <h3 class="m-0 text-lg font-semibold">Secuencia y cronograma</h3>
                             <p class="m-0 text-sm text-color-secondary">
-                                Planee el desarrollo del curso y distribuya las horas de trabajo académico
+                                Planea el desarrollo del curso distribuyendo las horas de trabajo académico
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
@@ -148,8 +188,8 @@
                                 [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
                             <app-bitacora-comment-button
                                 [seccionCodigo]="seccionCodigo"
-                                subseccionCodigo="general"
-                                [badge]="comentariosCounts()['general'] || 0" />
+                                subseccionCodigo="secuencia"
+                                [badge]="comentariosCounts()['secuencia'] || 0" />
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -173,56 +213,72 @@
                     <table class="w-full" formArrayName="secuenciaCurso">
                         <thead>
                             <tr>
-                                <th class="text-center p-2" style="width: 5rem;">Semana</th>
-                                <th class="p-2" style="min-width: 12rem;">Módulos / Temas</th>
-                                <th class="p-2" style="min-width: 14rem;">Actividades</th>
-                                <th class="p-2" style="min-width: 16rem;">Descripción</th>
-                                <th class="text-center p-2" style="width: 10rem;">Tipo</th>
+                                <th class="text-center p-2" style="width: 3rem;">#</th>
+                                <th class="p-2" style="min-width: 10rem;">Unidad / Módulo</th>
+                                <th class="p-2" style="min-width: 10rem;">Temas</th>
+                                <th class="p-2" style="min-width: 14rem;">
+                                    Actividades independientes de aprendizaje: Asincrónico
+                                </th>
+                                <th class="p-2" style="min-width: 14rem;">
+                                    Producto de la actividad
+                                    <span class="block text-xs font-normal text-color-secondary">
+                                        ¿Qué se espera del estudiante?
+                                    </span>
+                                </th>
+                                <th class="p-2" style="min-width: 10rem;">Evidencia</th>
                                 <th class="text-center p-2" style="width: 6rem;">Horas</th>
-                                <th class="p-2" style="width: 4rem;"></th>
+                                <th class="p-2" style="width: 3.5rem;"></th>
                             </tr>
                         </thead>
                         <tbody>
                             @for (fila of secuenciaFormArray.controls; track $index) {
-                                <tr [formGroupName]="$index" class="border-bottom-1 surface-border">
-                                    <!-- Semana -->
+                                <tr [formGroupName]="$index" class="border-bottom-1 surface-border"
+                                    [class.fila-excedida]="horasExcedidas">
+
+                                    <!-- Número de fila -->
                                     <td class="text-center font-semibold text-primary p-2">
                                         {{ $index + 1 }}
                                     </td>
 
-                                    <!-- Módulos / Temas -->
+                                    <!-- Unidad / Módulo -->
                                     <td class="p-2">
-                                        <textarea pTextarea formControlName="modulo" rows="2"
-                                            placeholder="Módulo, unidad o tema" class="w-full">
+                                        <textarea pTextarea formControlName="unidad" [autoResize]="true" rows="2"
+                                            placeholder="Unidad o módulo" class="w-full">
                                         </textarea>
                                     </td>
 
-                                    <!-- Actividades -->
+                                    <!-- Temas -->
                                     <td class="p-2">
-                                        <p-multiselect [options]="actividadesOpciones" formControlName="actividades"
-                                            placeholder="Seleccionar actividades" class="w-full" display="chip"
-                                            appendTo="body">
-                                        </p-multiselect>
-                                    </td>
-
-                                    <!-- Descripción -->
-                                    <td class="p-2">
-                                        <textarea pTextarea formControlName="descripcion" rows="2"
-                                            placeholder="Descripción breve de la actividad" class="w-full">
+                                        <textarea pTextarea formControlName="temas" [autoResize]="true" rows="2"
+                                            placeholder="Temas a desarrollar" class="w-full">
                                         </textarea>
                                     </td>
 
-                                    <!-- Tipo de actividad -->
-                                    <td class="text-center p-2">
-                                        <p-select [options]="tiposActividad" formControlName="tipo"
-                                            placeholder="Seleccionar" class="w-full"
-                                            appendTo="body">
-                                        </p-select>
+                                    <!-- Actividades independientes: Asincrónico -->
+                                    <td class="p-2">
+                                        <textarea pTextarea formControlName="actividadesAsync" [autoResize]="true" rows="2"
+                                            placeholder="Actividades asincrónicas que realizará el estudiante"
+                                            class="w-full">
+                                        </textarea>
+                                    </td>
+
+                                    <!-- Producto / Qué se espera -->
+                                    <td class="p-2">
+                                        <textarea pTextarea formControlName="producto" [autoResize]="true" rows="2"
+                                            placeholder="Producto esperado de la actividad" class="w-full">
+                                        </textarea>
+                                    </td>
+
+                                    <!-- Evidencia -->
+                                    <td class="p-2">
+                                        <textarea pTextarea formControlName="evidencia" [autoResize]="true" rows="2"
+                                            placeholder="Evidencia del aprendizaje" class="w-full">
+                                        </textarea>
                                     </td>
 
                                     <!-- Horas -->
                                     <td class="text-center p-2">
-                                        <p-inputNumber formControlName="horas" [min]="0" [max]="100"
+                                        <p-inputNumber formControlName="horas" [min]="0" [max]="9999"
                                             class="w-full">
                                         </p-inputNumber>
                                     </td>
@@ -236,6 +292,25 @@
                                 </tr>
                             }
                         </tbody>
+
+                        @if (secuenciaFormArray.length > 0) {
+                            <tfoot>
+                                <tr class="horas-total-row">
+                                    <td colspan="6" class="text-right pr-3 py-2 font-semibold">
+                                        Total horas asignadas
+                                    </td>
+                                    <td class="text-center py-2 font-bold text-lg"
+                                        [class.text-primary]="!horasExcedidas"
+                                        [class.text-red-500]="horasExcedidas">
+                                        {{ horasAsignadas }}
+                                        @if (datosHorasDisponibles()) {
+                                            <span class="text-xs font-normal"> / {{ horasTotalesDisponibles() }}</span>
+                                        }
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        }
                     </table>
                 </div>
             </form>
@@ -246,9 +321,13 @@
                     (onClick)="agregarFila()">
                 </p-button>
 
-                <small class="text-color-secondary">
-                    Para finalizar la planeación, las horas disponibles deben ser 0.
-                </small>
+                @if (datosHorasDisponibles()) {
+                    <small [class.text-color-secondary]="!horasExcedidas" [class.text-red-500]="horasExcedidas">
+                        {{ horasExcedidas
+                            ? 'Horas excedidas — reduce ' + (horasAsignadas - horasTotalesDisponibles()) + ' hrs'
+                            : 'Horas disponibles: ' + horasDisponibles }}
+                    </small>
+                }
             </div>
         </div>
     </p-fluid>

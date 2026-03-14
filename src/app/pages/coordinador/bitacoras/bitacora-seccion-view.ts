@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -10,6 +11,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { KnobModule } from 'primeng/knob';
+import { ChartModule } from 'primeng/chart';
 import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
 import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
@@ -19,6 +22,7 @@ import { AuthStateService } from '../../../core/services/auth-state.service';
 import { EstadoTutorSubseccionDTO } from '../../../core/models/estado-tutor-subseccion.model';
 import { getSeverityByEstado, getLabelByEstado, EstadoAvance, UserRole } from '../../../core/models';
 import { BITACORA_LABELS, SELECT_VALUE_LABELS, PanelMeta } from '../../tutor/revision/bitacora-labels';
+import { CaracterizaJson } from '../../../core/models/bitacora.model';
 
 interface PanelView {
   key: string;
@@ -45,7 +49,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
   'rap-rac': 'RAP y RAC',
   'actividades': 'Actividades de Aprendizaje',
   'evaluacion': 'Diseño de la evaluación',
-  'secuencia': 'Secuencia del Curso',
+  'secuencia': 'Secuencia y cronograma',
   'bibliografia': 'Bibliografía',
   'calificacion': 'Calificación'
 };
@@ -54,7 +58,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
   selector: 'app-bitacora-seccion-view',
   templateUrl: './bitacora-seccion-view.html',
   standalone: true,
-  imports: [CommonModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, CommentThreadComponent, EstadoTutorSelectorComponent]
+  imports: [CommonModule, FormsModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, KnobModule, ChartModule, CommentThreadComponent, EstadoTutorSelectorComponent]
 })
 export class BitacoraSeccionView implements OnInit {
   private route = inject(ActivatedRoute);
@@ -80,6 +84,21 @@ export class BitacoraSeccionView implements OnInit {
   /** Si el coordinador también es tutor, puede comentar y asignar estados */
   esTambienTutor = false;
 
+  // Datos para la sección secuencia
+  secuenciaNumeroCreditos     = signal<number | null>(null);
+  secuenciaHorasDirecto       = signal<number>(0);
+  secuenciaHorasIndependiente = signal<number>(0);
+  secuenciaHorasAsignadas     = signal<number>(0);
+  secuenciaPorcentaje         = signal<number>(0);
+  secuenciaChartData          = signal<any>(null);
+  secuenciaCaracterizaCargada = signal(false);
+  secuenciaChartOptions       = { cutout: '60%', plugins: { legend: { display: false } } };
+
+  secuenciaTotalHoras          = computed(() => this.secuenciaHorasDirecto() + this.secuenciaHorasIndependiente());
+  secuenciaHorasDisponibles    = computed(() => Math.max(this.secuenciaTotalHoras() - this.secuenciaHorasAsignadas(), 0));
+  secuenciaHorasExcedidas      = computed(() => this.secuenciaTotalHoras() > 0 && this.secuenciaHorasAsignadas() > this.secuenciaTotalHoras());
+  secuenciaDatosHorasDisponibles = computed(() => this.secuenciaTotalHoras() > 0);
+
   ngOnInit(): void {
     this.estudianteId = Number(this.route.snapshot.paramMap.get('estudianteId'));
     this.seccionCodigo = this.route.snapshot.paramMap.get('seccionCodigo') || '';
@@ -92,6 +111,9 @@ export class BitacoraSeccionView implements OnInit {
     this.tutorReviewService.obtenerRespuestasEstudiante(this.estudianteId, this.seccionCodigo).subscribe({
       next: (respuesta) => {
         this.construirPaneles(respuesta?.datos || {});
+        if (this.seccionCodigo === 'secuencia') {
+          this.calcularHorasAsignadas(respuesta?.datos);
+        }
         this.cargando.set(false);
       },
       error: () => {
@@ -100,12 +122,47 @@ export class BitacoraSeccionView implements OnInit {
       }
     });
 
+    if (this.seccionCodigo === 'secuencia') {
+      this.tutorReviewService.obtenerRespuestasEstudiante(this.estudianteId, 'caracteriza').subscribe({
+        next: (respuesta) => {
+          const db = (respuesta?.datos as CaracterizaJson | undefined)?.datosBasicos;
+          this.secuenciaNumeroCreditos.set(db?.numeroCreditos ?? null);
+          this.secuenciaHorasDirecto.set(db?.horasDirecto ?? 0);
+          this.secuenciaHorasIndependiente.set(db?.horasIndependiente ?? 0);
+          this.actualizarChartSecuencia();
+          this.secuenciaCaracterizaCargada.set(true);
+        },
+        error: () => this.secuenciaCaracterizaCargada.set(true)
+      });
+    }
+
     this.estadoTutorService.obtenerEstadosPorSeccion(this.estudianteId, this.seccionCodigo).subscribe({
       next: (estados) => this.estadosTutor.set(estados)
     });
 
     this.comentarioService.obtenerConteoPorSeccion(this.estudianteId, this.seccionCodigo).subscribe({
       next: (conteo) => this.comentariosCounts.set(conteo)
+    });
+  }
+
+  private calcularHorasAsignadas(datos: any): void {
+    const filas: any[] = Array.isArray(datos?.secuenciaCurso) ? datos.secuenciaCurso : [];
+    this.secuenciaHorasAsignadas.set(filas.reduce((sum, f) => sum + (Number(f.horas) || 0), 0));
+  }
+
+  private actualizarChartSecuencia(): void {
+    const directo       = this.secuenciaHorasDirecto();
+    const independiente = this.secuenciaHorasIndependiente();
+    const total         = directo + independiente;
+    const asignadas     = this.secuenciaHorasAsignadas();
+    this.secuenciaPorcentaje.set(total > 0 ? Math.min(Math.round((asignadas / total) * 100), 100) : 0);
+    this.secuenciaChartData.set({
+      labels: ['Trabajo independiente', 'Acompañamiento directo'],
+      datasets: [{
+        data: [independiente, directo],
+        backgroundColor: ['#22c55e', '#f97316'],
+        hoverBackgroundColor: ['#16a34a', '#ea580c']
+      }]
     });
   }
 
