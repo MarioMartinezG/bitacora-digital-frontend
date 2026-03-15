@@ -15,6 +15,7 @@ import { FieldsetModule } from 'primeng/fieldset';
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
+import { ExportButtonComponent } from '../../../shared/components/export-button/export-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -38,7 +39,8 @@ import { Subtopic } from '../../../core/models/subtopic.model';
     FieldsetModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
-    BitacoraCommentButtonComponent
+    BitacoraCommentButtonComponent,
+    ExportButtonComponent
   ],
   templateUrl: './bibliografia-component.html',
 })

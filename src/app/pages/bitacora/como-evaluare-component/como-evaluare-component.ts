@@ -17,6 +17,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
+import { ExportButtonComponent } from '../../../shared/components/export-button/export-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -42,7 +43,8 @@ import { ActividadItem } from '../../../core/models/bitacora.model';
     TextareaModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
-    BitacoraCommentButtonComponent
+    BitacoraCommentButtonComponent,
+    ExportButtonComponent
   ],
   templateUrl: './como-evaluare-component.html',
   styleUrl: './como-evaluare-component.css'

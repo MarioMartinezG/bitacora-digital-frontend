@@ -20,6 +20,7 @@ import { FieldsetModule } from 'primeng/fieldset';
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
+import { ExportButtonComponent } from '../../../shared/components/export-button/export-button';
 import { Contentwidget } from '../caracteriza-component/components/contenido/contentwidget';
 
 // Servicios
@@ -47,7 +48,8 @@ import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.co
     Contentwidget,
     LoadingComponent,
     SaveStatusIndicatorComponent,
-    BitacoraCommentButtonComponent
+    BitacoraCommentButtonComponent,
+    ExportButtonComponent
   ],
   templateUrl: './factores-component.html',
   styleUrl: './factores-component.css'

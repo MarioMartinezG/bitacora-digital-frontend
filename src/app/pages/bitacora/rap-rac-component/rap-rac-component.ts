@@ -10,6 +10,7 @@ import { ButtonModule } from 'primeng/button';
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
+import { ExportButtonComponent } from '../../../shared/components/export-button/export-button';
 import { Rapwidget } from './components/rap/rapwidget';
 import { Racwidget } from './components/rac/racwidget';
 
@@ -31,7 +32,8 @@ import { calcularEstadoAvance } from '../../../core/models';
         SaveStatusIndicatorComponent,
         BitacoraCommentButtonComponent,
         Rapwidget,
-        Racwidget
+        Racwidget,
+        ExportButtonComponent
     ],
     templateUrl: './rap-rac-component.html',
     styleUrl: './rap-rac-component.css'

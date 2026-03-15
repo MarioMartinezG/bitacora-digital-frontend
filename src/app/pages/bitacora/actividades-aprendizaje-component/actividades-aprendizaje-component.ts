@@ -17,6 +17,7 @@ import { DividerModule } from 'primeng/divider';
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
+import { ExportButtonComponent } from '../../../shared/components/export-button/export-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -47,7 +48,8 @@ interface InstructionStep {
     DividerModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
-    BitacoraCommentButtonComponent
+    BitacoraCommentButtonComponent,
+    ExportButtonComponent
   ],
   templateUrl: './actividades-aprendizaje-component.html',
   styleUrl: './actividades-aprendizaje-component.css'
