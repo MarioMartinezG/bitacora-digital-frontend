@@ -755,7 +755,7 @@ export class TutorRevisionSeccion implements OnInit {
             'actividades': 'Actividades de Aprendizaje',
             'evaluacion': 'Diseño de la evaluación',
             'secuencia': 'Secuencia y cronograma',
-            'bibliografia': 'Bibliografía',
+            'bibliografia': 'Medios educativos',
             'calificacion': 'Calificación'
         };
         return nombres[codigo] || codigo;

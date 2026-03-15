@@ -33,7 +33,7 @@
             <div class="card">
                 <p-fieldset legend="Ecosistema para el éxito académico" [toggleable]="true">
                     <ng-template pTemplate="header">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
                             <p-tag
                                 [severity]="getSeverity(getDisplayEstado('ecosistema'))"
                                 [value]="getLabel(getDisplayEstado('ecosistema'))"
@@ -144,7 +144,7 @@
             <div class="card">
                 <p-fieldset legend="Resultados de Aprendizaje" [toggleable]="true">
                     <ng-template pTemplate="header">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
                             <p-tag
                                 [severity]="getSeverity(getDisplayEstado('resultadosAprendizaje'))"
                                 [value]="getLabel(getDisplayEstado('resultadosAprendizaje'))"
@@ -234,7 +234,7 @@
             <div class="card">
                 <p-fieldset legend="Contenidos de la asignatura" [toggleable]="true">
                     <ng-template pTemplate="header">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
                             <p-tag
                                 [severity]="getSeverity(getDisplayEstado('contenidos'))"
                                 [value]="getLabel(getDisplayEstado('contenidos'))"

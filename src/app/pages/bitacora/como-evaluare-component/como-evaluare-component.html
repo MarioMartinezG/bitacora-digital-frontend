@@ -48,7 +48,7 @@
                 <div class="card">
                     <p-fieldset legend="Plan de evaluación por actividad" [toggleable]="true">
                         <ng-template pTemplate="header">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
                                 <p-tag
                                     [severity]="getSeverity(getDisplayEstado('evaluacion'))"
                                     [value]="getLabel(getDisplayEstado('evaluacion'))"

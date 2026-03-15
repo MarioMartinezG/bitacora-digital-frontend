@@ -25,7 +25,7 @@ export class ModuleProgressWidget implements OnChanges {
     { seccionCodigo: 'actividades', nombre: 'Actividades de aprendizaje', momento: 'Momento 3', color: '#a855f7', porcentaje: 0 },
     { seccionCodigo: 'evaluacion', nombre: 'Cómo evaluaré', momento: 'Momento 3', color: '#14b8a6', porcentaje: 0 },
     { seccionCodigo: 'secuencia', nombre: 'Secuencia del curso', momento: 'Momento 4', color: '#3b82f6', porcentaje: 0 },
-    { seccionCodigo: 'bibliografia', nombre: 'Bibliografía y medios educativos', momento: 'Momento 4', color: '#6366f1', porcentaje: 0 }
+    { seccionCodigo: 'bibliografia', nombre: 'Medios educativos', momento: 'Momento 4', color: '#6366f1', porcentaje: 0 }
   ];
 
   ngOnChanges(changes: SimpleChanges): void {
