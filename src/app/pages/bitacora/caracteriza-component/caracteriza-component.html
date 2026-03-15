@@ -34,7 +34,7 @@
             <div class="card">
                 <p-fieldset legend="Identificación de la asignatura" [toggleable]="true">
                     <ng-template pTemplate="header">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
                             <div class="flex items-center gap-2">
                                 <p-tag
                                     [severity]="getSeverity(getDisplayEstado('datosBasicos'))"
@@ -218,7 +218,7 @@
             <div class="card">
                 <p-fieldset legend="Justificación" [toggleable]="true">
                     <ng-template pTemplate="header">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
                             <p-tag
                                 [severity]="getSeverity(getDisplayEstado('justificacion'))"
                                 [value]="getLabel(getDisplayEstado('justificacion'))"

@@ -26,7 +26,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
     'evaluacion': 'Diseño de la evaluación',
     'secuencia': 'Secuencia y cronograma',
     'calificacion': 'Calificación',
-    'bibliografia': 'Bibliografía'
+    'bibliografia': 'Medios educativos'
 };
 
 @Component({

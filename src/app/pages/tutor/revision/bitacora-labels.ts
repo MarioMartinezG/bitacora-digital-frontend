@@ -318,15 +318,16 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
     },
 
     'bibliografia': {
-        'bibliografia': {
-            panelLabel: 'Bibliografía',
+        'mediosEducativos': {
+            panelLabel: 'Medios educativos',
             displayType: 'table',
             columns: [
-                { key: 'autor', label: 'Autor(es)' },
-                { key: 'titulo', label: 'Título' },
-                { key: 'year', label: 'Año' },
-                { key: 'editorial', label: 'Editorial' },
-                { key: 'url', label: 'URL' }
+                { key: 'tema', label: 'Tema' },
+                { key: 'subtema', label: 'Subtema' },
+                { key: 'nombre', label: 'Nombre' },
+                { key: 'descripcion', label: 'Descripción' },
+                { key: 'referencia', label: 'Referencia' },
+                { key: 'propositoPedagogico', label: 'Propósito pedagógico' }
             ]
         }
     },

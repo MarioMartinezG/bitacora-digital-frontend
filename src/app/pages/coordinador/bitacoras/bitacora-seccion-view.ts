@@ -50,7 +50,7 @@ const SECCIONES_NOMBRES: Record<string, string> = {
   'actividades': 'Actividades de Aprendizaje',
   'evaluacion': 'Diseño de la evaluación',
   'secuencia': 'Secuencia y cronograma',
-  'bibliografia': 'Bibliografía',
+  'bibliografia': 'Medios educativos',
   'calificacion': 'Calificación'
 };
 

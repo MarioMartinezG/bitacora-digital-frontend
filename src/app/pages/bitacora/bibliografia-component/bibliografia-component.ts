@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 // PrimeNG
@@ -7,6 +7,9 @@ import { FluidModule } from 'primeng/fluid';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { TagModule } from 'primeng/tag';
+import { SelectModule } from 'primeng/select';
+import { MessageModule } from 'primeng/message';
+import { FieldsetModule } from 'primeng/fieldset';
 
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
@@ -16,6 +19,9 @@ import { BitacoraCommentButtonComponent } from '../../../shared/components/bitac
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 import { calcularEstadoAvance } from '../../../core/models';
+import { FactoresJson } from '../../../core/models/bitacora.model';
+import { Topic } from '../../../core/models/topic.model';
+import { Subtopic } from '../../../core/models/subtopic.model';
 
 @Component({
   selector: 'app-bibliografia-component',
@@ -27,6 +33,9 @@ import { calcularEstadoAvance } from '../../../core/models';
     InputTextModule,
     TextareaModule,
     TagModule,
+    SelectModule,
+    MessageModule,
+    FieldsetModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
     BitacoraCommentButtonComponent
@@ -39,70 +48,102 @@ export class BibliografiaComponent extends BaseBitacoraComponent implements OnIn
   protected seccionCodigo = 'bibliografia';
   protected sectionsConfig: SectionConfig[] = [];
 
-  get bibliografiaFormArray(): FormArray {
-    return this.form.get('bibliografia') as FormArray;
+  topics = signal<Topic[]>([]);
+  subtopics = signal<Subtopic[]>([]);
+  factoresCargado = signal(false);
+
+  get mediosFormArray(): FormArray {
+    return this.form.get('mediosEducativos') as FormArray;
   }
 
   override ngOnInit(): void {
     super.ngOnInit();
+    this.cargarContenidosFactores();
   }
 
   override ngOnDestroy(): void {
     super.ngOnDestroy();
   }
 
-  protected initForm(): void {
-    this.form = this.fb.group({
-      bibliografia: this.fb.array([])
+  private cargarContenidosFactores(): void {
+    this.bitacoraService.obtenerSeccion('factores').subscribe({
+      next: (respuesta) => {
+        const datos = respuesta?.datos as FactoresJson | undefined;
+        const contenidos = datos?.contenidos;
+        this.topics.set(contenidos?.topics ?? []);
+        this.subtopics.set(contenidos?.subtopics ?? []);
+        this.factoresCargado.set(true);
+      },
+      error: () => {
+        this.factoresCargado.set(true);
+      }
     });
   }
 
-  agregarReferencia(): void {
-    this.bibliografiaFormArray.push(this.fb.group({
-      autor: [''],
-      titulo: [''],
-      year: [''],
-      editorial: [''],
-      url: ['']
-    }));
+  getSubtopicsForTema(topicName: string): Subtopic[] {
+    const topic = this.topics().find(t => t.name === topicName);
+    if (!topic) return [];
+    return this.subtopics().filter(s => s.topicId === topic.id);
+  }
+
+  onTemaChange(index: number): void {
+    this.mediosFormArray.at(index).patchValue({ subtema: '' });
+  }
+
+  protected initForm(): void {
+    this.form = this.fb.group({
+      mediosEducativos: this.fb.array([])
+    });
+  }
+
+  agregarMedio(): void {
+    this.mediosFormArray.push(this.crearFilaGroup({}));
     this.calculateProgress();
   }
 
-  eliminarReferencia(index: number): void {
-    this.bibliografiaFormArray.removeAt(index);
+  eliminarMedio(index: number): void {
+    this.mediosFormArray.removeAt(index);
     this.calculateProgress();
+  }
+
+  private crearFilaGroup(medio: any): FormGroup {
+    return this.fb.group({
+      tema: [medio.tema || ''],
+      subtema: [medio.subtema || ''],
+      nombre: [medio.nombre || ''],
+      descripcion: [medio.descripcion || ''],
+      referencia: [medio.referencia || ''],
+      propositoPedagogico: [medio.propositoPedagogico || '']
+    });
   }
 
   protected override patchFormWithData(data: any): void {
-    if (data?.bibliografia && Array.isArray(data.bibliografia)) {
-      const formArray = this.bibliografiaFormArray;
-      formArray.clear();
-      data.bibliografia.forEach((ref: any) => {
-        formArray.push(this.fb.group({
-          autor: [ref.autor || ''],
-          titulo: [ref.titulo || ''],
-          year: [ref.year || ''],
-          editorial: [ref.editorial || ''],
-          url: [ref.url || '']
-        }));
+    if (data?.mediosEducativos && Array.isArray(data.mediosEducativos)) {
+      const fa = this.mediosFormArray;
+      fa.clear();
+      data.mediosEducativos.forEach((medio: any) => {
+        fa.push(this.crearFilaGroup(medio));
       });
     }
   }
 
   protected override calculateProgress(): void {
-    const hasRows = this.bibliografiaFormArray.length > 0;
-    const percentage = hasRows ? 100 : 0;
+    const filas = this.mediosFormArray.controls;
+    const total = filas.length;
+    const completas = filas.filter(fila => {
+      const v = fila.value;
+      return v.tema?.trim() && v.nombre?.trim();
+    }).length;
+    const percentage = total > 0 ? Math.round((completas / total) * 100) : 0;
 
     this._progress.set({
-      sections: [
-        {
-          sectionName: 'bibliografia',
-          completedFields: hasRows ? 1 : 0,
-          totalFields: 1,
-          percentage,
-          estado: calcularEstadoAvance(percentage)
-        }
-      ],
+      sections: [{
+        sectionName: 'mediosEducativos',
+        completedFields: completas,
+        totalFields: total,
+        percentage,
+        estado: calcularEstadoAvance(percentage)
+      }],
       totalPercentage: percentage,
       estado: calcularEstadoAvance(percentage)
     });

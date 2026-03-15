@@ -29,7 +29,7 @@ const SECCIONES_BITACORA: { codigo: string; nombre: string }[] = [
   { codigo: 'evaluacion', nombre: 'Diseño de la evaluación' },
   { codigo: 'secuencia', nombre: 'Secuencia y cronograma' },
   { codigo: 'calificacion', nombre: 'Calificación' },
-  { codigo: 'bibliografia', nombre: 'Bibliografía' }
+  { codigo: 'bibliografia', nombre: 'Medios educativos' }
 ];
 
 @Component({
