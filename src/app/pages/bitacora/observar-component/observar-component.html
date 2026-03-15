@@ -8,6 +8,10 @@
     </div>
     <div class="flex items-center gap-2">
       <app-save-status-indicator [saveState]="saveState" />
+      <app-export-button
+        [seccionCodigo]="seccionCodigo"
+        [progress]="progress()"
+        [formData]="form.getRawValue()" />
       <p-button
         label="Guardar"
         icon="pi pi-save"

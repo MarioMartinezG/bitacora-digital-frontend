@@ -1,0 +1,111 @@
+<p-button
+    label="Exportar"
+    icon="pi pi-file-export"
+    size="small"
+    severity="secondary"
+    [outlined]="true"
+    [disabled]="!canExport()"
+    [pTooltip]="canExport() ? 'Vista previa y exportar como PDF' : 'El módulo debe estar 100% completado para exportar'"
+    tooltipPosition="bottom"
+    (onClick)="abrirPreview()" />
+
+<p-dialog
+    [(visible)]="dialogVisible"
+    [header]="'Vista previa — ' + seccionNombre()"
+    [modal]="true"
+    [maximizable]="true"
+    appendTo="body"
+    [style]="{ width: '80vw', maxWidth: '960px' }"
+    [contentStyle]="{ 'max-height': '72vh', 'overflow': 'auto', 'padding': '1.5rem' }">
+
+    <ng-template pTemplate="content">
+        <!-- Encabezado de documento -->
+        <div class="flex flex-col gap-1 mb-5 pb-4 border-bottom-1 surface-border">
+            <span class="text-xs text-surface-400 font-semibold uppercase tracking-wider">Bitácora Digital — En sus marcas, listos, RAC!</span>
+            <h2 class="m-0 text-xl font-bold">{{ seccionNombre() }}</h2>
+            @let usuario = authState.user();
+            @if (usuario) {
+                <div class="flex items-center gap-4 mt-1">
+                    <span class="text-sm"><i class="pi pi-user mr-1 text-surface-400"></i>{{ usuario.nombre }}</span>
+                    <span class="text-sm text-surface-400">{{ usuario.correo }}</span>
+                </div>
+            }
+            <span class="text-xs text-surface-400 mt-1">
+                <i class="pi pi-calendar mr-1"></i>Vista generada el {{ fechaActual }}
+            </span>
+        </div>
+
+        <!-- Paneles -->
+        @for (panel of paneles(); track panel.key) {
+            <div class="mb-5">
+                <h3 class="text-base font-semibold text-primary mt-0 mb-3 pb-2 border-bottom-1 surface-border">
+                    {{ panel.label }}
+                </h3>
+
+                @if (panel.displayType === 'fields' && panel.fields) {
+                    <div class="flex flex-col gap-2">
+                        @for (campo of panel.fields; track campo.key) {
+                            <div class="flex gap-3">
+                                <span class="text-sm text-color-secondary font-medium" style="min-width: 220px; flex-shrink: 0;">{{ campo.label }}</span>
+                                <span class="text-sm">{{ campo.value || '—' }}</span>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (panel.displayType === 'table' && panel.columns) {
+                    <div class="table-responsive">
+                        <table class="w-full" style="border-collapse: collapse; font-size: 0.8rem;">
+                            <thead>
+                                <tr>
+                                    @for (col of panel.columns; track col.key) {
+                                        <th style="border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; background: #f8fafc; font-weight: 600; text-align: left;">{{ col.label }}</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of panel.rows; track $index) {
+                                    <tr>
+                                        @for (col of panel.columns; track col.key) {
+                                            <td style="border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; vertical-align: top;">{{ exportDataService.formatValue(row[col.key]) || '—' }}</td>
+                                        }
+                                    </tr>
+                                }
+                                @if (!panel.rows?.length) {
+                                    <tr>
+                                        <td [attr.colspan]="panel.columns.length" style="border: 1px solid #e2e8f0; padding: 1rem; text-align: center; color: #94a3b8;">Sin datos registrados</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                @if (panel.displayType === 'list' && panel.listItems) {
+                    <ol style="padding-left: 1.5rem; margin: 0;">
+                        @for (item of panel.listItems; track $index) {
+                            <li class="text-sm mb-1">{{ item }}</li>
+                        }
+                    </ol>
+                    @if (!panel.listItems.length) {
+                        <span class="text-sm text-surface-400">Sin elementos registrados</span>
+                    }
+                }
+
+                @if (panel.displayType === 'info') {
+                    <span class="text-sm">{{ panel.infoText }}</span>
+                }
+            </div>
+        }
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-between items-center w-full">
+            <span class="text-xs text-surface-400">Solo lectura — refleja el estado actual del módulo</span>
+            <div class="flex gap-2">
+                <p-button label="Cerrar" severity="secondary" [text]="true" (onClick)="dialogVisible.set(false)" />
+                <p-button label="Descargar PDF" icon="pi pi-download" (onClick)="descargarPDF()" />
+            </div>
+        </div>
+    </ng-template>
+</p-dialog>

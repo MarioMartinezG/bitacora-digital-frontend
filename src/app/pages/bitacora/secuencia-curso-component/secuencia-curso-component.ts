@@ -15,6 +15,7 @@ import { MessageModule } from 'primeng/message';
 import { LoadingComponent } from '../../../utils/loading/loading';
 import { SaveStatusIndicatorComponent } from '../../../shared/components/save-status-indicator/save-status-indicator';
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
+import { ExportButtonComponent } from '../../../shared/components/export-button/export-button';
 
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
@@ -37,7 +38,8 @@ import { CaracterizaJson } from '../../../core/models/bitacora.model';
     MessageModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
-    BitacoraCommentButtonComponent
+    BitacoraCommentButtonComponent,
+    ExportButtonComponent
   ],
   templateUrl: './secuencia-curso-component.html',
   styleUrl: './secuencia-curso-component.css'

@@ -19,6 +19,10 @@
                             [saveState]="saveState"
                             (onRetry)="retryOnError()">
                         </app-save-status-indicator>
+                        <app-export-button
+                            [seccionCodigo]="seccionCodigo"
+                            [progress]="progress()"
+                            [formData]="form.getRawValue()" />
                         <p-button
                             label="Guardar"
                             icon="pi pi-save"
