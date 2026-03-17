@@ -341,6 +341,43 @@
                                                                 placeholder="Describe la actividad de aprendizaje...">
                                                             </textarea>
                                                         </div>
+
+                                                        <!-- Validación con IA -->
+                                                        <div class="flex flex-col gap-2 pt-1">
+                                                            <p-button
+                                                                label="Validar con TEIA"
+                                                                icon="pi pi-sparkles"
+                                                                size="small"
+                                                                [loading]="actividadValidation()[actividadIdx]?.loading ?? false"
+                                                                [disabled]="!ctrl.get('ra')?.value || !ctrl.get('dimension')?.value || !ctrl.get('metodologia')?.value || !ctrl.get('descripcion')?.value"
+                                                                (onClick)="validateActividad(actividadIdx)"
+                                                                pTooltip="Verifica si la actividad es coherente con el resultado de aprendizaje seleccionado"
+                                                                tooltipPosition="top">
+                                                            </p-button>
+
+                                                            @if (actividadValidation()[actividadIdx]?.result; as vResult) {
+                                                                <div class="validation-result-box">
+                                                                    <div class="flex items-center gap-2 mb-2">
+                                                                        <p-tag
+                                                                            [severity]="getVerdictSeverity(vResult.verdict)"
+                                                                            [value]="vResult.verdict"
+                                                                            styleClass="text-xs">
+                                                                        </p-tag>
+                                                                        <span class="text-xs text-surface-400">
+                                                                            {{ vResult.processing_time_ms ? (vResult.processing_time_ms / 1000 | number:'1.1-1') + 's' : '' }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p class="m-0 text-sm">{{ vResult.justification }}</p>
+                                                                </div>
+                                                            }
+
+                                                            @if (actividadValidation()[actividadIdx]?.error) {
+                                                                <p-message severity="error" styleClass="w-full">
+                                                                    <span>{{ actividadValidation()[actividadIdx]!.error }}</span>
+                                                                </p-message>
+                                                            }
+                                                        </div>
+
                                                     </div>
 
                                                 </div>

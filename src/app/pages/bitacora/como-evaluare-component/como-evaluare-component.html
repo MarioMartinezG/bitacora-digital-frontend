@@ -322,6 +322,42 @@
                                                     </p-multiselect>
                                                 </div>
 
+                                                <!-- Validación con IA -->
+                                                <div class="flex flex-col gap-2 pt-1">
+                                                    <p-button
+                                                        label="Validar con TEIA"
+                                                        icon="pi pi-sparkles"
+                                                        size="small"
+                                                        [loading]="evaluacionValidation()[idx]?.loading ?? false"
+                                                        [disabled]="!ctrl.get('descripcionEvaluacion')?.value || !ctrl.get('tipoEvaluacion')?.value || !ctrl.get('momento')?.value || !ctrl.get('actores')?.value"
+                                                        (onClick)="validateEvaluacion(idx)"
+                                                        pTooltip="Verifica si el diseño de evaluación es coherente con la actividad de aprendizaje"
+                                                        tooltipPosition="top">
+                                                    </p-button>
+
+                                                    @if (evaluacionValidation()[idx]?.result; as vResult) {
+                                                        <div class="validation-result-box">
+                                                            <div class="flex items-center gap-2 mb-2">
+                                                                <p-tag
+                                                                    [severity]="getVerdictSeverity(vResult.verdict)"
+                                                                    [value]="vResult.verdict"
+                                                                    styleClass="text-xs">
+                                                                </p-tag>
+                                                                <span class="text-xs text-surface-400">
+                                                                    {{ vResult.processing_time_ms ? (vResult.processing_time_ms / 1000 | number:'1.1-1') + 's' : '' }}
+                                                                </span>
+                                                            </div>
+                                                            <p class="m-0 text-sm">{{ vResult.justification }}</p>
+                                                        </div>
+                                                    }
+
+                                                    @if (evaluacionValidation()[idx]?.error) {
+                                                        <p-message severity="error" styleClass="w-full">
+                                                            <span>{{ evaluacionValidation()[idx]!.error }}</span>
+                                                        </p-message>
+                                                    }
+                                                </div>
+
                                             </div><!-- /eval fields -->
                                         </div><!-- /formGroupName -->
                                     </div><!-- /eval-actividad-card -->
