@@ -23,6 +23,8 @@ import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.co
 
 // Models
 import { calcularEstadoAvance } from '../../../core/models';
+import { DimensionService } from '../../../core/services/dimension.service';
+import { MetodologiaService } from '../../../core/services/metodologia.service';
 
 interface InstructionStep {
   icon: string;
@@ -54,6 +56,8 @@ interface InstructionStep {
 })
 export class ActividadesAprendizajeComponent extends BaseBitacoraComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
+  private dimensionService = inject(DimensionService);
+  private metodologiaService = inject(MetodologiaService);
 
   protected seccionCodigo = 'actividades';
   protected sectionsConfig: SectionConfig[] = [];
@@ -81,29 +85,11 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
     { icon: 'pi pi-send', iconColor: 'text-green-500', text: 'Sube tu actividad al foro del aula virtual en el formato establecido. Conoce y comenta las actividades de otros participantes.' },
   ];
 
-  // Opciones de dimensión
-  dimensionOptions = [
-    { label: 'Compromiso o valoración', value: 'Compromiso o valoración' },
-    { label: 'Dimensiones humanas del aprendizaje', value: 'Dimensiones humanas del aprendizaje' },
-    { label: 'Conocimiento Fundamental', value: 'Conocimiento Fundamental' },
-    { label: 'Aplicación del aprendizaje', value: 'Aplicación del aprendizaje' },
-    { label: 'Integración', value: 'Integración' },
-    { label: 'Aprender a aprender', value: 'Aprender a aprender' },
-  ];
+  // Opciones de dimensión — cargadas desde API
+  dimensionOptions: { label: string; value: string }[] = [];
 
-  // Opciones de metodología
-  metodologias = [
-    { label: 'Aprendizaje basado en proyectos', value: 'proyectos' },
-    { label: 'Aprendizaje basado en juegos', value: 'juegos' },
-    { label: 'Aprendizaje invertido', value: 'invertido' },
-    { label: 'Aprendizaje basado en evidencia', value: 'evidencia' },
-    { label: 'Diálogo reflexivo', value: 'dialogo' },
-    { label: 'Aprendizaje cooperativo', value: 'cooperativo' },
-    { label: 'Aprendizaje basado en problemas', value: 'problemas' },
-    { label: 'Investigación - Acción', value: 'investigacion' },
-    { label: 'Aprendizaje a través del servicio', value: 'servicio' },
-    { label: 'Aprendizaje adaptativo', value: 'adaptativo' },
-  ];
+  // Opciones de metodología — cargadas desde API
+  metodologias: { label: string; value: string }[] = [];
 
   get actividadesArray(): FormArray {
     return this.form.get('actividades') as FormArray;
@@ -141,6 +127,14 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
   override ngOnInit(): void {
     super.ngOnInit();
     this.loadFactoresData();
+    this.dimensionService.obtenerDimensiones().subscribe({
+      next: (items) => { this.dimensionOptions = items.map(d => ({ label: d.nombre, value: d.nombre })); },
+      error: () => {}
+    });
+    this.metodologiaService.obtenerMetodologias().subscribe({
+      next: (items) => { this.metodologias = items.map(m => ({ label: m.label, value: m.value })); },
+      error: () => {}
+    });
   }
 
   override ngOnDestroy(): void {

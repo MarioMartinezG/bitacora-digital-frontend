@@ -22,8 +22,12 @@ import { BitacoraCommentButtonComponent } from '../../../shared/components/bitac
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 
 // Models
-import { calcularEstadoAvance } from '../../../core/models';
+import { calcularEstadoAvance, MedioGrupo, TecnicaGrupo, InstrumentoDTO } from '../../../core/models';
 import { ActividadItem } from '../../../core/models/bitacora.model';
+import { MedioService } from '../../../core/services/medio.service';
+import { TecnicaService } from '../../../core/services/tecnica.service';
+import { InstrumentoService } from '../../../core/services/instrumento.service';
+import { MetodologiaService } from '../../../core/services/metodologia.service';
 
 @Component({
   selector: 'app-como-evaluare-component',
@@ -49,6 +53,10 @@ import { ActividadItem } from '../../../core/models/bitacora.model';
 })
 export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
+  private medioService = inject(MedioService);
+  private tecnicaService = inject(TecnicaService);
+  private instrumentoService = inject(InstrumentoService);
+  private metodologiaService = inject(MetodologiaService);
 
   protected seccionCodigo = 'evaluacion';
   protected sectionsConfig: SectionConfig[] = [];
@@ -60,108 +68,17 @@ export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnIn
   // Almacena los datos guardados de evaluación hasta que las actividades cargan
   private savedEvalData = new Map<string, any>();
 
-  // Mapa para mostrar label legible de metodología
-  readonly metodologiaLabels: Record<string, string> = {
-    'proyectos': 'Aprendizaje basado en proyectos',
-    'juegos': 'Aprendizaje basado en juegos',
-    'invertido': 'Aprendizaje invertido',
-    'evidencia': 'Aprendizaje basado en evidencia',
-    'dialogo': 'Diálogo reflexivo',
-    'cooperativo': 'Aprendizaje cooperativo',
-    'problemas': 'Aprendizaje basado en problemas',
-    'investigacion': 'Investigación - Acción',
-    'servicio': 'Aprendizaje a través del servicio',
-    'adaptativo': 'Aprendizaje adaptativo'
-  };
+  // Mapa para mostrar label legible de metodología — cargado dinámicamente desde API
+  metodologiaLabels: Record<string, string> = {};
 
-  // Opciones de selects
-  mediosOpciones = [
-    {
-      label: 'Escritos',
-      items: [
-        { label: 'Carpeta o dossier / carpeta colaborativa', value: 'carpeta_dossier' },
-        { label: 'Control (Examen)', value: 'control_examen' },
-        { label: 'Cuaderno / cuaderno de notas / cuaderno de campo', value: 'cuaderno' },
-        { label: 'Cuestionario', value: 'cuestionario' },
-        { label: 'Diario reflexivo / diario de clase', value: 'diario' },
-        { label: 'Estudio de casos', value: 'estudio_casos' },
-        { label: 'Ensayo', value: 'ensayo' },
-        { label: 'Examen', value: 'examen' },
-        { label: 'Foro virtual', value: 'foro_virtual' },
-        { label: 'Memoria', value: 'memoria' },
-        { label: 'Monografía', value: 'monografia' },
-        { label: 'Informe', value: 'informe' },
-        { label: 'Portafolio / portafolio electrónico', value: 'portafolio' },
-        { label: 'Póster', value: 'poster' },
-        { label: 'Proyecto', value: 'proyecto' },
-        { label: 'Pruebas objetivas', value: 'pruebas_objetivas' },
-        { label: 'Recensión', value: 'recension' },
-        { label: 'Test diagnóstico', value: 'test_diagnostico' },
-        { label: 'Trabajo escrito', value: 'trabajo_escrito' }
-      ]
-    },
-    {
-      label: 'Orales',
-      items: [
-        { label: 'Comunicación', value: 'comunicacion_oral' },
-        { label: 'Cuestionario oral', value: 'cuestionario_oral' },
-        { label: 'Debate / diálogo grupal', value: 'debate' },
-        { label: 'Exposición', value: 'exposicion' },
-        { label: 'Discusión grupal', value: 'discusion_grupal' },
-        { label: 'Mesa redonda', value: 'mesa_redonda' },
-        { label: 'Ponencia', value: 'ponencia' },
-        { label: 'Pregunta de clase', value: 'pregunta_clase' },
-        { label: 'Presentación oral', value: 'presentacion_oral' }
-      ]
-    },
-    {
-      label: 'Prácticos',
-      items: [
-        { label: 'Práctica supervisada', value: 'practica_supervisada' },
-        { label: 'Demostración / actuación / representación', value: 'demostracion' },
-        { label: 'Role playing', value: 'role_playing' }
-      ]
-    }
-  ];
+  // Opciones de medios — cargadas desde API
+  mediosOpciones: MedioGrupo[] = [];
 
-  tecnicasOpciones = [
-    {
-      label: 'El alumno no interviene',
-      items: [
-        { label: 'Análisis documental', value: 'analisis_documental' },
-        { label: 'Análisis de producciones', value: 'analisis_producciones' },
-        { label: 'Observación directa del alumno', value: 'observacion_directa' },
-        { label: 'Observación del grupo', value: 'observacion_grupo' },
-        { label: 'Observación sistemática', value: 'observacion_sistematica' },
-        { label: 'Análisis de grabación de audio o video', value: 'analisis_audio_video' }
-      ]
-    },
-    {
-      label: 'El alumno participa',
-      items: [
-        { label: 'Autoevaluación (autorreflexión y/o análisis documental)', value: 'autoevaluacion' },
-        { label: 'Evaluación entre pares (análisis documental y/o observación)', value: 'coevaluacion' },
-        { label: 'Evaluación compartida o colaborativa (entrevista individual o grupal)', value: 'evaluacion_colaborativa' }
-      ]
-    }
-  ];
+  // Opciones de técnicas — cargadas desde API
+  tecnicasOpciones: TecnicaGrupo[] = [];
 
-  instrumentosOpciones = [
-    { label: 'Diario del profesor', value: 'diario_profesor' },
-    { label: 'Escala de comprobación', value: 'escala_comprobacion' },
-    { label: 'Escala de diferencial semántico', value: 'escala_diferencial' },
-    { label: 'Escala verbal o numérica', value: 'escala_verbal_numerica' },
-    { label: 'Escala descriptiva o rúbrica', value: 'escala_rubrica' },
-    { label: 'Escala de estimación', value: 'escala_estimacion' },
-    { label: 'Ficha de observación', value: 'ficha_observacion' },
-    { label: 'Lista de control', value: 'lista_control' },
-    { label: 'Matrices de decisión', value: 'matrices_decision' },
-    { label: 'Fichas de seguimiento individual o grupal', value: 'fichas_seguimiento' },
-    { label: 'Fichas de autoevaluación', value: 'fichas_autoevaluacion' },
-    { label: 'Fichas de evaluación entre iguales', value: 'fichas_entre_iguales' },
-    { label: 'Informe de expertos', value: 'informe_expertos' },
-    { label: 'Informe de autoevaluación', value: 'informe_autoevaluacion' }
-  ];
+  // Opciones de instrumentos — cargadas desde API
+  instrumentosOpciones: { label: string; value: string }[] = [];
 
   tipoEvaluacionOpciones = [
     { label: 'Sumativa', value: 'sumativa' },
@@ -188,6 +105,24 @@ export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnIn
   override ngOnInit(): void {
     super.ngOnInit();
     this.loadActividades();
+    this.metodologiaService.obtenerMetodologias().subscribe({
+      next: (items) => {
+        this.metodologiaLabels = Object.fromEntries(items.map(m => [m.value, m.label]));
+      },
+      error: () => {}
+    });
+    this.medioService.obtenerMediosAgrupados().subscribe({
+      next: (grupos) => { this.mediosOpciones = grupos; },
+      error: () => {}
+    });
+    this.tecnicaService.obtenerTecnicasAgrupadas().subscribe({
+      next: (grupos) => { this.tecnicasOpciones = grupos; },
+      error: () => {}
+    });
+    this.instrumentoService.obtenerInstrumentos().subscribe({
+      next: (items) => { this.instrumentosOpciones = items.map(i => ({ label: i.label, value: i.value })); },
+      error: () => {}
+    });
   }
 
   override ngOnDestroy(): void {
