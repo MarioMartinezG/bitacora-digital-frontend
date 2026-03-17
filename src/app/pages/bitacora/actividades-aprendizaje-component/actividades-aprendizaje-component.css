@@ -218,3 +218,11 @@
   color: var(--primary-color-text, white);
   border-color: var(--primary-color);
 }
+
+/* ====== VALIDATION RESULT BOX ====== */
+.validation-result-box {
+  padding: 0.875rem 1rem;
+  border-radius: 0.625rem;
+  border: 1.5px solid var(--surface-border);
+  background: var(--surface-ground);
+}

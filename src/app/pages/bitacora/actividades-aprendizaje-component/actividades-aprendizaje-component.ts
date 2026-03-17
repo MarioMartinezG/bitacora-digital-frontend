@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -27,10 +28,19 @@ import { calcularEstadoAvance } from '../../../core/models';
 import { DimensionService } from '../../../core/services/dimension.service';
 import { MetodologiaService } from '../../../core/services/metodologia.service';
 
+// Validation
+import { ValidationService, ValidationResponse } from '../../../core/services/validation.service';
+
 interface InstructionStep {
   icon: string;
   iconColor: string;
   text: string;
+}
+
+interface ValidationState {
+  loading: boolean;
+  result: ValidationResponse | null;
+  error: string | null;
 }
 
 @Component({
@@ -38,6 +48,7 @@ interface InstructionStep {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    DecimalPipe,
     ButtonModule,
     FluidModule,
     SelectModule,
@@ -58,6 +69,7 @@ interface InstructionStep {
 })
 export class ActividadesAprendizajeComponent extends BaseBitacoraComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
+  private validationService = inject(ValidationService);
   private dimensionService = inject(DimensionService);
   private metodologiaService = inject(MetodologiaService);
 
@@ -76,6 +88,9 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
   topicsWithoutSubtopics = computed(() =>
     this.topics().filter(t => !this.subtopics().some(st => st.topicId === t.id))
   );
+
+  // Estado de validación por actividad (índice → estado)
+  actividadValidation = signal<Partial<Record<number, ValidationState>>>({});
 
   // Pasos de instrucción
   instructionSteps: InstructionStep[] = [
@@ -124,6 +139,48 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
     if (field === 'tema') {
       group.get('subtema')?.setValue('');
     }
+  }
+
+  getMetodologiaLabel(value: string | null | undefined): string {
+    const found = this.metodologias.find(m => m.value === value);
+    return found ? found.label : (value || '');
+  }
+
+  getVerdictSeverity(verdict: string): 'success' | 'warn' | 'danger' | 'secondary' {
+    if (verdict === 'COHERENTE') return 'success';
+    if (verdict === 'PARCIALMENTE COHERENTE') return 'warn';
+    if (verdict === 'NO COHERENTE') return 'danger';
+    return 'secondary';
+  }
+
+  validateActividad(index: number): void {
+    const group = this.actividadesArray.at(index) as FormGroup;
+    const val = group.value;
+
+    this.actividadValidation.update(s => ({
+      ...s,
+      [index]: { loading: true, result: null, error: null }
+    }));
+
+    this.validationService.validateActivity({
+      resultado_aprendizaje: val.ra,
+      dimension: val.dimension,
+      metodologia: this.getMetodologiaLabel(val.metodologia),
+      descripcion: val.descripcion
+    }).subscribe({
+      next: (result) => {
+        this.actividadValidation.update(s => ({
+          ...s,
+          [index]: { loading: false, result, error: null }
+        }));
+      },
+      error: () => {
+        this.actividadValidation.update(s => ({
+          ...s,
+          [index]: { loading: false, result: null, error: 'No se pudo conectar con el servicio de validación. Intenta de nuevo.' }
+        }));
+      }
+    });
   }
 
   override ngOnInit(): void {
@@ -199,6 +256,16 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
 
   removeActividad(index: number): void {
     this.actividadesArray.removeAt(index);
+    // Limpiar estado de validación del índice eliminado
+    this.actividadValidation.update(s => {
+      const updated: Partial<Record<number, ValidationState>> = {};
+      Object.keys(s).forEach(k => {
+        const i = Number(k);
+        if (i < index) updated[i] = s[i];
+        else if (i > index) updated[i - 1] = s[i];
+      });
+      return updated;
+    });
   }
 
   protected override calculateProgress(): void {

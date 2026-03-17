@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -30,11 +31,21 @@ import { TecnicaService } from '../../../core/services/tecnica.service';
 import { InstrumentoService } from '../../../core/services/instrumento.service';
 import { MetodologiaService } from '../../../core/services/metodologia.service';
 
+// Validation
+import { ValidationService, ValidationResponse } from '../../../core/services/validation.service';
+
+interface ValidationState {
+  loading: boolean;
+  result: ValidationResponse | null;
+  error: string | null;
+}
+
 @Component({
   selector: 'app-como-evaluare-component',
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    DecimalPipe,
     ButtonModule,
     FluidModule,
     TagModule,
@@ -55,6 +66,7 @@ import { MetodologiaService } from '../../../core/services/metodologia.service';
 })
 export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
+  private validationService = inject(ValidationService);
   private medioService = inject(MedioService);
   private tecnicaService = inject(TecnicaService);
   private instrumentoService = inject(InstrumentoService);
@@ -66,6 +78,9 @@ export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnIn
   // Actividades cargadas desde el módulo de Actividades de Aprendizaje
   actividadesList = signal<ActividadItem[]>([]);
   actividadesLoaded = signal(false);
+
+  // Estado de validación por evaluación (índice → estado)
+  evaluacionValidation = signal<Partial<Record<number, ValidationState>>>({});
 
   // Almacena los datos guardados de evaluación hasta que las actividades cargan
   private savedEvalData = new Map<string, any>();
@@ -218,6 +233,49 @@ export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnIn
 
   getMetodologiaLabel(value: string | undefined | null): string {
     return value ? (this.metodologiaLabels[value] || value) : '';
+  }
+
+  getVerdictSeverity(verdict: string): 'success' | 'warn' | 'danger' | 'secondary' {
+    if (verdict === 'COHERENTE') return 'success';
+    if (verdict === 'PARCIALMENTE COHERENTE') return 'warn';
+    if (verdict === 'NO COHERENTE') return 'danger';
+    return 'secondary';
+  }
+
+  validateEvaluacion(index: number): void {
+    const evalGroup = this.actividadesEvalArray.at(index) as FormGroup;
+    const evalVal = evalGroup.value;
+    const act = this.actividadesList()[index];
+
+    this.evaluacionValidation.update(s => ({
+      ...s,
+      [index]: { loading: true, result: null, error: null }
+    }));
+
+    this.validationService.validateEvaluation({
+      resultado_aprendizaje: act?.ra || '',
+      nombre_actividad: act?.nombre || evalVal.nombre || '',
+      descripcion_evaluacion: evalVal.descripcionEvaluacion,
+      tipo: evalVal.tipoEvaluacion,
+      momento: evalVal.momento,
+      actores: evalVal.actores,
+      medios: evalVal.medios || [],
+      tecnicas: evalVal.tecnicas || [],
+      instrumentos: evalVal.instrumentos || []
+    }).subscribe({
+      next: (result) => {
+        this.evaluacionValidation.update(s => ({
+          ...s,
+          [index]: { loading: false, result, error: null }
+        }));
+      },
+      error: () => {
+        this.evaluacionValidation.update(s => ({
+          ...s,
+          [index]: { loading: false, result: null, error: 'No se pudo conectar con el servicio de validación. Intenta de nuevo.' }
+        }));
+      }
+    });
   }
 
   protected override calculateProgress(): void {
