@@ -1,0 +1,329 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="flex flex-col gap-4 pt-3">
+
+  <p class="text-surface-500 text-sm m-0">Gestiona los medios, técnicas e instrumentos de evaluación disponibles en el diseño de evaluación del curso</p>
+
+  <!-- Panel: Medios -->
+  <p-panel [toggleable]="true" [collapsed]="true">
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between w-full pr-2">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-list text-primary-500"></i>
+          <span class="font-semibold">Medios de evaluación</span>
+          <p-tag [value]="medios().length + ' items'" severity="secondary" />
+        </div>
+        <p-button label="Nuevo medio" icon="pi pi-plus" size="small"
+                  (click)="abrirNuevoMedio(); $event.stopPropagation()" />
+      </div>
+    </ng-template>
+
+    @if (cargandoMedios()) {
+      <div class="flex flex-col gap-3 py-2">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="3rem" /> }
+      </div>
+    } @else {
+      <!-- Filter row -->
+      <div class="flex gap-2 mb-3 flex-wrap">
+        <input pInputText type="text" [(ngModel)]="filtroMedioNombre"
+               placeholder="Buscar por nombre..." class="flex-1 min-w-48" />
+        <p-select [options]="categoriasOpciones" [(ngModel)]="filtroMedioCategoria"
+                  placeholder="Todas las categorías" [showClear]="true"
+                  optionLabel="label" optionValue="value"
+                  styleClass="w-52" appendTo="body" />
+        <p-select [options]="visibilidadOpciones" [(ngModel)]="filtroMedioVisibilidad"
+                  optionLabel="label" optionValue="value"
+                  styleClass="w-44" appendTo="body" />
+      </div>
+
+      <p-table [value]="mediosFiltrados" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Nombre del medio</th>
+            <th style="width: 130px" class="text-center">Categoría</th>
+            <th style="width: 100px" class="text-center">Estado</th>
+            <th style="width: 110px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <span class="text-sm text-surface-900 dark:text-surface-0">{{ row.label }}</span>
+            </td>
+            <td class="text-center">
+              <p-tag [value]="getCategoriaLabel(row.categoria)"
+                     [severity]="getCategoriaColor(row.categoria)" />
+            </td>
+            <td class="text-center">
+              <p-tag [value]="row.activo ? 'Visible' : 'Oculto'"
+                     [severity]="row.activo ? 'success' : 'secondary'" />
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-1">
+                <p-button icon="pi pi-pencil" severity="secondary" [outlined]="true" size="small"
+                          pTooltip="Editar" tooltipPosition="top" (click)="abrirEditarMedio(row)" />
+                <p-button [icon]="row.activo ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                          [severity]="row.activo ? 'warn' : 'success'" [outlined]="true" size="small"
+                          [pTooltip]="row.activo ? 'Ocultar' : 'Mostrar'" tooltipPosition="top"
+                          (click)="toggleActivoMedio(row)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="4">
+              <div class="flex flex-col items-center justify-center py-8 text-center">
+                <i class="pi pi-list text-3xl text-surface-300 mb-2"></i>
+                <p class="text-surface-500 text-sm m-0">No hay medios que coincidan con los filtros</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-panel>
+
+  <!-- Panel: Técnicas -->
+  <p-panel [toggleable]="true" [collapsed]="true">
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between w-full pr-2">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-check-square text-cyan-500"></i>
+          <span class="font-semibold">Técnicas de evaluación</span>
+          <p-tag [value]="tecnicas().length + ' items'" severity="secondary" />
+        </div>
+        <p-button label="Nueva técnica" icon="pi pi-plus" size="small"
+                  (click)="abrirNuevaTecnica(); $event.stopPropagation()" />
+      </div>
+    </ng-template>
+
+    @if (cargandoTecnicas()) {
+      <div class="flex flex-col gap-3 py-2">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="3rem" /> }
+      </div>
+    } @else {
+      <!-- Filter row -->
+      <div class="flex gap-2 mb-3 flex-wrap">
+        <input pInputText type="text" [(ngModel)]="filtroTecnicaNombre"
+               placeholder="Buscar por nombre..." class="flex-1 min-w-48" />
+        <p-select [options]="gruposOpciones" [(ngModel)]="filtroTecnicaGrupo"
+                  placeholder="Todos los grupos" [showClear]="true"
+                  optionLabel="label" optionValue="value"
+                  styleClass="w-60" appendTo="body" />
+        <p-select [options]="visibilidadOpciones" [(ngModel)]="filtroTecnicaVisibilidad"
+                  optionLabel="label" optionValue="value"
+                  styleClass="w-44" appendTo="body" />
+      </div>
+
+      <p-table [value]="tecnicasFiltradas" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Nombre de la técnica</th>
+            <th style="width: 220px" class="text-center">Agrupación</th>
+            <th style="width: 100px" class="text-center">Estado</th>
+            <th style="width: 110px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <span class="text-sm text-surface-900 dark:text-surface-0">{{ row.label }}</span>
+            </td>
+            <td class="text-center">
+              <p-tag [value]="getGrupoLabel(row.grupo)"
+                     [severity]="getGrupoColor(row.grupo)" />
+            </td>
+            <td class="text-center">
+              <p-tag [value]="row.activo ? 'Visible' : 'Oculto'"
+                     [severity]="row.activo ? 'success' : 'secondary'" />
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-1">
+                <p-button icon="pi pi-pencil" severity="secondary" [outlined]="true" size="small"
+                          pTooltip="Editar" tooltipPosition="top" (click)="abrirEditarTecnica(row)" />
+                <p-button [icon]="row.activo ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                          [severity]="row.activo ? 'warn' : 'success'" [outlined]="true" size="small"
+                          [pTooltip]="row.activo ? 'Ocultar' : 'Mostrar'" tooltipPosition="top"
+                          (click)="toggleActivoTecnica(row)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="4">
+              <div class="flex flex-col items-center justify-center py-8 text-center">
+                <i class="pi pi-check-square text-3xl text-surface-300 mb-2"></i>
+                <p class="text-surface-500 text-sm m-0">No hay técnicas que coincidan con los filtros</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-panel>
+
+  <!-- Panel: Instrumentos -->
+  <p-panel [toggleable]="true" [collapsed]="true">
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between w-full pr-2">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-pencil text-indigo-500"></i>
+          <span class="font-semibold">Instrumentos de evaluación</span>
+          <p-tag [value]="instrumentos().length + ' items'" severity="secondary" />
+        </div>
+        <p-button label="Nuevo instrumento" icon="pi pi-plus" size="small"
+                  (click)="abrirNuevoInstrumento(); $event.stopPropagation()" />
+      </div>
+    </ng-template>
+
+    @if (cargandoInstrumentos()) {
+      <div class="flex flex-col gap-3 py-2">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="3rem" /> }
+      </div>
+    } @else {
+      <!-- Filter row -->
+      <div class="flex gap-2 mb-3 flex-wrap">
+        <input pInputText type="text" [(ngModel)]="filtroInstrumentoNombre"
+               placeholder="Buscar por nombre..." class="flex-1 min-w-48" />
+        <p-select [options]="visibilidadOpciones" [(ngModel)]="filtroInstrumentoVisibilidad"
+                  optionLabel="label" optionValue="value"
+                  styleClass="w-44" appendTo="body" />
+      </div>
+
+      <p-table [value]="instrumentosFiltrados" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Nombre del instrumento</th>
+            <th style="width: 100px" class="text-center">Estado</th>
+            <th style="width: 110px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <span class="text-sm text-surface-900 dark:text-surface-0">{{ row.label }}</span>
+            </td>
+            <td class="text-center">
+              <p-tag [value]="row.activo ? 'Visible' : 'Oculto'"
+                     [severity]="row.activo ? 'success' : 'secondary'" />
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-1">
+                <p-button icon="pi pi-pencil" severity="secondary" [outlined]="true" size="small"
+                          pTooltip="Editar" tooltipPosition="top" (click)="abrirEditarInstrumento(row)" />
+                <p-button [icon]="row.activo ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                          [severity]="row.activo ? 'warn' : 'success'" [outlined]="true" size="small"
+                          [pTooltip]="row.activo ? 'Ocultar' : 'Mostrar'" tooltipPosition="top"
+                          (click)="toggleActivoInstrumento(row)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3">
+              <div class="flex flex-col items-center justify-center py-8 text-center">
+                <i class="pi pi-pencil text-3xl text-surface-300 mb-2"></i>
+                <p class="text-surface-500 text-sm m-0">No hay instrumentos que coincidan con los filtros</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-panel>
+
+</div>
+
+<!-- Dialog: Crear / Editar medio -->
+<p-dialog [header]="editandoMedioId ? 'Editar medio' : 'Nuevo medio'"
+  [visible]="dialogMedioVisible()" (visibleChange)="dialogMedioVisible.set($event)"
+  [modal]="true" [style]="{ width: '440px' }"
+  [draggable]="false" [closable]="!guardandoMedio()">
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label class="block font-medium text-sm mb-2">Nombre del medio <span class="text-red-500">*</span></label>
+      <input pInputText type="text" [(ngModel)]="formMedio.label"
+             placeholder="Ej. Trabajo colaborativo" class="w-full" />
+    </div>
+    <div>
+      <label class="block font-medium text-sm mb-2">Categoría <span class="text-red-500">*</span></label>
+      <p-select [options]="categoriasOpciones" [(ngModel)]="formMedio.categoria"
+                optionLabel="label" optionValue="value"
+                placeholder="Selecciona una categoría" styleClass="w-full" appendTo="body" />
+    </div>
+    @if (editandoMedioId) {
+      <p class="text-xs text-surface-400 m-0">
+        <i class="pi pi-info-circle mr-1"></i>
+        El identificador interno del medio no cambia al editar, para preservar los datos guardados en las bitácoras.
+      </p>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true"
+              [disabled]="guardandoMedio()" (click)="dialogMedioVisible.set(false)" />
+    <p-button [label]="editandoMedioId ? 'Guardar cambios' : 'Crear medio'"
+              icon="pi pi-check" [loading]="guardandoMedio()" (click)="guardarMedio()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog: Crear / Editar técnica -->
+<p-dialog [header]="editandoTecnicaId ? 'Editar técnica' : 'Nueva técnica'"
+  [visible]="dialogTecnicaVisible()" (visibleChange)="dialogTecnicaVisible.set($event)"
+  [modal]="true" [style]="{ width: '440px' }"
+  [draggable]="false" [closable]="!guardandoTecnica()">
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label class="block font-medium text-sm mb-2">Nombre de la técnica <span class="text-red-500">*</span></label>
+      <input pInputText type="text" [(ngModel)]="formTecnica.label"
+             placeholder="Ej. Observación participante" class="w-full" />
+    </div>
+    <div>
+      <label class="block font-medium text-sm mb-2">Grupo <span class="text-red-500">*</span></label>
+      <p-select [options]="gruposOpciones" [(ngModel)]="formTecnica.grupo"
+                optionLabel="label" optionValue="value"
+                placeholder="Selecciona un grupo" styleClass="w-full" appendTo="body" />
+    </div>
+    @if (editandoTecnicaId) {
+      <p class="text-xs text-surface-400 m-0">
+        <i class="pi pi-info-circle mr-1"></i>
+        El identificador interno de la técnica no cambia al editar, para preservar los datos guardados en las bitácoras.
+      </p>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true"
+              [disabled]="guardandoTecnica()" (click)="dialogTecnicaVisible.set(false)" />
+    <p-button [label]="editandoTecnicaId ? 'Guardar cambios' : 'Crear técnica'"
+              icon="pi pi-check" [loading]="guardandoTecnica()" (click)="guardarTecnica()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog: Crear / Editar instrumento -->
+<p-dialog [header]="editandoInstrumentoId ? 'Editar instrumento' : 'Nuevo instrumento'"
+  [visible]="dialogInstrumentoVisible()" (visibleChange)="dialogInstrumentoVisible.set($event)"
+  [modal]="true" [style]="{ width: '440px' }"
+  [draggable]="false" [closable]="!guardandoInstrumento()">
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label class="block font-medium text-sm mb-2">Nombre del instrumento <span class="text-red-500">*</span></label>
+      <input pInputText type="text" [(ngModel)]="formInstrumento.label"
+             placeholder="Ej. Escala de valoración" class="w-full" />
+    </div>
+    @if (editandoInstrumentoId) {
+      <p class="text-xs text-surface-400 m-0">
+        <i class="pi pi-info-circle mr-1"></i>
+        El identificador interno del instrumento no cambia al editar, para preservar los datos guardados en las bitácoras.
+      </p>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true"
+              [disabled]="guardandoInstrumento()" (click)="dialogInstrumentoVisible.set(false)" />
+    <p-button [label]="editandoInstrumentoId ? 'Guardar cambios' : 'Crear instrumento'"
+              icon="pi pi-check" [loading]="guardandoInstrumento()" (click)="guardarInstrumento()" />
+  </ng-template>
+</p-dialog>

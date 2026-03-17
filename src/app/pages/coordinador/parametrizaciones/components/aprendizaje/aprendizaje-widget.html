@@ -1,0 +1,196 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="flex flex-col gap-4 pt-3">
+
+  <p class="text-surface-500 text-sm m-0">Gestiona las dimensiones de aprendizaje y las metodologías de aprendizaje activo disponibles en las actividades del curso</p>
+
+  <!-- Panel: Dimensiones de aprendizaje -->
+  <p-panel [toggleable]="true" [collapsed]="true">
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between w-full pr-2">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-th-large text-primary-500"></i>
+          <span class="font-semibold">Dimensiones de aprendizaje</span>
+          <p-tag [value]="dimensiones().length + ' items'" severity="secondary" />
+        </div>
+        <p-button label="Nueva dimensión" icon="pi pi-plus" size="small"
+                  (click)="abrirNuevaDimension(); $event.stopPropagation()" />
+      </div>
+    </ng-template>
+
+    @if (cargandoDimensiones()) {
+      <div class="flex flex-col gap-3 py-2">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="3rem" /> }
+      </div>
+    } @else {
+      <!-- Filter row -->
+      <div class="flex gap-2 mb-3 flex-wrap">
+        <input pInputText type="text" [(ngModel)]="filtroDimensionNombre"
+               placeholder="Buscar por nombre..." class="flex-1 min-w-48" />
+        <p-select [options]="visibilidadOpciones" [(ngModel)]="filtroDimensionVisibilidad"
+                  optionLabel="label" optionValue="value"
+                  styleClass="w-44" appendTo="body" />
+      </div>
+
+      <p-table [value]="dimensionesFiltradas" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Nombre de la dimensión</th>
+            <th style="width: 100px" class="text-center">Estado</th>
+            <th style="width: 110px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <span class="text-sm text-surface-900 dark:text-surface-0">{{ row.nombre }}</span>
+            </td>
+            <td class="text-center">
+              <p-tag [value]="row.activo ? 'Visible' : 'Oculto'"
+                     [severity]="row.activo ? 'success' : 'secondary'" />
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-1">
+                <p-button icon="pi pi-pencil" severity="secondary" [outlined]="true" size="small"
+                          pTooltip="Editar" tooltipPosition="top" (click)="abrirEditarDimension(row)" />
+                <p-button [icon]="row.activo ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                          [severity]="row.activo ? 'warn' : 'success'" [outlined]="true" size="small"
+                          [pTooltip]="row.activo ? 'Ocultar' : 'Mostrar'" tooltipPosition="top"
+                          (click)="toggleActivoDimension(row)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3">
+              <div class="flex flex-col items-center justify-center py-8 text-center">
+                <i class="pi pi-th-large text-3xl text-surface-300 mb-2"></i>
+                <p class="text-surface-500 text-sm m-0">No hay dimensiones que coincidan con los filtros</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-panel>
+
+  <!-- Panel: Metodologías de aprendizaje activo -->
+  <p-panel [toggleable]="true" [collapsed]="true">
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between w-full pr-2">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-sitemap text-teal-500"></i>
+          <span class="font-semibold">Metodologías de aprendizaje activo</span>
+          <p-tag [value]="metodologias().length + ' items'" severity="secondary" />
+        </div>
+        <p-button label="Nueva metodología" icon="pi pi-plus" size="small"
+                  (click)="abrirNuevaMetodologia(); $event.stopPropagation()" />
+      </div>
+    </ng-template>
+
+    @if (cargandoMetodologias()) {
+      <div class="flex flex-col gap-3 py-2">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="3rem" /> }
+      </div>
+    } @else {
+      <!-- Filter row -->
+      <div class="flex gap-2 mb-3 flex-wrap">
+        <input pInputText type="text" [(ngModel)]="filtroMetodologiaNombre"
+               placeholder="Buscar por nombre..." class="flex-1 min-w-48" />
+        <p-select [options]="visibilidadOpciones" [(ngModel)]="filtroMetodologiaVisibilidad"
+                  optionLabel="label" optionValue="value"
+                  styleClass="w-44" appendTo="body" />
+      </div>
+
+      <p-table [value]="metodologiasFiltradas" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Nombre de la metodología</th>
+            <th style="width: 100px" class="text-center">Estado</th>
+            <th style="width: 110px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <span class="text-sm text-surface-900 dark:text-surface-0">{{ row.label }}</span>
+            </td>
+            <td class="text-center">
+              <p-tag [value]="row.activo ? 'Visible' : 'Oculto'"
+                     [severity]="row.activo ? 'success' : 'secondary'" />
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-1">
+                <p-button icon="pi pi-pencil" severity="secondary" [outlined]="true" size="small"
+                          pTooltip="Editar" tooltipPosition="top" (click)="abrirEditarMetodologia(row)" />
+                <p-button [icon]="row.activo ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                          [severity]="row.activo ? 'warn' : 'success'" [outlined]="true" size="small"
+                          [pTooltip]="row.activo ? 'Ocultar' : 'Mostrar'" tooltipPosition="top"
+                          (click)="toggleActivoMetodologia(row)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3">
+              <div class="flex flex-col items-center justify-center py-8 text-center">
+                <i class="pi pi-sitemap text-3xl text-surface-300 mb-2"></i>
+                <p class="text-surface-500 text-sm m-0">No hay metodologías que coincidan con los filtros</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-panel>
+
+</div>
+
+<!-- Dialog: Crear / Editar dimensión -->
+<p-dialog [header]="editandoDimensionId ? 'Editar dimensión' : 'Nueva dimensión'"
+  [visible]="dialogDimensionVisible()" (visibleChange)="dialogDimensionVisible.set($event)"
+  [modal]="true" [style]="{ width: '440px' }"
+  [draggable]="false" [closable]="!guardandoDimension()">
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label class="block font-medium text-sm mb-2">Nombre de la dimensión <span class="text-red-500">*</span></label>
+      <input pInputText type="text" [(ngModel)]="formDimension.nombre"
+             placeholder="Ej. Aplicación del aprendizaje" class="w-full" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true"
+              [disabled]="guardandoDimension()" (click)="dialogDimensionVisible.set(false)" />
+    <p-button [label]="editandoDimensionId ? 'Guardar cambios' : 'Crear dimensión'"
+              icon="pi pi-check" [loading]="guardandoDimension()" (click)="guardarDimension()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Dialog: Crear / Editar metodología -->
+<p-dialog [header]="editandoMetodologiaId ? 'Editar metodología' : 'Nueva metodología'"
+  [visible]="dialogMetodologiaVisible()" (visibleChange)="dialogMetodologiaVisible.set($event)"
+  [modal]="true" [style]="{ width: '440px' }"
+  [draggable]="false" [closable]="!guardandoMetodologia()">
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label class="block font-medium text-sm mb-2">Nombre de la metodología <span class="text-red-500">*</span></label>
+      <input pInputText type="text" [(ngModel)]="formMetodologia.label"
+             placeholder="Ej. Aprendizaje basado en proyectos" class="w-full" />
+    </div>
+    @if (editandoMetodologiaId) {
+      <p class="text-xs text-surface-400 m-0">
+        <i class="pi pi-info-circle mr-1"></i>
+        El identificador interno de la metodología no cambia al editar, para preservar los datos guardados en las bitácoras.
+      </p>
+    }
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true"
+              [disabled]="guardandoMetodologia()" (click)="dialogMetodologiaVisible.set(false)" />
+    <p-button [label]="editandoMetodologiaId ? 'Guardar cambios' : 'Crear metodología'"
+              icon="pi pi-check" [loading]="guardandoMetodologia()" (click)="guardarMetodologia()" />
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,141 @@
+<p-toast />
+
+<div class="flex flex-col gap-5 pt-3">
+
+  @if (cargandoAlertas()) {
+    <div class="flex flex-col gap-3">
+      @for (i of [1,2]; track i) { <p-skeleton height="10rem" /> }
+    </div>
+  } @else {
+
+    <!-- Sección: Umbrales de completitud -->
+    <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 p-5 flex flex-col gap-4">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
+          <i class="pi pi-chart-line text-blue-600 dark:text-blue-300"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-semibold text-surface-900 dark:text-surface-0 m-0">Umbrales de completitud</h3>
+          <p class="text-sm text-surface-500 m-0 mt-1">
+            Define los porcentajes de avance de una bitácora que generarán una alerta automática.
+            Cuando un estudiante alcance alguno de estos porcentajes, se notificará al coordinador.
+          </p>
+        </div>
+      </div>
+
+      <!-- Chips actuales -->
+      <div class="flex flex-wrap gap-2 min-h-10">
+        @if (umbralesCompletitud.length === 0) {
+          <p class="text-surface-400 text-sm italic m-0">Sin umbrales configurados</p>
+        }
+        @for (u of umbralesCompletitud; track u) {
+          <div class="flex items-center gap-1 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-full pl-3 pr-1 py-1">
+            <span class="text-sm font-medium text-blue-700 dark:text-blue-300">{{ u }}%</span>
+            <button class="w-5 h-5 rounded-full flex items-center justify-center text-blue-400 hover:bg-blue-100 hover:text-blue-600 bg-transparent border-none cursor-pointer"
+                    (click)="removerUmbral(u)">
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Input para agregar -->
+      <div class="flex gap-2">
+        <input pInputText type="number" [(ngModel)]="nuevoUmbral" min="1" max="100"
+               placeholder="Ej: 50" class="w-28" (keydown.enter)="agregarUmbral()" />
+        <p-button label="Agregar" icon="pi pi-plus" severity="secondary"
+                  (click)="agregarUmbral()" [disabled]="!nuevoUmbral" />
+      </div>
+      <div class="flex justify-end">
+        <p-button label="Guardar umbrales" icon="pi pi-check" [loading]="guardandoUmbrales()"
+                  [disabled]="umbralesCompletitud.length === 0" (click)="guardarUmbrales()" />
+      </div>
+    </div>
+
+    <!-- Sección: Alertas por demora -->
+    <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 p-5 flex flex-col gap-4">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center flex-shrink-0">
+          <i class="pi pi-calendar-clock text-amber-600 dark:text-amber-300"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-semibold text-surface-900 dark:text-surface-0 m-0">Alertas por demora</h3>
+          <p class="text-sm text-surface-500 m-0 mt-1">
+            Define con cuántos días de anticipación al vencimiento de un momento se considerará
+            que un estudiante está en demora si aún no ha completado las secciones correspondientes.
+          </p>
+        </div>
+      </div>
+
+      <!-- Chips actuales -->
+      <div class="flex flex-wrap gap-2 min-h-10">
+        @if (diasDemora.length === 0) {
+          <p class="text-surface-400 text-sm italic m-0">Sin días configurados</p>
+        }
+        @for (d of diasDemora; track d) {
+          <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-900 border border-amber-200 dark:border-amber-700 rounded-full pl-3 pr-1 py-1">
+            <span class="text-sm font-medium text-amber-700 dark:text-amber-300">{{ d }} {{ d === 1 ? 'día' : 'días' }}</span>
+            <button class="w-5 h-5 rounded-full flex items-center justify-center text-amber-400 hover:bg-amber-100 hover:text-amber-600 bg-transparent border-none cursor-pointer"
+                    (click)="removerDia(d)">
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Input para agregar -->
+      <div class="flex gap-2">
+        <input pInputText type="number" [(ngModel)]="nuevoDia" min="1" max="365"
+               placeholder="Ej: 7" class="w-28" (keydown.enter)="agregarDia()" />
+        <p-button label="Agregar" icon="pi pi-plus" severity="secondary"
+                  (click)="agregarDia()" [disabled]="!nuevoDia" />
+      </div>
+      <div class="flex justify-end">
+        <p-button label="Guardar días" icon="pi pi-check" [loading]="guardandoDemora()"
+                  [disabled]="diasDemora.length === 0" (click)="guardarDiasDemora()" />
+      </div>
+    </div>
+
+    <!-- Sección: Estudiante en riesgo -->
+    <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 p-5 flex flex-col gap-4">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center flex-shrink-0">
+          <i class="pi pi-exclamation-circle text-red-600 dark:text-red-300"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-semibold text-surface-900 dark:text-surface-0 m-0">Estudiante en riesgo de no completar</h3>
+          <p class="text-sm text-surface-500 m-0 mt-1">
+            Define cuándo un estudiante se considera en riesgo de no poder terminar la bitácora.
+            Si al acercarse a la fecha de cierre del curso el avance del estudiante es menor al porcentaje mínimo esperado, se generará una alerta al coordinador.
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <p class="text-sm text-red-700 dark:text-red-300 m-0">
+          <i class="pi pi-info-circle mr-1"></i>
+          <strong>Ejemplo:</strong> Si configuras <strong>15 días</strong> y <strong>50%</strong>, el sistema alertará cuando falten 15 días o menos para el cierre
+          y el estudiante tenga menos del 50% de avance total en su bitácora.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-4 items-end">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Días antes del cierre del curso</label>
+          <input pInputText type="number" [(ngModel)]="diasAnticipacionRiesgo" min="1" max="365"
+                 placeholder="Ej: 15" class="w-36" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Avance mínimo esperado</label>
+          <input pInputText type="number" [(ngModel)]="porcentajeMinimoRiesgo" min="1" max="99"
+                 placeholder="Ej: 50" class="w-32" />
+        </div>
+        <p-button label="Guardar" icon="pi pi-check" severity="danger"
+                  [loading]="guardandoRiesgo()"
+                  [disabled]="!diasAnticipacionRiesgo || !porcentajeMinimoRiesgo"
+                  (click)="guardarAlertaRiesgo()" />
+      </div>
+    </div>
+
+  }
+</div>

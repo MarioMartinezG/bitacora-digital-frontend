@@ -1,0 +1,23 @@
+<div class="flex flex-col gap-4 p-4">
+  <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 p-5">
+    <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 m-0">Parametrizaciones</h2>
+    <p class="text-surface-500 text-sm mt-1 m-0">Configura los momentos, fechas y umbrales de alerta del curso</p>
+  </div>
+
+  <p-tabs value="momentos">
+    <p-tablist>
+      <p-tab value="momentos"><i class="pi pi-calendar mr-2"></i>Momentos del curso</p-tab>
+      <p-tab value="alertas"><i class="pi pi-bell mr-2"></i>Alertas</p-tab>
+      <p-tab value="programas"><i class="pi pi-book mr-2"></i>Programas académicos</p-tab>
+      <p-tab value="evaluacion"><i class="pi pi-palette mr-2"></i>Diseño de evaluación</p-tab>
+      <p-tab value="aprendizaje"><i class="pi pi-graduation-cap mr-2"></i>Aprendizaje</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="momentos"><app-momentos-widget /></p-tabpanel>
+      <p-tabpanel value="alertas"><app-alertas-widget /></p-tabpanel>
+      <p-tabpanel value="programas"><app-programas-widget /></p-tabpanel>
+      <p-tabpanel value="evaluacion"><app-evaluacion-widget /></p-tabpanel>
+      <p-tabpanel value="aprendizaje"><app-aprendizaje-widget /></p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>
