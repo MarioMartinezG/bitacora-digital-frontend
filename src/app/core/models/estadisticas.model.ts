@@ -1,7 +1,6 @@
 export interface EstadisticasGenerales {
   totalEstudiantes: number;
   totalTutores: number;
-  totalAsignaturas: number;
   estudiantesActivos: number;
   promedioProgreso: number;
   alertasPendientes: number;

@@ -43,23 +43,11 @@ export default [
     loadComponent: () => import('./bitacoras/bitacora-seccion-view').then(m => m.BitacoraSeccionView)
   },
   {
-    path: 'asignaturas',
-    loadComponent: () => import('./asignaturas/asignaturas-list').then(m => m.AsignaturasList)
-  },
-  {
     path: 'asignaciones',
     loadComponent: () => import('./asignaciones/asignaciones-list').then(m => m.AsignacionesList)
   },
   {
-    path: 'asignaturas/nueva',
-    loadComponent: () => import('./asignaturas/asignatura-form').then(m => m.AsignaturaForm)
-  },
-  {
-    path: 'asignaturas/:id',
-    loadComponent: () => import('./asignaturas/asignatura-detalle').then(m => m.AsignaturaDetalle)
-  },
-  {
-    path: 'asignaturas/:id/editar',
-    loadComponent: () => import('./asignaturas/asignatura-form').then(m => m.AsignaturaForm)
+    path: 'parametrizaciones',
+    loadComponent: () => import('./parametrizaciones/parametrizaciones').then(m => m.Parametrizaciones)
   }
 ] as Routes;

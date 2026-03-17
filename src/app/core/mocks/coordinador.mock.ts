@@ -1,5 +1,4 @@
 import { Usuario } from '../models/usuario.model';
-import { Asignatura, AsignaturaListResponse } from '../models/asignatura.model';
 import { EstadisticasGenerales, MetricaProgreso, AlertaSistema, ReporteProgreso, EstudianteBitacora } from '../models/estadisticas.model';
 import { UserRole } from '../models/role.model';
 
@@ -76,38 +75,6 @@ export const MOCK_USUARIOS: Usuario[] = [
   }
 ];
 
-export const MOCK_ASIGNATURAS: Asignatura[] = [
-  {
-    id: 1,
-    codigo: 'MAT401',
-    nombre: 'Matemáticas Avanzadas',
-    descripcion: 'Curso de cálculo diferencial e integral avanzado',
-    activa: true,
-    fechaCreacion: '2024-01-01T00:00:00Z',
-    tutores: [{ id: 2, nombre: 'María García', correo: 'maria.garcia@ejemplo.com' }],
-    estudiantesCount: 25
-  },
-  {
-    id: 2,
-    codigo: 'FIS501',
-    nombre: 'Física Cuántica',
-    descripcion: 'Introducción a la mecánica cuántica',
-    activa: true,
-    fechaCreacion: '2024-01-01T00:00:00Z',
-    tutores: [{ id: 2, nombre: 'María García', correo: 'maria.garcia@ejemplo.com' }],
-    estudiantesCount: 18
-  },
-  {
-    id: 3,
-    codigo: 'QUI301',
-    nombre: 'Química Orgánica',
-    descripcion: 'Fundamentos de química orgánica',
-    activa: true,
-    fechaCreacion: '2024-01-01T00:00:00Z',
-    tutores: [{ id: 4, nombre: 'Ana Martínez', correo: 'ana.martinez@ejemplo.com' }],
-    estudiantesCount: 30
-  }
-];
 
 export const MOCK_METRICAS_PROGRESO: MetricaProgreso[] = [
   { seccionCodigo: 'caracteriza-asignatura', seccionNombre: 'Caracteriza tu Asignatura', totalEstudiantes: 55, completados: 45, enDesarrollo: 8, sinAvances: 2, porcentajeCompletado: 81.8 },
@@ -123,7 +90,6 @@ export const MOCK_METRICAS_PROGRESO: MetricaProgreso[] = [
 export const MOCK_ESTADISTICAS: EstadisticasGenerales = {
   totalEstudiantes: 55,
   totalTutores: 15,
-  totalAsignaturas: 8,
   estudiantesActivos: 48,
   promedioProgreso: 62.5,
   alertasPendientes: 5,
@@ -309,7 +275,3 @@ export const MOCK_ESTUDIANTES_BITACORA: EstudianteBitacora[] = [
 
 export const MOCK_USUARIO_LIST: Usuario[] = MOCK_USUARIOS;
 
-export const MOCK_ASIGNATURA_LIST: AsignaturaListResponse = {
-  asignaturas: MOCK_ASIGNATURAS,
-  total: MOCK_ASIGNATURAS.length
-};

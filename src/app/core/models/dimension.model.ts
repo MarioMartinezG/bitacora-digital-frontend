@@ -30,3 +30,13 @@ export interface Dimension {
 
   criterios: string[];
 }
+
+export interface DimensionDTO {
+  id: number;
+  nombre: string;
+  activo: boolean;
+}
+
+export interface CrearDimensionRequest {
+  nombre: string;
+}

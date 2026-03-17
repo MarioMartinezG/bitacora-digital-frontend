@@ -26,8 +26,9 @@ import { ExportButtonComponent } from '../../../shared/components/export-button/
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 
-// Models
+// Models & Services
 import { calcularEstadoAvance } from '../../../core/models';
+import { ProgramaService } from '../../../core/services/programa.service';
 
 @Component({
     selector: 'app-caracteriza-component',
@@ -56,6 +57,7 @@ import { calcularEstadoAvance } from '../../../core/models';
 })
 export class CaracterizaComponent extends BaseBitacoraComponent implements OnInit, OnDestroy {
     private fb = inject(FormBuilder);
+    private programaService = inject(ProgramaService);
     private horasSubscriptions: Subscription[] = [];
 
     // Codigo de seccion
@@ -64,21 +66,9 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
     // Configuracion de secciones para calculo de progreso
     protected sectionsConfig: SectionConfig[] = [];
 
-    // Opciones para autocomplete de programas
-    programas = [
-        { name: 'Medicina', code: 'MED' },
-        { name: 'Odontología', code: 'ODO' },
-        { name: 'Psicología', code: 'PSI' },
-        { name: 'Enfermería', code: 'ENF' },
-        { name: 'Ingeniería de Sistemas', code: 'IS' },
-        { name: 'Ingeniería Industrial', code: 'II' },
-        { name: 'Diseno Industrial', code: 'DI' },
-        { name: 'Administración de Empresas', code: 'ADE' },
-        { name: 'Economía', code: 'ECO' },
-        { name: 'Arte dramático', code: 'ART' },
-        { name: 'Música', code: 'MUS' }
-    ];
-    filteredProgramas: any[] = [];
+    // Opciones para autocomplete de programas (cargadas desde API)
+    programas: { name: string }[] = [];
+    filteredProgramas: { name: string }[] = [];
 
     tiposAsignatura = [
         { name: 'Obligatoria', code: 'OB' },
@@ -123,6 +113,7 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
 
     override ngOnInit(): void {
         this.initPeriodos();
+        this.cargarProgramas();
         super.ngOnInit();
 
         // Habilitar/deshabilitar materiaPrerequisito segun el valor de prerequisito
@@ -243,6 +234,15 @@ export class CaracterizaComponent extends BaseBitacoraComponent implements OnIni
         if (typeof value === 'number') return value > 0;
         if (typeof value === 'object') return Object.keys(value).length > 0;
         return true;
+    }
+
+    cargarProgramas(): void {
+        this.programaService.obtenerProgramas().subscribe({
+            next: (data) => {
+                this.programas = data.filter(p => p.activo).map(p => ({ name: p.nombre }));
+            },
+            error: () => {} // silencioso: el autocomplete quedará vacío si falla
+        });
     }
 
     filterProgramas(event: AutoCompleteCompleteEvent): void {
