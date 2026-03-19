@@ -309,6 +309,7 @@
       <p-multiselect id="roles" formControlName="roles"
                      [options]="rolesOptions" optionLabel="label" optionValue="value"
                      placeholder="Seleccionar roles" display="chip" class="w-full"
+                     appendTo="body"
                      [class.ng-invalid]="isFieldInvalid('roles')" />
       @if (isFieldInvalid('roles')) {
         <small class="text-red-500">Selecciona al menos un rol</small>

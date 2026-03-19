@@ -34,6 +34,11 @@
                                 "glob": "config.json",
                                 "input": "src/assets",
                                 "output": "assets"
+                            },
+                            {
+                                "glob": "**/*",
+                                "input": "src/assets/recursos",
+                                "output": "assets/recursos"
                             }
                         ],
                         "styles": [

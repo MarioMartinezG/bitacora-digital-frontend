@@ -18,14 +18,14 @@ export class ModuleProgressWidget implements OnChanges {
   @Input() secciones: Record<string, RespuestaSeccionDTO> = {};
 
   modulos: ModuloProgreso[] = [
-    { seccionCodigo: 'caracteriza', nombre: 'Caracteriza tu asignatura', momento: 'Momento 1', color: '#f97316', porcentaje: 0 },
-    { seccionCodigo: 'factores', nombre: 'Factores situacionales', momento: 'Momento 1', color: '#06b6d4', porcentaje: 0 },
-    { seccionCodigo: 'ajustes', nombre: 'Ambientes sanos y seguros', momento: 'Momento 2', color: '#ec4899', porcentaje: 0 },
-    { seccionCodigo: 'rap-rac', nombre: 'RAP y RAC', momento: 'Momento 2', color: '#22c55e', porcentaje: 0 },
-    { seccionCodigo: 'actividades', nombre: 'Actividades de aprendizaje', momento: 'Momento 3', color: '#a855f7', porcentaje: 0 },
-    { seccionCodigo: 'evaluacion', nombre: 'Cómo evaluaré', momento: 'Momento 3', color: '#14b8a6', porcentaje: 0 },
-    { seccionCodigo: 'secuencia', nombre: 'Secuencia del curso', momento: 'Momento 4', color: '#3b82f6', porcentaje: 0 },
-    { seccionCodigo: 'bibliografia', nombre: 'Medios educativos', momento: 'Momento 4', color: '#6366f1', porcentaje: 0 }
+    { seccionCodigo: 'observar',    nombre: 'Observar, registrar y actuar de manera oportuna', momento: 'Módulo 1', color: '#8b5cf6', porcentaje: 0 },
+    { seccionCodigo: 'caracteriza', nombre: 'Identificación de tu curso',                       momento: 'Módulo 2', color: '#f97316', porcentaje: 0 },
+    { seccionCodigo: 'factores',    nombre: 'Factores Situacionales',                           momento: 'Módulo 3', color: '#06b6d4', porcentaje: 0 },
+    { seccionCodigo: 'actividades', nombre: 'Actividades de Aprendizaje',                       momento: 'Módulo 4', color: '#a855f7', porcentaje: 0 },
+    { seccionCodigo: 'evaluacion',  nombre: 'Diseño de la evaluación',                          momento: 'Módulo 5', color: '#14b8a6', porcentaje: 0 },
+    { seccionCodigo: 'secuencia',   nombre: 'Secuencia y cronograma',                           momento: 'Módulo 6', color: '#3b82f6', porcentaje: 0 },
+    { seccionCodigo: 'calificacion',nombre: 'Calificación',                                     momento: 'Módulo 7', color: '#22c55e', porcentaje: 0 },
+    { seccionCodigo: 'bibliografia',nombre: 'Medios educativos',                                momento: 'Módulo 8', color: '#6366f1', porcentaje: 0 }
   ];
 
   ngOnChanges(changes: SimpleChanges): void {
