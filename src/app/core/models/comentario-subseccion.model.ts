@@ -7,6 +7,8 @@ export interface ComentarioSubseccionDTO {
     subseccionCodigo: string;
     comentario: string;
     fechaCreacion: string;
+    resuelto: boolean;
+    fechaResolucion: string | null;
 }
 
 export interface CrearComentarioSubseccionRequest {
