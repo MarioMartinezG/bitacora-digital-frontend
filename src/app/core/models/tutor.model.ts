@@ -67,6 +67,70 @@ export interface TutorContext {
     courseId: string;
 }
 
+// Módulo del curso (para selector en el Tutor IA del coordinador)
+export interface TutorModule {
+  id: string;
+  name: string;
+  description: string;
+}
+
+// Health del Tutor (GET /api/tutor/health)
+export interface TutorHealth {
+  status: string;
+  ollama_connected: boolean;
+  message: string;
+}
+
+// Status del Tutor (GET /api/tutor/status)
+export interface TutorStatus {
+  status: string;
+  models: string[];
+  systemInfo: Record<string, any>;
+  model_used?: string;
+}
+
+// Documento individual
+export interface DocumentInfo {
+  filename: string;
+  path: string;
+  size_bytes: number;
+  extension: string;
+}
+
+// Response de GET /api/tutor/documents
+export interface DocumentListResponse {
+  documents: DocumentInfo[];
+  total_count: number;
+  raw_path: string;
+}
+
+// Response de POST /api/tutor/documents/upload
+export interface DocumentUploadResponse {
+  message: string;
+  uploaded_files: DocumentInfo[];
+  total_uploaded: number;
+  errors: string[];
+}
+
+// Response de POST /api/tutor/index
+export interface IndexTaskResponse {
+  task_id: string;
+  status: string;
+  message: string;
+}
+
+// Response de GET /api/tutor/index/status/{taskId}
+export interface IndexStatusResponse {
+  task_id: string;
+  status: string;
+  message: string;
+  started_at: string;
+  completed_at: string;
+  documents_processed: number;
+  chunks_created: number;
+  error?: string;
+}
+
 // Request para POST /api/solicitudes-sesion
 export interface SolicitudSesionRequest {
     estudianteId: number;

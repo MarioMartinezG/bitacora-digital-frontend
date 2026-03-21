@@ -49,5 +49,9 @@ export default [
   {
     path: 'parametrizaciones',
     loadComponent: () => import('./parametrizaciones/parametrizaciones').then(m => m.Parametrizaciones)
+  },
+  {
+    path: 'tutor',
+    loadComponent: () => import('./tutor/tutor-ia').then(m => m.TutorIa)
   }
 ] as Routes;
