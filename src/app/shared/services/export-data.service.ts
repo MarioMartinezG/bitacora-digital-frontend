@@ -20,13 +20,11 @@ export class ExportDataService {
             'observar': 'Observar, registrar y actuar de manera oportuna',
             'caracteriza': 'Identificación de tu curso',
             'factores': 'Factores Situacionales',
-            'ajustes': 'Ambientes Sanos y Seguros',
-            'rap-rac': 'RAP y RAC',
             'actividades': 'Actividades de Aprendizaje',
             'evaluacion': 'Diseño de la evaluación',
             'secuencia': 'Secuencia y cronograma',
-            'bibliografia': 'Medios educativos',
-            'calificacion': 'Calificación'
+            'calificacion': 'Calificación',
+            'bibliografia': 'Medios educativos'
         };
         return nombres[codigo] || codigo;
     }

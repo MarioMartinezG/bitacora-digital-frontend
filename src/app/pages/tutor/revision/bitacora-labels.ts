@@ -234,41 +234,6 @@ export const BITACORA_LABELS: SeccionLabelsMap = {
         }
     },
 
-    'ajustes': {
-        'ajustes': {
-            panelLabel: 'Ajustes Razonables',
-            displayType: 'table',
-            columns: [
-                { key: 'desde', label: 'Desde' },
-                { key: 'ajuste', label: 'Ajuste' },
-                { key: 'siNo', label: 'Sí/No' },
-                { key: 'comoHacerlo', label: '¿Cómo hacerlo?' }
-            ]
-        }
-    },
-
-    'rap-rac': {
-        'rap': {
-            panelLabel: 'Resultados de aprendizaje del Programa (RAP)',
-            displayType: 'fields',
-            fields: {
-                'resultados': 'Resultados'
-            }
-        },
-        'rac': {
-            panelLabel: 'Resultados de aprendizaje del curso (RAC)',
-            displayType: 'fields',
-            fields: {
-                'compromiso': 'Compromiso o valoración',
-                'humanas': 'Dimensiones humanas del aprendizaje',
-                'conocimiento': 'Conocimiento Fundamental',
-                'aplicacion': 'Aplicación del aprendizaje',
-                'integracion': 'Integración',
-                'aprender': 'Aprender a aprender'
-            }
-        }
-    },
-
     'actividades': {
         'actividades': {
             panelLabel: 'Actividades de aprendizaje',
