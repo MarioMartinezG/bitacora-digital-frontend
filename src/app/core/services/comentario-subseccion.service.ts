@@ -34,4 +34,8 @@ export class ComentarioSubseccionService extends BaseHttpService {
             `/api/comentarios-subseccion/estudiante/${estudianteId}/seccion/${seccionCodigo}/conteo`
         );
     }
+
+    toggleResuelto(comentarioId: number): Observable<ComentarioSubseccionDTO> {
+        return this.patch<ComentarioSubseccionDTO>(`/api/comentarios-subseccion/${comentarioId}/resolver`, {});
+    }
 }
