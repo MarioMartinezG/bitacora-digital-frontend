@@ -15,6 +15,7 @@ export interface MetricaProgreso {
   enDesarrollo: number;
   sinAvances: number;
   porcentajeCompletado: number;
+  promedioProgreso: number;
 }
 
 export interface AlertaSistema {

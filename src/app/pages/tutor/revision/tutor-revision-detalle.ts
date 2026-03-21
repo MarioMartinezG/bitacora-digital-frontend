@@ -20,8 +20,6 @@ const SECCIONES_NOMBRES: Record<string, string> = {
     'observar': 'Observar, registrar y actuar de manera oportuna',
     'caracteriza': 'Identificación de tu curso',
     'factores': 'Factores Situacionales',
-    'ajustes': 'Ambientes Sanos y seguros',
-    'rap-rac': 'RAP y RAC',
     'actividades': 'Actividades de Aprendizaje',
     'evaluacion': 'Diseño de la evaluación',
     'secuencia': 'Secuencia y cronograma',

@@ -23,8 +23,6 @@ const SECCIONES_BITACORA: { codigo: string; nombre: string }[] = [
   { codigo: 'observar', nombre: 'Observar, registrar y actuar de manera oportuna' },
   { codigo: 'caracteriza', nombre: 'Identificación de tu curso' },
   { codigo: 'factores', nombre: 'Factores Situacionales' },
-  { codigo: 'ajustes', nombre: 'Ambientes Sanos y Seguros' },
-  { codigo: 'rap-rac', nombre: 'RAP y RAC' },
   { codigo: 'actividades', nombre: 'Actividades de Aprendizaje' },
   { codigo: 'evaluacion', nombre: 'Diseño de la evaluación' },
   { codigo: 'secuencia', nombre: 'Secuencia y cronograma' },

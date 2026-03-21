@@ -3,8 +3,8 @@ import { ProgressBar } from 'primeng/progressbar';
 import { RespuestaSeccionDTO } from '../../../../core/models';
 
 const SECCIONES_CODIGOS = [
-  'caracteriza', 'factores', 'ajustes', 'rap-rac',
-  'actividades', 'evaluacion', 'secuencia', 'bibliografia'
+  'observar', 'caracteriza', 'factores', 'actividades',
+  'evaluacion', 'secuencia', 'calificacion', 'bibliografia'
 ];
 
 @Component({

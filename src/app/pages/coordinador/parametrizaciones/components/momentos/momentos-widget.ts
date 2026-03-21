@@ -17,13 +17,14 @@ import { MomentoDTO, CrearMomentoRequest } from '../../../../../core/models';
 import { MomentoService } from '../../../../../core/services/momento.service';
 
 const SECCIONES: { label: string; value: string }[] = [
-  { label: 'Identificación de tu curso', value: 'caracteriza-asignatura' },
-  { label: 'Factores Situacionales', value: 'factores-situacionales' },
-  { label: 'Actividades de Aprendizaje', value: 'actividades-aprendizaje' },
-  { label: 'Diseño de la evaluación', value: 'como-evaluare' },
+  { label: 'Observar, registrar y actuar de manera oportuna', value: 'observar' },
+  { label: 'Identificación de tu curso', value: 'caracteriza' },
+  { label: 'Factores Situacionales', value: 'factores' },
+  { label: 'Actividades de Aprendizaje', value: 'actividades' },
+  { label: 'Diseño de la evaluación', value: 'evaluacion' },
+  { label: 'Secuencia y cronograma', value: 'secuencia' },
   { label: 'Calificación', value: 'calificacion' },
-  { label: 'Secuencia del Curso', value: 'secuencia-curso' },
-  { label: 'Bibliografía y medios educativos', value: 'bibliografia' }
+  { label: 'Medios educativos', value: 'bibliografia' }
 ];
 
 @Component({

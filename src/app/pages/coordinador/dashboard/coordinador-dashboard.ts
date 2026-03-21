@@ -47,23 +47,15 @@ export class CoordinadorDashboard implements OnInit {
     const secciones = stats.progresosPorSeccion;
     return {
       labels: secciones.map(s => s.seccionNombre),
-      datasets: [
-        {
-          label: 'Completados',
-          backgroundColor: '#22c55e',
-          data: secciones.map(s => s.completados)
-        },
-        {
-          label: 'En desarrollo',
-          backgroundColor: '#f97316',
-          data: secciones.map(s => s.enDesarrollo)
-        },
-        {
-          label: 'Sin avances',
-          backgroundColor: '#94a3b8',
-          data: secciones.map(s => s.sinAvances)
-        }
-      ]
+      datasets: [{
+        label: 'Progreso promedio (%)',
+        data: secciones.map(s => Math.round(s.promedioProgreso)),
+        backgroundColor: secciones.map(s =>
+          s.promedioProgreso >= 75 ? '#22c55e' :
+          s.promedioProgreso >= 40 ? '#f97316' : '#ef4444'
+        ),
+        borderRadius: 4
+      }]
     };
   });
 
@@ -72,21 +64,26 @@ export class CoordinadorDashboard implements OnInit {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'bottom' as const },
-      tooltip: { mode: 'index' as const, intersect: false }
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => ` ${ctx.raw}%`
+        }
+      }
     },
     scales: {
       x: {
-        stacked: true,
-        title: { display: true, text: 'Estudiantes' }
+        min: 0,
+        max: 100,
+        ticks: { callback: (v: any) => v + '%' },
+        title: { display: true, text: 'Progreso promedio del grupo' }
       },
       y: {
-        stacked: true,
         ticks: {
           font: { size: 11 },
           callback: function(this: any, _value: any, index: number) {
             const label = this.getLabelForValue(index) as string;
-            return label.length > 25 ? label.substring(0, 25) + '...' : label;
+            return label.length > 28 ? label.substring(0, 28) + '…' : label;
           }
         }
       }
@@ -99,7 +96,7 @@ export class CoordinadorDashboard implements OnInit {
     return [
       { label: 'Estudiantes', value: stats.totalEstudiantes, icon: 'pi pi-users', color: 'blue' },
       { label: 'Tutores', value: stats.totalTutores, icon: 'pi pi-user', color: 'green' },
-      { label: 'Progreso promedio', value: stats.promedioProgreso + '%', icon: 'pi pi-chart-line', color: 'orange' },
+      { label: 'Progreso promedio', value: Math.round(stats.promedioProgreso) + '%', icon: 'pi pi-chart-line', color: 'orange' },
       { label: 'Alertas pendientes', value: stats.alertasPendientes, icon: 'pi pi-bell', color: 'red' }
     ];
   });
