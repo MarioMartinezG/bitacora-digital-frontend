@@ -1,0 +1,365 @@
+<p-toast />
+
+<div class="flex flex-col gap-5">
+
+  <!-- Encabezado + estado del sistema -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-2xl font-semibold m-0">TEIA — Tutor Inteligente</h2>
+
+    @if (cargandoSistema()) {
+      <div class="flex gap-2">
+        <p-skeleton width="120px" height="2rem" />
+        <p-skeleton width="140px" height="2rem" />
+      </div>
+    } @else {
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full border"
+             [class]="apiConectada ? 'border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-700 text-green-700 dark:text-green-400'
+                                   : 'border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-700 text-red-700 dark:text-red-400'">
+          <span class="w-2 h-2 rounded-full" [class]="apiConectada ? 'bg-green-500' : 'bg-red-500'"></span>
+          API {{ apiConectada ? 'activa' : 'sin conexión' }}
+        </div>
+        <div class="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full border"
+             [class]="ollamaConectado ? 'border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-700 text-green-700 dark:text-green-400'
+                                      : 'border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-700 text-red-700 dark:text-red-400'">
+          <span class="w-2 h-2 rounded-full" [class]="ollamaConectado ? 'bg-green-500' : 'bg-red-500'"></span>
+          Ollama {{ ollamaConectado ? 'conectado' : 'desconectado' }}
+        </div>
+        @if (modeloActivo !== '-') {
+          <div class="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-full border border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-300">
+            <i class="pi pi-microchip text-xs"></i>{{ modeloActivo }}
+          </div>
+        }
+        <p-button icon="pi pi-refresh" severity="secondary" [outlined]="true" size="small"
+                  pTooltip="Actualizar" tooltipPosition="top" (click)="verificarSalud()" />
+      </div>
+    }
+  </div>
+
+  <!-- Tabs -->
+  <p-tabs value="consultar">
+    <p-tablist>
+      <p-tab value="consultar"><i class="pi pi-comments mr-2"></i>Consultar al tutor</p-tab>
+      <p-tab value="documentos"><i class="pi pi-folder-open mr-2"></i>Documentos</p-tab>
+      <p-tab value="sistema"><i class="pi pi-server mr-2"></i>Estado del sistema</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+
+      <!-- ── Tab: Consultar ─────────────────────────────────────── -->
+      <p-tabpanel value="consultar">
+        <div class="flex flex-col gap-5 pt-3 max-w-3xl">
+
+          <!-- Módulo (si hay) -->
+          @if (modulos().length > 0) {
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm">Módulo temático <span class="text-surface-400 font-normal">(opcional)</span></label>
+              <div class="flex flex-wrap gap-2">
+                @for (mod of modulos(); track mod.id) {
+                  <button type="button"
+                          class="px-3 py-1.5 rounded-full text-sm border transition-colors cursor-pointer"
+                          [class]="moduloSeleccionado() === mod.id
+                            ? 'border-primary-500 bg-primary text-white'
+                            : 'border-surface-300 dark:border-surface-600 hover:border-primary-400 text-surface-700 dark:text-surface-300'"
+                          (click)="seleccionarModulo(mod.id)">
+                    {{ mod.name }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Pregunta -->
+          <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm">¿Qué quieres consultar?</label>
+            <textarea pTextarea [(ngModel)]="pregunta" rows="4"
+                      placeholder="Escribe tu pregunta sobre diseño curricular..."
+                      class="w-full resize-y"></textarea>
+          </div>
+
+          <div>
+            <p-button label="Consultar" icon="pi pi-send"
+                      [loading]="enviando()" [disabled]="!pregunta.trim()"
+                      (click)="enviarPregunta()" />
+          </div>
+
+          <!-- Respuesta -->
+          @if (enviando()) {
+            <div class="flex flex-col gap-3">
+              <p-skeleton height="1.5rem" width="60%" />
+              <p-skeleton height="1rem" />
+              <p-skeleton height="1rem" />
+              <p-skeleton height="1rem" width="80%" />
+            </div>
+          }
+
+          @if (respuesta(); as r) {
+            <div class="border border-primary-200 dark:border-primary-700 rounded-xl overflow-hidden">
+              <div class="flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 border-b border-primary-200 dark:border-primary-700">
+                <i class="pi pi-sparkles text-primary"></i>
+                <span class="font-semibold text-primary text-sm">Respuesta de TEIA</span>
+                <div class="ml-auto flex items-center gap-2 text-xs text-surface-500">
+                  <p-tag [value]="confianzaLabel(r.confidence)" [severity]="confianzaSeverity(r.confidence)" />
+                  <span>{{ r.processing_time_ms }} ms</span>
+                </div>
+              </div>
+
+              <div class="p-5 flex flex-col gap-4">
+                <p class="text-surface-800 dark:text-surface-100 leading-relaxed m-0 whitespace-pre-wrap">{{ r.answer }}</p>
+
+                @if (r.sources.length || r.suggested_actions.length) {
+                  <div class="border-t border-surface-200 dark:border-surface-700 pt-4 flex flex-col gap-3">
+                    @if (r.sources.length) {
+                      <p class="text-xs text-surface-500 m-0">
+                        <i class="pi pi-book mr-1"></i>Fuentes: {{ r.sources.join(', ') }}
+                      </p>
+                    }
+                    @if (r.suggested_actions.length) {
+                      <div>
+                        <p class="text-xs font-medium text-surface-500 mb-2 m-0">Acciones sugeridas:</p>
+                        <div class="flex flex-col gap-1">
+                          @for (accion of r.suggested_actions; track $index) {
+                            <div class="flex items-start gap-2 text-sm">
+                              <i class="pi pi-arrow-right text-xs text-primary mt-0.5 flex-shrink-0"></i>
+                              <span class="text-surface-700 dark:text-surface-300">{{ accion }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </p-tabpanel>
+
+      <!-- ── Tab: Documentos ────────────────────────────────────── -->
+      <p-tabpanel value="documentos">
+        <div class="flex flex-col gap-5 pt-3">
+
+          <!-- Dos columnas en pantallas grandes -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+            <!-- Columna izq: acciones -->
+            <div class="flex flex-col gap-4">
+
+              <!-- Subir archivos -->
+              <div class="border border-surface-200 dark:border-surface-700 rounded-xl p-4 bg-surface-0 dark:bg-surface-900 flex flex-col gap-3">
+                <h3 class="text-sm font-semibold m-0 flex items-center gap-2">
+                  <i class="pi pi-upload text-primary"></i> Subir documentos
+                </h3>
+                <div class="border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg p-5 text-center cursor-pointer hover:border-primary-400 transition-colors"
+                     (click)="fileInput.click()">
+                  <input #fileInput type="file" multiple accept=".pdf,.xlsx,.xls,.md,.txt"
+                         class="hidden" (change)="onFileChange($event)" />
+                  @if (subiendoArchivos()) {
+                    <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+                    <p class="text-sm text-surface-500 mt-2 m-0">Subiendo...</p>
+                  } @else {
+                    <i class="pi pi-file-plus text-2xl text-surface-400"></i>
+                    <p class="text-sm text-surface-600 dark:text-surface-400 mt-2 m-0">PDF, Excel, Markdown, TXT</p>
+                  }
+                </div>
+
+                @if (resultadoSubida(); as r) {
+                  @if (r.total_uploaded > 0) {
+                    <div class="text-sm text-green-700 dark:text-green-400 flex items-center gap-2">
+                      <i class="pi pi-check-circle"></i> {{ r.total_uploaded }} archivo(s) subido(s)
+                    </div>
+                  }
+                  @if (r.errors.length) {
+                    <div class="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
+                      <i class="pi pi-exclamation-triangle"></i> {{ r.errors.length }} error(es)
+                    </div>
+                  }
+                }
+              </div>
+
+              <!-- Indexación -->
+              <div class="border border-surface-200 dark:border-surface-700 rounded-xl p-4 bg-surface-0 dark:bg-surface-900 flex flex-col gap-3">
+                <h3 class="text-sm font-semibold m-0 flex items-center gap-2">
+                  <i class="pi pi-database text-primary"></i> Indexación
+                </h3>
+                <p class="text-xs text-surface-500 m-0">
+                  Procesa los documentos para que el tutor pueda consultarlos. Ejecuta después de subir archivos nuevos.
+                </p>
+                <p-button label="Indexar documentos" icon="pi pi-play" class="w-full"
+                          styleClass="w-full"
+                          [loading]="iniciandoIndexacion() || indexacionEnProgreso()"
+                          [disabled]="documentos().length === 0"
+                          (click)="iniciarIndexacion()" />
+
+                @if (indexacionMensaje()) {
+                  <div class="rounded-lg p-3 text-sm flex flex-col gap-2"
+                       [class]="estadoIndexacion()?.status === 'completed' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                               : estadoIndexacion()?.status === 'failed' || estadoIndexacion()?.status === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                               : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'">
+                    <div class="flex items-center gap-2">
+                      @if (indexacionEnProgreso()) {
+                        <i class="pi pi-spin pi-spinner text-xs"></i>
+                      } @else if (estadoIndexacion()?.status === 'completed') {
+                        <i class="pi pi-check-circle text-xs"></i>
+                      } @else if (estadoIndexacion()?.status === 'failed' || estadoIndexacion()?.status === 'error') {
+                        <i class="pi pi-times-circle text-xs"></i>
+                      } @else {
+                        <i class="pi pi-info-circle text-xs"></i>
+                      }
+                      <span>{{ indexacionMensaje() }}</span>
+                    </div>
+                    @if (estadoIndexacion(); as s) {
+                      @if (s.documents_processed != null) {
+                        <span class="text-xs opacity-75">{{ s.documents_processed }} doc(s) · {{ s.chunks_created }} chunks</span>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+
+            </div>
+
+            <!-- Columna der: lista de documentos -->
+            <div class="lg:col-span-2">
+              <div class="border border-surface-200 dark:border-surface-700 rounded-xl overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+                  <span class="font-semibold text-sm">
+                    Documentos disponibles
+                    @if (documentos().length > 0) {
+                      <span class="text-surface-400 font-normal ml-1">({{ documentos().length }})</span>
+                    }
+                  </span>
+                  <p-button icon="pi pi-refresh" severity="secondary" [outlined]="true" size="small"
+                            pTooltip="Actualizar lista" tooltipPosition="top"
+                            [loading]="cargandoDocumentos()" (click)="cargarDocumentos()" />
+                </div>
+
+                @if (cargandoDocumentos()) {
+                  <div class="p-4 flex flex-col gap-3">
+                    @for (i of [1,2,3,4]; track i) { <p-skeleton height="2.5rem" /> }
+                  </div>
+                } @else {
+                  <p-table [value]="documentos()" [rowHover]="true" styleClass="p-datatable-sm">
+                    <ng-template #header>
+                      <tr>
+                        <th>Nombre del archivo</th>
+                        <th style="width: 70px" class="text-center">Tipo</th>
+                        <th style="width: 90px" class="text-right">Tamaño</th>
+                      </tr>
+                    </ng-template>
+                    <ng-template #body let-doc>
+                      <tr>
+                        <td class="text-sm">{{ doc.filename }}</td>
+                        <td class="text-center"><p-tag [value]="doc.extension" severity="secondary" /></td>
+                        <td class="text-right text-sm text-surface-500">{{ formatBytes(doc.size_bytes) }}</td>
+                      </tr>
+                    </ng-template>
+                    <ng-template #emptymessage>
+                      <tr>
+                        <td colspan="3">
+                          <div class="flex flex-col items-center justify-center py-12 text-center">
+                            <i class="pi pi-folder-open text-4xl text-surface-300 mb-3"></i>
+                            <p class="text-surface-500 font-medium m-0">Sin documentos</p>
+                            <p class="text-surface-400 text-sm mt-1 m-0">Sube archivos para que el tutor pueda consultarlos</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                }
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </p-tabpanel>
+
+      <!-- ── Tab: Estado del sistema ────────────────────────────── -->
+      <p-tabpanel value="sistema">
+        <div class="flex flex-col gap-4 pt-3">
+
+          <div class="flex justify-end">
+            <p-button label="Actualizar" icon="pi pi-refresh" severity="secondary" [outlined]="true" size="small"
+                      [loading]="cargandoSistema()" (click)="verificarSalud()" />
+          </div>
+
+          @if (cargandoSistema()) {
+            <p-skeleton height="180px" />
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div class="border border-surface-200 dark:border-surface-700 rounded-xl p-5 bg-surface-0 dark:bg-surface-900">
+                <h3 class="text-sm font-semibold mb-4 m-0 flex items-center gap-2">
+                  <i class="pi pi-heart text-primary"></i> Salud del servicio
+                </h3>
+                @if (health(); as h) {
+                  <div class="flex flex-col gap-3 text-sm">
+                    <div class="flex justify-between items-center">
+                      <span class="text-surface-500">Estado</span>
+                      <p-tag [value]="h.status" [severity]="h.status === 'healthy' ? 'success' : 'danger'" />
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-surface-500">Ollama</span>
+                      <p-tag [value]="h.ollama_connected ? 'Conectado' : 'Desconectado'"
+                             [severity]="h.ollama_connected ? 'success' : 'danger'" />
+                    </div>
+                    @if (h.message) {
+                      <p class="text-xs text-surface-400 m-0">{{ h.message }}</p>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-surface-400 text-sm m-0">No disponible</p>
+                }
+              </div>
+
+              <div class="border border-surface-200 dark:border-surface-700 rounded-xl p-5 bg-surface-0 dark:bg-surface-900">
+                <h3 class="text-sm font-semibold mb-4 m-0 flex items-center gap-2">
+                  <i class="pi pi-server text-primary"></i> Configuración
+                </h3>
+                @if (status(); as s) {
+                  <div class="flex flex-col gap-3 text-sm">
+                    <div class="flex justify-between items-center">
+                      <span class="text-surface-500">Estado</span>
+                      <p-tag [value]="s.status" [severity]="s.status === 'running' ? 'success' : 'warn'" />
+                    </div>
+                    @if (s.model_used) {
+                      <div class="flex justify-between items-center">
+                        <span class="text-surface-500">Modelo activo</span>
+                        <span class="font-mono text-xs bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded">{{ s.model_used }}</span>
+                      </div>
+                    }
+                    @if (s.models.length) {
+                      <div>
+                        <span class="text-surface-500 block mb-2">Modelos disponibles</span>
+                        <div class="flex flex-wrap gap-1">
+                          @for (m of s.models; track m) {
+                            <span class="font-mono text-xs bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded">{{ m }}</span>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if (s.systemInfo && (s.systemInfo | keyvalue).length > 0) {
+                      <div class="border-t border-surface-200 dark:border-surface-700 pt-3 flex flex-col gap-1">
+                        @for (kv of s.systemInfo | keyvalue; track kv.key) {
+                          <div class="flex justify-between text-xs">
+                            <span class="text-surface-400">{{ kv.key }}</span>
+                            <span class="text-surface-600 dark:text-surface-400">{{ kv.value }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-surface-400 text-sm m-0">No disponible</p>
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+      </p-tabpanel>
+
+    </p-tabpanels>
+  </p-tabs>
+
+</div>

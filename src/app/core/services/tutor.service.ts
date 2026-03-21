@@ -13,7 +13,14 @@ import {
     TutorWidgetState,
     TutorContext,
     SolicitudSesionRequest,
-    SolicitudSesionResponse
+    SolicitudSesionResponse,
+    TutorModule,
+    TutorHealth,
+    TutorStatus,
+    DocumentListResponse,
+    DocumentUploadResponse,
+    IndexTaskResponse,
+    IndexStatusResponse
 } from '../models/tutor.model';
 
 @Injectable({
@@ -174,6 +181,52 @@ export class TutorService extends BaseHttpService {
                 }
             })
         );
+    }
+
+    // ── Coordinador: gestión de documentos e indexación ─────────────────
+
+    // GET /api/tutor/health (respuesta completa para el coordinador)
+    getHealth(): Observable<TutorHealth> {
+        return this.get<TutorHealth>('/api/tutor/health');
+    }
+
+    // GET /api/tutor/status (respuesta completa para el coordinador)
+    getStatus(): Observable<TutorStatus> {
+        return this.get<TutorStatus>('/api/tutor/status');
+    }
+
+    // GET /api/tutor/modules
+    getModules(): Observable<TutorModule[]> {
+        return this.get<TutorModule[]>('/api/tutor/modules');
+    }
+
+    // GET /api/tutor/documents
+    getDocuments(): Observable<DocumentListResponse> {
+        return this.get<DocumentListResponse>('/api/tutor/documents');
+    }
+
+    // POST /api/tutor/documents/upload
+    uploadDocuments(files: File[]): Observable<DocumentUploadResponse> {
+        const formData = new FormData();
+        files.forEach(f => formData.append('files', f));
+        return this.handleRequest<DocumentUploadResponse>(
+            this.http.post<DocumentUploadResponse>('/api/tutor/documents/upload', formData)
+        );
+    }
+
+    // POST /api/tutor/index
+    startIndexing(): Observable<IndexTaskResponse> {
+        return this.post<IndexTaskResponse>('/api/tutor/index', {});
+    }
+
+    // GET /api/tutor/index/status/{taskId}
+    getIndexStatus(taskId: string): Observable<IndexStatusResponse> {
+        return this.get<IndexStatusResponse>(`/api/tutor/index/status/${taskId}`);
+    }
+
+    // POST /api/tutor/ask (versión sin manejo de estado interno, para el coordinador)
+    askRaw(request: TutorAskRequest): Observable<TutorAskResponse> {
+        return this.post<TutorAskResponse>('/api/tutor/ask', request);
     }
 
     // POST /api/solicitudes-sesion - Solicitar sesión con tutor humano
