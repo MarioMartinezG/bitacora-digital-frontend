@@ -6,6 +6,7 @@ import { DecimalPipe } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
 import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { TagModule } from 'primeng/tag';
@@ -52,6 +53,7 @@ interface ValidationState {
     ButtonModule,
     FluidModule,
     SelectModule,
+    MultiSelectModule,
     InputTextModule,
     TextareaModule,
     TagModule,
@@ -164,7 +166,7 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
 
     this.validationService.validateActivity({
       resultado_aprendizaje: val.ra,
-      dimension: val.dimension,
+      dimension: Array.isArray(val.dimension) ? val.dimension.join(', ') : (val.dimension || ''),
       metodologia: this.getMetodologiaLabel(val.metodologia),
       descripcion: val.descripcion
     }).subscribe({
@@ -228,12 +230,14 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
       const arr = this.actividadesArray;
       arr.clear({ emitEvent: false });
       data.actividades.forEach((a: any, idx: number) => {
+        const dim = a.dimension;
+        const dimensionValue = Array.isArray(dim) ? dim : (dim ? [dim] : []);
         arr.push(this.fb.group({
           nombre: [a.nombre || `Actividad ${idx + 1}`],
           ra: [a.ra || ''],
           tema: [a.tema || ''],
           subtema: [a.subtema || ''],
-          dimension: [a.dimension || null],
+          dimension: [dimensionValue],
           metodologia: [a.metodologia || null],
           descripcion: [a.descripcion || '']
         }), { emitEvent: false });
@@ -248,7 +252,7 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
       ra: [''],
       tema: [''],
       subtema: [''],
-      dimension: [null],
+      dimension: [[]],
       metodologia: [null],
       descripcion: ['']
     }));
@@ -279,10 +283,12 @@ export class ActividadesAprendizajeComponent extends BaseBitacoraComponent imple
     const totalFields = count * 5; // ra, tema, dimension, metodologia, descripcion
     for (let i = 0; i < count; i++) {
       const g = this.actividadesArray.at(i) as FormGroup;
-      ['ra', 'tema', 'dimension', 'metodologia', 'descripcion'].forEach(field => {
+      ['ra', 'tema', 'metodologia', 'descripcion'].forEach(field => {
         const val = g.get(field)?.value;
         if (val !== null && val !== undefined && val !== '') totalCompleted++;
       });
+      const dim = g.get('dimension')?.value;
+      if (Array.isArray(dim) ? dim.length > 0 : (dim !== null && dim !== undefined && dim !== '')) totalCompleted++;
     }
 
     const totalPercentage = Math.round((totalCompleted / totalFields) * 100);

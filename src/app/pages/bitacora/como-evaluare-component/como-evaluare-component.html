@@ -116,14 +116,18 @@
                                                         </div>
                                                     }
 
-                                                    @if (act.dimension) {
+                                                    @if (act.dimension?.length) {
                                                         <div class="info-field-card">
                                                             <div class="info-field-icon">
                                                                 <i class="pi pi-compass text-xs text-purple-500"></i>
                                                             </div>
                                                             <div class="info-field-content">
-                                                                <span class="info-field-label">Dimensión</span>
-                                                                <span class="info-field-value font-semibold">{{ act.dimension }}</span>
+                                                                <span class="info-field-label">Dimensión(es)</span>
+                                                                <div class="flex flex-wrap gap-1 mt-1">
+                                                                    @for (dim of act.dimension; track dim) {
+                                                                        <span class="dimension-chip">{{ dim }}</span>
+                                                                    }
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     }
