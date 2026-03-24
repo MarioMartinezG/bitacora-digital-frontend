@@ -113,6 +113,19 @@
   line-height: 1.4;
 }
 
+/* ====== DIMENSION CHIPS ====== */
+.dimension-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--primary-50, #ede9fe);
+  color: var(--primary-700, #6d28d9);
+  border: 1px solid var(--primary-200, #c4b5fd);
+}
+
 /* ====== VALIDATION RESULT BOX ====== */
 .validation-result-box {
   padding: 0.875rem 1rem;

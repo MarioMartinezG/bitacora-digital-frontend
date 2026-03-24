@@ -299,17 +299,19 @@
                                                             <div class="flex flex-col gap-2 w-full">
                                                                 <label>
                                                                     <i class="pi pi-compass text-sm text-surface-400 mr-1"></i>
-                                                                    Dimensión a la que apunta
+                                                                    Dimensión(es) a la(s) que apunta
                                                                 </label>
-                                                                <p-select
+                                                                <p-multiselect
                                                                     formControlName="dimension"
                                                                     [options]="dimensionOptions"
                                                                     optionLabel="label"
                                                                     optionValue="value"
-                                                                    placeholder="Seleccione una dimensión"
+                                                                    placeholder="Seleccione dimensión(es)"
+                                                                    display="chip"
+                                                                    selectedItemsLabel="{0} dimensiones seleccionadas"
                                                                     appendTo="body"
                                                                     class="w-full">
-                                                                </p-select>
+                                                                </p-multiselect>
                                                             </div>
                                                             <div class="flex flex-col gap-2 w-full">
                                                                 <label>
@@ -349,7 +351,7 @@
                                                                 icon="pi pi-sparkles"
                                                                 size="small"
                                                                 [loading]="actividadValidation()[actividadIdx]?.loading ?? false"
-                                                                [disabled]="!ctrl.get('ra')?.value || !ctrl.get('dimension')?.value || !ctrl.get('metodologia')?.value || !ctrl.get('descripcion')?.value"
+                                                                [disabled]="!ctrl.get('ra')?.value || !ctrl.get('dimension')?.value?.length || !ctrl.get('metodologia')?.value || !ctrl.get('descripcion')?.value"
                                                                 (onClick)="validateActividad(actividadIdx)"
                                                                 pTooltip="Verifica si la actividad es coherente con el resultado de aprendizaje seleccionado"
                                                                 tooltipPosition="top">

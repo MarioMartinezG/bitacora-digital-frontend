@@ -154,7 +154,7 @@ export interface ActividadItem {
     ra?: string;
     tema?: string;
     subtema?: string;
-    dimension?: string;
+    dimension?: string[];
     metodologia?: string;
     descripcion?: string;
 }
