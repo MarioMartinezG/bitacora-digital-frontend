@@ -29,13 +29,18 @@
       @for (seccion of secciones(); track seccion.codigo) {
         <div class="card cursor-pointer hover:shadow-lg transition-shadow" (click)="verSeccion(seccion.codigo)">
           <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <span class="font-semibold text-sm">{{ seccion.nombre }}</span>
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-semibold text-sm flex-1 min-w-0">{{ seccion.nombre }}</span>
               <p-tag [severity]="getSeverity(seccion.estado)" [value]="getLabel(seccion.estado)" />
             </div>
             <p-progressbar [value]="seccion.porcentaje" [showValue]="true" styleClass="h-5" />
-            <div class="flex justify-end">
+            <div class="flex items-center justify-between gap-2">
               <p-button icon="pi pi-eye" label="Ver" size="small" [text]="true" />
+              @if (seccion.revisado) {
+                <p-tag severity="success" value="Revisado" icon="pi pi-check-circle" />
+              } @else {
+                <p-tag severity="warn" value="Pendiente" icon="pi pi-clock" />
+              }
             </div>
           </div>
         </div>

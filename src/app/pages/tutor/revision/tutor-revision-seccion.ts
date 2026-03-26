@@ -47,10 +47,18 @@ interface PanelView {
     imports: [CommonModule, FormsModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, KnobModule, ChartModule, CommentThreadComponent, EstadoTutorSelectorComponent],
     template: `
         <div class="flex flex-col gap-4">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
                 <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" (onClick)="volver()" />
-                <h3 class="m-0">{{ seccionNombre }}</h3>
+                <h3 class="m-0 flex-1">{{ seccionNombre }}</h3>
                 <span class="text-surface-400">(Solo lectura)</span>
+                <p-button
+                    [label]="revisado ? 'Revisado' : 'Marcar como revisado'"
+                    [icon]="revisado ? 'pi pi-check-circle' : 'pi pi-circle'"
+                    [severity]="revisado ? undefined : 'secondary'"
+                    (onClick)="toggleRevisado(!revisado)"
+                    [disabled]="guardandoRevisado()"
+                    [style]="{'min-width': '12rem'}"
+                />
             </div>
 
             @if (cargando()) {
@@ -366,6 +374,8 @@ export class TutorRevisionSeccion implements OnInit {
     seccionNombre = '';
     cargando = signal(true);
     paneles = signal<PanelView[]>([]);
+    revisado = false;
+    guardandoRevisado = signal(false);
     panelValues: string[] = [];
     estadosTutor = signal<EstadoTutorSubseccionDTO[]>([]);
     comentariosCounts = signal<Record<string, number>>({});
@@ -394,6 +404,7 @@ export class TutorRevisionSeccion implements OnInit {
         this.seccionCodigo = this.route.snapshot.paramMap.get('seccionCodigo') || '';
         this.seccionNombre = this.getNombreSeccion(this.seccionCodigo);
         this.cargarDatos();
+        this.cargarEstadoRevisado();
     }
 
     private cargarDatos(): void {
@@ -757,5 +768,29 @@ export class TutorRevisionSeccion implements OnInit {
             'bibliografia': 'Medios educativos'
         };
         return nombres[codigo] || codigo;
+    }
+
+    private cargarEstadoRevisado(): void {
+        this.tutorReviewService.obtenerProgresoIndividual(this.estudianteId).subscribe({
+            next: (progreso) => {
+                const seccion = progreso.secciones?.[this.seccionCodigo];
+                this.revisado = seccion?.revisado ?? false;
+            }
+        });
+    }
+
+    toggleRevisado(nuevoValor: boolean): void {
+        this.guardandoRevisado.set(true);
+        this.tutorReviewService.marcarRevisado(this.estudianteId, this.seccionCodigo, nuevoValor).subscribe({
+            next: (resultado) => {
+                this.revisado = resultado.revisado ?? nuevoValor;
+                this.guardandoRevisado.set(false);
+            },
+            error: () => {
+                // Revertir el toggle en caso de error
+                this.revisado = !nuevoValor;
+                this.guardandoRevisado.set(false);
+            }
+        });
     }
 }

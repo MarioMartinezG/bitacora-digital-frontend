@@ -81,6 +81,7 @@ export class BitacoraSeccionView implements OnInit {
 
   /** Si el coordinador también es tutor, puede comentar y asignar estados */
   esTambienTutor = false;
+  revisado = signal(false);
 
   // Datos para la sección secuencia
   secuenciaNumeroCreditos     = signal<number | null>(null);
@@ -103,6 +104,7 @@ export class BitacoraSeccionView implements OnInit {
     this.seccionNombre = SECCIONES_NOMBRES[this.seccionCodigo] || this.seccionCodigo;
     this.esTambienTutor = this.authStateService.hasRole(UserRole.TUTOR);
     this.cargarDatos();
+    this.cargarEstadoRevisado();
   }
 
   private cargarDatos(): void {
@@ -405,5 +407,14 @@ export class BitacoraSeccionView implements OnInit {
       }
     }
     return rows;
+  }
+
+  private cargarEstadoRevisado(): void {
+    this.tutorReviewService.obtenerProgresoIndividual(this.estudianteId).subscribe({
+      next: (progreso) => {
+        const seccion = progreso.secciones?.[this.seccionCodigo];
+        this.revisado.set(seccion?.revisado ?? false);
+      }
+    });
   }
 }

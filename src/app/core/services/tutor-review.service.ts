@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BaseHttpService } from './base-http.service';
 import { LoginService } from './login.service';
-import { EstudianteProgresoResumenDTO } from '../models/estudiante-progreso.model';
+import { EstudianteProgresoResumenDTO, ProgresoSeccionDTO } from '../models/estudiante-progreso.model';
 import { RespuestaSeccionDTO } from '../models';
 
 @Injectable({
@@ -38,6 +38,14 @@ export class TutorReviewService extends BaseHttpService {
         return this.get<Record<string, RespuestaSeccionDTO>>(
             `/api/bitacora/secciones/usuario/${estudianteId}`
         );
+    }
+
+    marcarRevisado(estudianteId: number, seccionCodigo: string, revisado: boolean): Observable<ProgresoSeccionDTO> {
+        return this.patch<ProgresoSeccionDTO>('/api/bitacora/progreso/revisado', {
+            estudianteId,
+            seccionCodigo,
+            revisado
+        });
     }
 
     obtenerTutorId(): number {

@@ -30,7 +30,7 @@
       icon="pi pi-download"
       severity="help"
       [outlined]="true"
-      (onClick)="dt.exportCSV()"
+      (onClick)="exportarPDF()"
     />
   </ng-template>
 </p-toolbar>
@@ -102,7 +102,7 @@
       </td>
       <td>
         <span class="font-medium">{{ getSeccionesCompletadas(reporte) }}</span>
-        <span class="text-surface-500"> / {{ reporte.secciones?.length ?? 0 }}</span>
+        <span class="text-surface-500"> / 8</span>
       </td>
       <td>
         <p-button
