@@ -1,9 +1,11 @@
-import { Component, inject, OnInit, signal, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, inject, OnInit, signal, ElementRef, ViewChild, AfterViewChecked, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { interval } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
-import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
 import { PopoverModule } from 'primeng/popover';
@@ -21,7 +23,7 @@ import { SolicitudSesionDialog } from '../../../shared/components/solicitud-sesi
         FormsModule,
         ButtonModule,
         DrawerModule,
-        InputTextModule,
+        TextareaModule,
         TooltipModule,
         DividerModule,
         PopoverModule,
@@ -34,9 +36,10 @@ import { SolicitudSesionDialog } from '../../../shared/components/solicitud-sesi
 export class TutorWidget implements OnInit, AfterViewChecked {
     private tutorService = inject(TutorService);
     private toastService = inject(ToastService);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
-    @ViewChild('messageInput') messageInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
 
     // Estado local del widget
     isOpen = signal(false);
@@ -54,8 +57,11 @@ export class TutorWidget implements OnInit, AfterViewChecked {
     isOnline = this.tutorService.isOnline;
 
     ngOnInit(): void {
-        // Verificar estado del tutor al iniciar
+        // Verificar estado del tutor al iniciar y cada 30 segundos
         this.tutorService.checkStatus().subscribe();
+        interval(30000)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.tutorService.checkStatus().subscribe());
     }
 
     ngAfterViewChecked(): void {
