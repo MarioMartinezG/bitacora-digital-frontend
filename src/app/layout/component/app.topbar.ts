@@ -16,13 +16,13 @@ import { AuthStateService } from '../../core/services/auth-state.service';
     standalone: true,
     imports: [RouterModule, CommonModule, StyleClassModule, OverlayBadgeModule, AppConfigurator, NotificationPanel, UserMenu],
     template: ` <div class="layout-topbar">
-        <div class="layout-topbar-logo-container">
+        <div class="layout-topbar-logo-container" style="flex: 1; min-width: 0; display: flex; align-items: center;">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
             </button>
-            <span class="layout-topbar-logo" style="display: flex; align-items: center; gap: 0.5rem; cursor: default;">
-                <img src="ueb-escudo.jpg" alt="Escudo UEB" style="height: 2.5rem; width: auto; object-fit: contain;">
-                <span>Bitácora Digital</span>
+            <span class="layout-topbar-logo" style="display: flex; align-items: center; gap: 0.5rem; cursor: default; min-width: 0;">
+                <img src="ueb-escudo.jpg" alt="Escudo UEB" style="height: 2.5rem; width: auto; object-fit: contain; flex-shrink: 0;">
+                <span style="font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">TEIA - Tutoría Educativa con Inteligencia Artificial para el desarrollo de la Bitácora Digital</span>
             </span>
         </div>
 
