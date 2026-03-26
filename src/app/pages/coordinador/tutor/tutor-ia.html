@@ -37,103 +37,13 @@
   </div>
 
   <!-- Tabs -->
-  <p-tabs value="consultar">
+  <p-tabs value="documentos">
     <p-tablist>
-      <p-tab value="consultar"><i class="pi pi-comments mr-2"></i>Consultar al tutor</p-tab>
       <p-tab value="documentos"><i class="pi pi-folder-open mr-2"></i>Documentos</p-tab>
       <p-tab value="sistema"><i class="pi pi-server mr-2"></i>Estado del sistema</p-tab>
     </p-tablist>
 
     <p-tabpanels>
-
-      <!-- ── Tab: Consultar ─────────────────────────────────────── -->
-      <p-tabpanel value="consultar">
-        <div class="flex flex-col gap-5 pt-3 max-w-3xl">
-
-          <!-- Módulo (si hay) -->
-          @if (modulos().length > 0) {
-            <div class="flex flex-col gap-2">
-              <label class="font-medium text-sm">Módulo temático <span class="text-surface-400 font-normal">(opcional)</span></label>
-              <div class="flex flex-wrap gap-2">
-                @for (mod of modulos(); track mod.id) {
-                  <button type="button"
-                          class="px-3 py-1.5 rounded-full text-sm border transition-colors cursor-pointer"
-                          [class]="moduloSeleccionado() === mod.id
-                            ? 'border-primary-500 bg-primary text-white'
-                            : 'border-surface-300 dark:border-surface-600 hover:border-primary-400 text-surface-700 dark:text-surface-300'"
-                          (click)="seleccionarModulo(mod.id)">
-                    {{ mod.name }}
-                  </button>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- Pregunta -->
-          <div class="flex flex-col gap-2">
-            <label class="font-medium text-sm">¿Qué quieres consultar?</label>
-            <textarea pTextarea [(ngModel)]="pregunta" rows="4"
-                      placeholder="Escribe tu pregunta sobre diseño curricular..."
-                      class="w-full resize-y"></textarea>
-          </div>
-
-          <div>
-            <p-button label="Consultar" icon="pi pi-send"
-                      [loading]="enviando()" [disabled]="!pregunta.trim()"
-                      (click)="enviarPregunta()" />
-          </div>
-
-          <!-- Respuesta -->
-          @if (enviando()) {
-            <div class="flex flex-col gap-3">
-              <p-skeleton height="1.5rem" width="60%" />
-              <p-skeleton height="1rem" />
-              <p-skeleton height="1rem" />
-              <p-skeleton height="1rem" width="80%" />
-            </div>
-          }
-
-          @if (respuesta(); as r) {
-            <div class="border border-primary-200 dark:border-primary-700 rounded-xl overflow-hidden">
-              <div class="flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 border-b border-primary-200 dark:border-primary-700">
-                <i class="pi pi-sparkles text-primary"></i>
-                <span class="font-semibold text-primary text-sm">Respuesta de TEIA</span>
-                <div class="ml-auto flex items-center gap-2 text-xs text-surface-500">
-                  <p-tag [value]="confianzaLabel(r.confidence)" [severity]="confianzaSeverity(r.confidence)" />
-                  <span>{{ r.processing_time_ms }} ms</span>
-                </div>
-              </div>
-
-              <div class="p-5 flex flex-col gap-4">
-                <p class="text-surface-800 dark:text-surface-100 leading-relaxed m-0 whitespace-pre-wrap">{{ r.answer }}</p>
-
-                @if (r.sources.length || r.suggested_actions.length) {
-                  <div class="border-t border-surface-200 dark:border-surface-700 pt-4 flex flex-col gap-3">
-                    @if (r.sources.length) {
-                      <p class="text-xs text-surface-500 m-0">
-                        <i class="pi pi-book mr-1"></i>Fuentes: {{ r.sources.join(', ') }}
-                      </p>
-                    }
-                    @if (r.suggested_actions.length) {
-                      <div>
-                        <p class="text-xs font-medium text-surface-500 mb-2 m-0">Acciones sugeridas:</p>
-                        <div class="flex flex-col gap-1">
-                          @for (accion of r.suggested_actions; track $index) {
-                            <div class="flex items-start gap-2 text-sm">
-                              <i class="pi pi-arrow-right text-xs text-primary mt-0.5 flex-shrink-0"></i>
-                              <span class="text-surface-700 dark:text-surface-300">{{ accion }}</span>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      </p-tabpanel>
 
       <!-- ── Tab: Documentos ────────────────────────────────────── -->
       <p-tabpanel value="documentos">
@@ -164,16 +74,61 @@
                 </div>
 
                 @if (resultadoSubida(); as r) {
-                  @if (r.total_uploaded > 0) {
-                    <div class="text-sm text-green-700 dark:text-green-400 flex items-center gap-2">
-                      <i class="pi pi-check-circle"></i> {{ r.total_uploaded }} archivo(s) subido(s)
+                  <div class="rounded-lg border overflow-hidden text-sm"
+                       [class]="r.uploaded_files?.length && !r.failed_files?.length
+                         ? 'border-green-200 dark:border-green-700'
+                         : r.uploaded_files?.length
+                           ? 'border-yellow-200 dark:border-yellow-700'
+                           : 'border-red-200 dark:border-red-700'">
+
+                    <!-- Cabecera del resultado -->
+                    <div class="flex items-center gap-2 px-3 py-2"
+                         [class]="r.uploaded_files?.length && !r.failed_files?.length
+                           ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                           : r.uploaded_files?.length
+                             ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
+                             : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'">
+                      <i [class]="r.uploaded_files?.length && !r.failed_files?.length
+                           ? 'pi pi-check-circle'
+                           : r.uploaded_files?.length
+                             ? 'pi pi-exclamation-circle'
+                             : 'pi pi-times-circle'"></i>
+                      <span class="font-medium">
+                        @if (r.uploaded_files?.length && !r.failed_files?.length) {
+                          {{ r.uploaded_files?.length }} archivo(s) cargado(s) correctamente
+                        } @else if (r.uploaded_files?.length) {
+                          {{ r.uploaded_files?.length }} cargado(s), {{ r.failed_files?.length }} con error
+                        } @else {
+                          No se pudo cargar ningún archivo
+                        }
+                      </span>
                     </div>
-                  }
-                  @if (r.errors.length) {
-                    <div class="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
-                      <i class="pi pi-exclamation-triangle"></i> {{ r.errors.length }} error(es)
-                    </div>
-                  }
+
+                    <!-- Archivos subidos exitosamente -->
+                    @if (r.uploaded_files?.length) {
+                      <div class="px-3 py-2 border-t border-surface-100 dark:border-surface-700 flex flex-col gap-1">
+                        @for (f of r.uploaded_files; track f.filename) {
+                          <div class="flex items-center gap-1.5 text-surface-600 dark:text-surface-400">
+                            <i class="pi pi-file text-xs text-green-500"></i>
+                            <span class="truncate">{{ f.filename }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    <!-- Archivos fallidos -->
+                    @if (r.failed_files?.length) {
+                      <div class="px-3 py-2 border-t border-red-100 dark:border-red-800/30 flex flex-col gap-1">
+                        @for (f of r.failed_files; track f.filename) {
+                          <div class="flex items-start gap-1.5 text-red-600 dark:text-red-400">
+                            <i class="pi pi-times text-xs mt-0.5 flex-shrink-0"></i>
+                            <span>{{ f.filename }}: {{ f.error }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                  </div>
                 }
               </div>
 
@@ -328,7 +283,7 @@
                         <span class="font-mono text-xs bg-surface-100 dark:bg-surface-800 px-2 py-0.5 rounded">{{ s.model_used }}</span>
                       </div>
                     }
-                    @if (s.models.length) {
+                    @if (s.models?.length) {
                       <div>
                         <span class="text-surface-500 block mb-2">Modelos disponibles</span>
                         <div class="flex flex-wrap gap-1">

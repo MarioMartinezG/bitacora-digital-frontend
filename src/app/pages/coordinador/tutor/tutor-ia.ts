@@ -1,11 +1,9 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { KeyValuePipe } from '@angular/common';
 
 // PrimeNG
 import { TabsModule } from 'primeng/tabs';
 import { ButtonModule } from 'primeng/button';
-import { TextareaModule } from 'primeng/textarea';
 import { TagModule } from 'primeng/tag';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
@@ -17,9 +15,6 @@ import { MessageService } from 'primeng/api';
 import {
   TutorHealth,
   TutorStatus,
-  TutorModule,
-  TutorAskRequest,
-  TutorAskResponse,
   DocumentInfo,
   DocumentUploadResponse,
   IndexTaskResponse,
@@ -28,17 +23,14 @@ import {
 
 // Services
 import { TutorService } from '../../../core/services/tutor.service';
-import { LoginService } from '../../../core/services/login.service';
 
 @Component({
   selector: 'app-tutor-ia',
   standalone: true,
   imports: [
-    FormsModule,
     KeyValuePipe,
     TabsModule,
     ButtonModule,
-    TextareaModule,
     TagModule,
     TableModule,
     ToastModule,
@@ -50,10 +42,8 @@ import { LoginService } from '../../../core/services/login.service';
 })
 export class TutorIa implements OnInit, OnDestroy {
   private tutorService = inject(TutorService);
-  private loginService = inject(LoginService);
   private messageService = inject(MessageService);
 
-  private readonly SESSION_ID = crypto.randomUUID();
   private pollTimer: any = null;
 
   // ── Estado del sistema ────────────────────────────────────────────
@@ -61,15 +51,6 @@ export class TutorIa implements OnInit, OnDestroy {
   status = signal<TutorStatus | null>(null);
   cargandoSistema = signal(true);
   logs = signal<{ nivel: 'ok' | 'error' | 'warn'; mensaje: string; detalle?: string }[]>([]);
-
-  // ── Módulos ───────────────────────────────────────────────────────
-  modulos = signal<TutorModule[]>([]);
-  moduloSeleccionado = signal<string | null>(null);
-
-  // ── Pregunta / Respuesta ──────────────────────────────────────────
-  pregunta = '';
-  enviando = signal(false);
-  respuesta = signal<TutorAskResponse | null>(null);
 
   // ── Documentos ────────────────────────────────────────────────────
   documentos = signal<DocumentInfo[]>([]);
@@ -85,7 +66,6 @@ export class TutorIa implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.verificarSalud();
-    this.cargarModulos();
     this.cargarDocumentos();
   }
 
@@ -147,64 +127,12 @@ export class TutorIa implements OnInit, OnDestroy {
   get apiConectada(): boolean { return this.health() !== null; }
   get ollamaConectado(): boolean { return this.health()?.ollama_connected ?? false; }
   get modeloActivo(): string { return this.status()?.model_used ?? (this.status()?.models?.[0] ?? '-'); }
-  get tutorListo(): boolean { return this.apiConectada && this.ollamaConectado; }
-
-  // ── Módulos ───────────────────────────────────────────────────────
-  cargarModulos(): void {
-    this.tutorService.getModules().subscribe({
-      next: (m) => this.modulos.set(m),
-      error: () => {}
-    });
-  }
-
-  seleccionarModulo(id: string): void {
-    this.moduloSeleccionado.set(this.moduloSeleccionado() === id ? null : id);
-  }
-
-  // ── Pregunta ──────────────────────────────────────────────────────
-  enviarPregunta(): void {
-    if (!this.pregunta.trim()) return;
-
-    const userData = this.getUserData();
-    const request: TutorAskRequest = {
-      question: this.pregunta,
-      module: this.moduloSeleccionado() ?? '',
-      session_id: this.SESSION_ID,
-      user_id: userData.username,
-      user_role: 'administrador',
-      course_id: 'bitacora_digital'
-    };
-
-    this.enviando.set(true);
-    this.respuesta.set(null);
-
-    this.tutorService.askRaw(request).subscribe({
-      next: (r) => {
-        this.respuesta.set(r);
-        this.enviando.set(false);
-      },
-      error: () => {
-        this.enviando.set(false);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo obtener respuesta del tutor' });
-      }
-    });
-  }
-
-  confianzaLabel(c: number): string {
-    return `${Math.round(c * 100)}%`;
-  }
-
-  confianzaSeverity(c: number): 'success' | 'warn' | 'danger' {
-    if (c >= 0.7) return 'success';
-    if (c >= 0.4) return 'warn';
-    return 'danger';
-  }
 
   // ── Documentos ────────────────────────────────────────────────────
   cargarDocumentos(): void {
     this.cargandoDocumentos.set(true);
     this.tutorService.getDocuments().subscribe({
-      next: (r) => { this.documentos.set(r.documents); this.cargandoDocumentos.set(false); },
+      next: (r) => { this.documentos.set(r.documents ?? []); this.cargandoDocumentos.set(false); },
       error: () => this.cargandoDocumentos.set(false)
     });
   }
@@ -226,11 +154,11 @@ export class TutorIa implements OnInit, OnDestroy {
         this.resultadoSubida.set(r);
         this.subiendoArchivos.set(false);
         this.cargarDocumentos();
-        if (r.total_uploaded > 0) {
-          this.messageService.add({ severity: 'success', summary: 'Archivos subidos', detail: `${r.total_uploaded} archivo(s) subido(s) correctamente` });
+        if (r.uploaded_files?.length) {
+          this.messageService.add({ severity: 'success', summary: 'Archivos subidos', detail: `${r.uploaded_files?.length} archivo(s) subido(s) correctamente` });
         }
-        if (r.errors?.length) {
-          this.messageService.add({ severity: 'warn', summary: 'Algunos errores', detail: `${r.errors.length} archivo(s) fallaron` });
+        if (r.failed_files?.length) {
+          this.messageService.add({ severity: 'warn', summary: 'Algunos errores', detail: `${r.failed_files?.length} archivo(s) fallaron` });
         }
       },
       error: () => {
@@ -310,15 +238,5 @@ export class TutorIa implements OnInit, OnDestroy {
       error: 'danger'
     };
     return map[status] ?? 'secondary';
-  }
-
-  // ── Utilidades ────────────────────────────────────────────────────
-  private getUserData(): { username: string } {
-    try {
-      const u = JSON.parse(this.loginService.getUser() ?? '{}');
-      return { username: u.username ?? u.correo ?? 'coordinador' };
-    } catch {
-      return { username: 'coordinador' };
-    }
   }
 }

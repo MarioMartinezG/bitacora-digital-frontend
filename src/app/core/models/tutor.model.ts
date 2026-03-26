@@ -84,7 +84,7 @@ export interface TutorHealth {
 // Status del Tutor (GET /api/tutor/status)
 export interface TutorStatus {
   status: string;
-  models: string[];
+  models: string[] | null;
   systemInfo: Record<string, any>;
   model_used?: string;
 }
@@ -104,12 +104,16 @@ export interface DocumentListResponse {
   raw_path: string;
 }
 
+export interface FailedFileInfo {
+  filename: string;
+  error: string;
+}
+
 // Response de POST /api/tutor/documents/upload
 export interface DocumentUploadResponse {
-  message: string;
-  uploaded_files: DocumentInfo[];
-  total_uploaded: number;
-  errors: string[];
+  uploaded_files: DocumentInfo[] | null;
+  failed_files: FailedFileInfo[] | null;
+  upload_path: string;
 }
 
 // Response de POST /api/tutor/index
