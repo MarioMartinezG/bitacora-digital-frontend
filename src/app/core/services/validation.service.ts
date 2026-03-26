@@ -23,6 +23,9 @@ export interface ValidateActivityRequest {
 export interface ValidateEvaluationRequest {
   resultado_aprendizaje: string;
   nombre_actividad: string;
+  dimension: string;
+  metodologia: string;
+  descripcion_actividad: string;
   descripcion_evaluacion: string;
   tipo: string;
   momento: string;
