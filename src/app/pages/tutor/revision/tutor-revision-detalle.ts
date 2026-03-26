@@ -14,6 +14,7 @@ interface SeccionInfo {
     porcentaje: number;
     estado: EstadoAvance;
     estadoProfesor?: EstadoAvance;
+    revisado: boolean;
 }
 
 const SECCIONES_NOMBRES: Record<string, string> = {
@@ -44,13 +45,18 @@ const SECCIONES_NOMBRES: Record<string, string> = {
                     <div class="col-span-12 md:col-span-6 xl:col-span-3">
                         <div class="card cursor-pointer" (click)="verSeccion(seccion.codigo)">
                             <div class="flex flex-col gap-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-semibold text-sm">{{ seccion.nombre }}</span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-semibold text-sm flex-1 min-w-0">{{ seccion.nombre }}</span>
                                     <p-tag [severity]="getSeverity(seccion.estadoProfesor || seccion.estado)" [value]="getLabel(seccion.estadoProfesor || seccion.estado)" />
                                 </div>
                                 <p-progressbar [value]="seccion.porcentaje" [showValue]="true" [style]="{height: '1.25rem'}" />
-                                <div class="flex justify-end">
+                                <div class="flex items-center justify-between gap-2">
                                     <p-button icon="pi pi-eye" label="Revisar" size="small" [text]="true" />
+                                    @if (seccion.revisado) {
+                                        <p-tag severity="success" value="Revisado" icon="pi pi-check-circle" />
+                                    } @else {
+                                        <p-tag severity="warn" value="Pendiente" icon="pi pi-clock" />
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -86,7 +92,8 @@ export class TutorRevisionDetalle implements OnInit {
                             nombre: SECCIONES_NOMBRES[codigo],
                             porcentaje: secData?.porcentaje ?? 0,
                             estado: (secData?.estado ?? 'sin_avances') as EstadoAvance,
-                            estadoProfesor: secData?.estadoProfesor as EstadoAvance | undefined
+                            estadoProfesor: secData?.estadoProfesor as EstadoAvance | undefined,
+                            revisado: secData?.revisado ?? false
                         };
                     });
                     this.secciones.set(seccionesList);

@@ -1,8 +1,13 @@
 <div class="flex flex-col gap-4">
-  <div class="flex items-center gap-3">
+  <div class="flex items-center gap-3 flex-wrap">
     <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" (onClick)="volver()" />
-    <h3 class="m-0">{{ seccionNombre }}</h3>
+    <h3 class="m-0 flex-1">{{ seccionNombre }}</h3>
     <span class="text-surface-400">(Solo lectura)</span>
+    @if (revisado()) {
+      <p-tag severity="success" value="Revisado por tutor" icon="pi pi-check-circle" />
+    } @else {
+      <p-tag severity="warn" value="Pendiente de revisión" icon="pi pi-clock" />
+    }
   </div>
 
   @if (cargando()) {

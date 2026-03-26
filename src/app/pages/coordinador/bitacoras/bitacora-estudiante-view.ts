@@ -17,6 +17,7 @@ interface SeccionInfo {
   nombre: string;
   porcentaje: number;
   estado: EstadoAvance;
+  revisado: boolean;
 }
 
 const SECCIONES_BITACORA: { codigo: string; nombre: string }[] = [
@@ -71,7 +72,8 @@ export class BitacoraEstudianteView implements OnInit {
           return {
             ...s,
             porcentaje,
-            estado: calcularEstadoAvance(porcentaje)
+            estado: calcularEstadoAvance(porcentaje),
+            revisado: seccionProgreso?.revisado ?? false
           };
         }));
 
