@@ -252,9 +252,15 @@ export class ComoEvaluareComponent extends BaseBitacoraComponent implements OnIn
       [index]: { loading: true, result: null, error: null }
     }));
 
+    const dim = act?.dimension;
+    const dimensionStr = Array.isArray(dim) ? dim.join(', ') : (dim || '');
+
     this.validationService.validateEvaluation({
       resultado_aprendizaje: act?.ra || '',
       nombre_actividad: act?.nombre || evalVal.nombre || '',
+      dimension: dimensionStr,
+      metodologia: act?.metodologia || '',
+      descripcion_actividad: act?.descripcion || '',
       descripcion_evaluacion: evalVal.descripcionEvaluacion,
       tipo: evalVal.tipoEvaluacion,
       momento: evalVal.momento,
