@@ -4,6 +4,19 @@
   <!-- Title -->
   <h2 class="text-2xl font-semibold m-0">Dashboard del Coordinador</h2>
 
+  <p-fieldset legend="¿Qué puedes hacer como coordinador?" [toggleable]="true" styleClass="mb-8">
+    <p class="m-0 leading-relaxed text-surface-600">
+      Desde este espacio puedes hacer seguimiento al progreso general del programa y gestionar
+      las alertas del sistema. Para consultar las bitácoras de los docentes, ve a
+      <strong>Seguimiento &rsaquo; Bitácoras Globales</strong>, selecciona un estudiante y luego el módulo
+      que deseas revisar: podrás leer sus respuestas y ver si el tutor ya lo marcó como revisado.
+      En <strong>Seguimiento &rsaquo; Reportes de Progreso</strong> puedes consultar el avance de todos los
+      estudiantes y exportar el informe en PDF. Las <strong>alertas pendientes</strong> que aparecen
+      en este dashboard también pueden resolverse directamente desde aquí.
+    </p>
+  </p-fieldset>
+  <br>
+
   <!-- Row 1: Stats Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
     @if (loading()) {

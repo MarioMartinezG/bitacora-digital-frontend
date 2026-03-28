@@ -1,4 +1,17 @@
 @if (userRole === 1) {
+    <p-fieldset legend="¿Cómo funciona la bitácora?" [toggleable]="true" styleClass="mb-8">
+        <p class="m-0 leading-relaxed text-surface-600">
+            La bitácora digital es el espacio donde registras y organizas tu planeación pedagógica a lo
+            largo del curso <strong>En sus marcas, listos, RAC!</strong>. Está compuesta por
+            <strong>8 módulos</strong> que debes diligenciar: desde
+            <em>Observar, registrar y actuar de manera oportuna</em> hasta <em>Medios educativos</em>.
+            El sistema guarda automáticamente tus avances y calcula el progreso de cada sección.
+            Cuando termines un módulo, tu tutor podrá revisarlo y dejarte comentarios o retroalimentación.
+            Puedes exportar cualquier sección como PDF desde el botón de exportar dentro del módulo.
+        </p>
+    </p-fieldset>
+    <br>
+
     <div class="grid grid-cols-12 gap-8">
         <div class="col-span-12">
             <app-timeline-widget />
@@ -47,6 +60,19 @@
         </div>
     </div>
 } @else {
+    <p-fieldset legend="¿Cómo funciona la revisión?" [toggleable]="true" styleClass="mb-8">
+        <p class="m-0 leading-relaxed text-surface-600">
+            Como tutor puedes hacer seguimiento al avance de tus estudiantes en los
+            <strong>8 módulos</strong> de la bitácora. Desde esta vista ves el progreso general de
+            cada uno. Para revisar las respuestas en detalle, ve a
+            <strong>Revisión de respuestas</strong> en el menú lateral, selecciona el estudiante y
+            luego el módulo. Dentro de cada módulo puedes marcar subsecciones con un estado
+            (<em>Sin avances</em>, <em>En desarrollo</em> o <em>Completado</em>), dejar comentarios por subsección y marcar
+            el módulo completo como revisado cuando hayas terminado.
+        </p>
+    </p-fieldset>
+    <br>
+
     <div class="grid grid-cols-12 gap-8">
         <div class="col-span-12 xl:col-span-8">
             <app-student-progress-summary />
