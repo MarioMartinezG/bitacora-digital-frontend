@@ -6,6 +6,7 @@ import { ProgressBar } from 'primeng/progressbar';
 import { ChartModule } from 'primeng/chart';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
+import { FieldsetModule } from 'primeng/fieldset';
 import { MessageService } from 'primeng/api';
 import { EstadisticasGenerales, AlertaSistema } from '../../../core/models';
 import { EstadisticasService } from '../../../core/services/estadisticas.service';
@@ -22,7 +23,8 @@ import { forkJoin } from 'rxjs';
     ProgressBar,
     ChartModule,
     SkeletonModule,
-    ToastModule
+    ToastModule,
+    FieldsetModule,
   ],
   providers: [MessageService]
 })

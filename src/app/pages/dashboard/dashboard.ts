@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FieldsetModule } from 'primeng/fieldset';
 import { Router } from '@angular/router';
 import { NotificationsWidget } from './components/notificaciones/notificationswidget';
 import { TimelineWidget } from './components/linea-tiempo/timelinewidget';
@@ -12,7 +13,7 @@ import { RespuestaSeccionDTO, TutorEstudianteDTO, UserRole } from '../../core/mo
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NotificationsWidget, TimelineWidget, Generalprogresswidget, ModuleProgressWidget, StudentProgressSummary],
+  imports: [NotificationsWidget, TimelineWidget, Generalprogresswidget, ModuleProgressWidget, StudentProgressSummary, FieldsetModule],
   templateUrl: 'dashboard.html'
 })
 export class Dashboard implements OnInit {
