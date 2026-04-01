@@ -10,6 +10,8 @@ import { KnobModule } from 'primeng/knob';
 import { TagModule } from 'primeng/tag';
 import { ChartModule } from 'primeng/chart';
 import { MessageModule } from 'primeng/message';
+import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 // Componentes
 import { LoadingComponent } from '../../../utils/loading/loading';
@@ -17,10 +19,16 @@ import { SaveStatusIndicatorComponent } from '../../../shared/components/save-st
 import { BitacoraCommentButtonComponent } from '../../../shared/components/bitacora-comment-button/bitacora-comment-button';
 import { ExportButtonComponent } from '../../../shared/components/export-button/export-button';
 
+// Modelos
+import { Topic } from '../../../core/models/topic.model';
+
 // Base
 import { BaseBitacoraComponent, SectionConfig } from '../shared/base-bitacora.component';
 import { calcularEstadoAvance } from '../../../core/models';
 import { CaracterizaJson } from '../../../core/models/bitacora.model';
+
+/** Opción del multiselect de temas */
+interface TemaItem { label: string; value: string; }
 
 @Component({
   selector: 'app-secuencia-curso-component',
@@ -36,6 +44,8 @@ import { CaracterizaJson } from '../../../core/models/bitacora.model';
     TagModule,
     ChartModule,
     MessageModule,
+    SelectModule,
+    MultiSelectModule,
     LoadingComponent,
     SaveStatusIndicatorComponent,
     BitacoraCommentButtonComponent,
@@ -49,6 +59,16 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
 
   protected seccionCodigo = 'secuencia';
   protected sectionsConfig: SectionConfig[] = [];
+
+  // Opciones de tipo de actividad
+  readonly tipoOptions = [
+    { label: 'Sincrónica',  value: 'sincrona'  },
+    { label: 'Asincrónica', value: 'asincrona' }
+  ];
+
+  // Temas cargados desde Factores situacionales
+  temasDisponibles = signal<TemaItem[]>([]);
+  temasEncontrados = signal(false);
 
   // Datos cargados desde "Identificación de tu curso"
   numeroCreditos = signal<number | null>(null);
@@ -64,11 +84,23 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
   /** True si hay horas disponibles para planear */
   datosHorasDisponibles = computed(() => this.horasTotalesDisponibles() > 0);
 
-  // Horas calculadas desde la tabla
+  // Horas calculadas desde la tabla — totales
   horasAsignadas = 0;
   horasDisponibles = 0;
   porcentajeHorasAsignadas = 0;
   horasExcedidas = false;
+
+  // Horas por tipo: sincrónicas (acompañamiento directo)
+  horasAsignadasSync  = 0;
+  horasDisponiblesSync = 0;
+  porcentajeHorasSync = 0;
+  horasExcedidasSync  = false;
+
+  // Horas por tipo: asincrónicas (trabajo independiente)
+  horasAsignadasAsync  = 0;
+  horasDisponiblesAsync = 0;
+  porcentajeHorasAsync = 0;
+  horasExcedidasAsync  = false;
 
   // Chart de referencia: directo vs independiente (valores de caracteriza)
   chartData: any;
@@ -81,6 +113,7 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
   override ngOnInit(): void {
     super.ngOnInit();
     this.cargarDatosCaracteriza();
+    this.cargarDatosFactores();
     this.inicializarChart();
   }
 
@@ -98,9 +131,27 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
         this.caracterizaCargada.set(true);
         this.actualizarChart();
         this.recalcularHoras();
+        this.calculateProgress();
       },
       error: () => {
         this.caracterizaCargada.set(true);
+      }
+    });
+  }
+
+  private cargarDatosFactores(): void {
+    this.bitacoraService.obtenerSeccion('factores').subscribe({
+      next: (respuesta) => {
+        const contenidos = (respuesta?.datos as any)?.contenidos;
+        const topics: Topic[] = contenidos?.topics || [];
+
+        const opciones: TemaItem[] = topics.map(t => ({ label: t.name, value: t.name }));
+
+        this.temasDisponibles.set(opciones);
+        this.temasEncontrados.set(topics.length > 0);
+      },
+      error: () => {
+        this.temasEncontrados.set(false);
       }
     });
   }
@@ -131,14 +182,18 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
   }
 
   private crearFilaGroup(fila: any): FormGroup {
+    // temas: ahora es string[] (multiselect). Backward-compat: si era string lo descartamos
+    const temasValue = Array.isArray(fila.temas) ? fila.temas : [];
     return this.fb.group({
       // Backward-compat: 'modulo' → 'unidad', 'descripcion' → 'producto'
-      unidad:           [fila.unidad           || fila.modulo      || ''],
-      temas:            [fila.temas            || ''],
-      actividadesAsync: [fila.actividadesAsync || ''],
-      producto:         [fila.producto         || fila.descripcion || ''],
-      evidencia:        [fila.evidencia        || ''],
-      horas:            [fila.horas            || 0]
+      unidad:          [fila.unidad           || fila.modulo      || ''],
+      temas:           [temasValue],
+      // Backward-compat: filas antiguas sin tipo se consideran asincrónicas
+      tipoActividad:   [fila.tipoActividad    || 'asincrona'],
+      actividadesAsync:[fila.actividadesAsync || ''],
+      producto:        [fila.producto         || fila.descripcion || ''],
+      evidencia:       [fila.evidencia        || ''],
+      horas:           [fila.horas            || 0]
     });
   }
 
@@ -152,25 +207,35 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
   }
 
   protected override calculateProgress(): void {
-    const filas = this.secuenciaFormArray.controls;
-    const total = filas.length;
-    const completas = filas.filter(fila => {
-      const v = fila.value;
-      return v.unidad?.trim() &&
-             v.temas?.trim() &&
-             v.actividadesAsync?.trim() &&
-             v.producto?.trim() &&
-             v.evidencia?.trim() &&
-             (Number(v.horas) > 0);
-    }).length;
+    const directo       = this.horasDirectoCat()      ?? 0;
+    const independiente = this.horasIndependienteCat() ?? 0;
 
-    const percentage = total > 0 ? Math.round((completas / total) * 100) : 0;
+    // Sin datos de horas en Identificación: progreso 0
+    if (directo === 0 && independiente === 0) {
+      this._progress.set({
+        sections: [{ sectionName: 'secuencia', completedFields: 0, totalFields: 1, percentage: 0, estado: calcularEstadoAvance(0) }],
+        totalPercentage: 0,
+        estado: calcularEstadoAvance(0)
+      });
+      return;
+    }
+
+    // % de cada tipo, ya calculados y capados a 100 en recalcularHoras()
+    const pSync  = directo       > 0 ? this.porcentajeHorasSync  : null;
+    const pAsync = independiente > 0 ? this.porcentajeHorasAsync : null;
+
+    // Promedio solo de los tipos que tienen horas definidas
+    const partes = [pSync, pAsync].filter((p): p is number => p !== null);
+    const raw = Math.round(partes.reduce((s, p) => s + p, 0) / partes.length);
+
+    // Si hay horas excedidas la sección nunca se marca como completada
+    const percentage = this.horasExcedidas ? Math.min(raw, 99) : Math.min(raw, 100);
 
     this._progress.set({
       sections: [{
         sectionName: 'secuencia',
-        completedFields: completas,
-        totalFields: total,
+        completedFields: percentage,
+        totalFields: 100,
         percentage,
         estado: calcularEstadoAvance(percentage)
       }],
@@ -189,13 +254,42 @@ export class SecuenciaCursoComponent extends BaseBitacoraComponent implements On
 
   recalcularHoras(): void {
     const filas = this.secuenciaFormArray.value as any[];
-    this.horasAsignadas = filas.reduce((sum, f) => sum + (Number(f.horas) || 0), 0);
-    const total = this.horasTotalesDisponibles();
-    this.horasDisponibles = Math.max(total - this.horasAsignadas, 0);
+
+    // Separar por tipo
+    this.horasAsignadasSync  = filas
+      .filter(f => f.tipoActividad === 'sincrona')
+      .reduce((sum, f) => sum + (Number(f.horas) || 0), 0);
+
+    this.horasAsignadasAsync = filas
+      .filter(f => f.tipoActividad !== 'sincrona')
+      .reduce((sum, f) => sum + (Number(f.horas) || 0), 0);
+
+    this.horasAsignadas = this.horasAsignadasSync + this.horasAsignadasAsync;
+
+    const directo       = this.horasDirectoCat()      ?? 0;
+    const independiente = this.horasIndependienteCat() ?? 0;
+    const total         = this.horasTotalesDisponibles();
+
+    // Disponibles por tipo (mínimo 0, nunca negativo)
+    this.horasDisponiblesSync  = Math.max(directo       - this.horasAsignadasSync,  0);
+    this.horasDisponiblesAsync = Math.max(independiente - this.horasAsignadasAsync, 0);
+    this.horasDisponibles      = Math.max(total         - this.horasAsignadas,      0);
+
+    // Excedidos
+    this.horasExcedidasSync  = directo       > 0 && this.horasAsignadasSync  > directo;
+    this.horasExcedidasAsync = independiente > 0 && this.horasAsignadasAsync > independiente;
+    this.horasExcedidas      = this.horasExcedidasSync || this.horasExcedidasAsync;
+
+    // Porcentajes
     this.porcentajeHorasAsignadas = total > 0
       ? Math.min(Math.round((this.horasAsignadas / total) * 100), 100)
       : 0;
-    this.horasExcedidas = total > 0 && this.horasAsignadas > total;
+    this.porcentajeHorasSync = directo > 0
+      ? Math.min(Math.round((this.horasAsignadasSync / directo) * 100), 100)
+      : 0;
+    this.porcentajeHorasAsync = independiente > 0
+      ? Math.min(Math.round((this.horasAsignadasAsync / independiente) * 100), 100)
+      : 0;
   }
 
   actualizarChart(): void {
