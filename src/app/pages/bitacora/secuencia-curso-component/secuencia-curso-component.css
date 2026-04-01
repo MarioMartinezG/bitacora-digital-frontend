@@ -26,6 +26,15 @@
   overflow-x: auto;
 }
 
+/* Filas por tipo de actividad */
+.fila-sincrona {
+  background-color: color-mix(in srgb, #f97316 4%, transparent);
+}
+
+.fila-asincrona {
+  background-color: color-mix(in srgb, #22c55e 4%, transparent);
+}
+
 /* Fila con horas excedidas: resaltado sutil en rojo */
 .fila-excedida {
   background-color: color-mix(in srgb, var(--p-red-500) 6%, transparent);

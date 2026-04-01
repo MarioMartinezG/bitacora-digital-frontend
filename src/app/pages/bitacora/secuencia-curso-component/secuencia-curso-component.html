@@ -18,11 +18,11 @@
         @if (datosHorasDisponibles()) {
             <div class="grid grid-cols-12 gap-4 mb-5">
 
-                <!-- TARJETA 1: Distribución de horas -->
-                <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
+                <!-- TARJETA 1: Progreso total de horas -->
+                <div class="col-span-12 lg:col-span-4" style="min-height: 280px;">
                     <div class="card h-full">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="font-semibold text-lg">Distribución de horas</span>
+                            <span class="font-semibold text-lg">Horas totales</span>
                             <div class="flex items-center justify-center bg-blue-100 rounded-border"
                                 style="width: 2.5rem; height: 2.5rem;">
                                 <i class="pi pi-clock text-blue-500 text-xl"></i>
@@ -30,7 +30,7 @@
                         </div>
 
                         <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 md:col-span-5">
+                            <div class="col-span-12 md:col-span-6">
                                 <table>
                                     <tr class="border-bottom-1 surface-border">
                                         <td class="py-2 pr-3">
@@ -46,17 +46,8 @@
                                     <tr class="border-bottom-1 surface-border">
                                         <td class="py-2 pr-3">
                                             <div class="flex items-center gap-2">
-                                                <i class="pi pi-clock text-gray-500"></i>
-                                                <span class="text-color-secondary">Horas totales</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-2 font-semibold">{{ horasTotalesDisponibles() }}</td>
-                                    </tr>
-                                    <tr class="border-bottom-1 surface-border">
-                                        <td class="py-2 pr-3">
-                                            <div class="flex items-center gap-2">
                                                 <i class="pi pi-check-circle text-green-500"></i>
-                                                <span class="text-color-secondary">Horas asignadas</span>
+                                                <span class="text-color-secondary">Asignadas</span>
                                             </div>
                                         </td>
                                         <td class="py-2 font-semibold"
@@ -69,86 +60,148 @@
                                         <td class="py-2 pr-3">
                                             <div class="flex items-center gap-2">
                                                 <i class="pi pi-hourglass text-primary"></i>
-                                                <span class="font-medium">Horas disponibles</span>
+                                                <span class="font-medium">Disponibles</span>
                                             </div>
                                         </td>
                                         <td class="py-2 font-bold text-xl"
                                             [class.text-primary]="!horasExcedidas"
                                             [class.text-red-500]="horasExcedidas">
-                                            {{ horasExcedidas ? '-' + (horasAsignadas - horasTotalesDisponibles()) : horasDisponibles }}
+                                            {{ horasDisponibles }}
                                         </td>
                                     </tr>
                                 </table>
                             </div>
 
-                            <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                            <div class="col-span-12 md:col-span-6 flex items-center justify-center">
                                 <p-knob [(ngModel)]="porcentajeHorasAsignadas" [readonly]="true"
-                                    [min]="0" [max]="100" valueTemplate="{value}%" [size]="150">
+                                    [min]="0" [max]="100" valueTemplate="{value}%" [size]="130">
                                 </p-knob>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TARJETA 2: Distribución por tipo de trabajo (valores de referencia) -->
-                <div class="col-span-12 lg:col-span-6" style="min-height: 280px;">
-                    <div class="card h-full">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-lg">Distribución por tipo de trabajo</span>
-                            <div class="flex items-center justify-center bg-orange-100 rounded-border"
+                <!-- TARJETA 2: Actividades sincrónicas -->
+                <div class="col-span-12 lg:col-span-4" style="min-height: 280px;">
+                    <div class="card h-full border-left-3"
+                        [class.border-orange-400]="!horasExcedidasSync"
+                        [class.border-red-500]="horasExcedidasSync">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-semibold text-lg">Sincrónicas</span>
+                            <div class="flex items-center justify-center rounded-border"
+                                [class.bg-orange-100]="!horasExcedidasSync"
+                                [class.bg-red-100]="horasExcedidasSync"
                                 style="width: 2.5rem; height: 2.5rem;">
-                                <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
+                                <i class="pi pi-users text-xl"
+                                    [class.text-orange-500]="!horasExcedidasSync"
+                                    [class.text-red-500]="horasExcedidasSync"></i>
                             </div>
                         </div>
                         <p class="text-color-secondary text-xs mt-0 mb-3">
-                            Valores de referencia definidos en Identificación de tu curso
+                            Acompañamiento directo — disponible: <strong>{{ horasDirectoCat() }} hrs</strong>
                         </p>
 
                         <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 md:col-span-5">
+                            <div class="col-span-12 md:col-span-6">
                                 <table>
                                     <tr class="border-bottom-1 surface-border">
                                         <td class="py-2 pr-3">
                                             <div class="flex items-center gap-2">
-                                                <i class="pi pi-home text-green-500"></i>
-                                                <span class="text-color-secondary">Trabajo independiente</span>
+                                                <i class="pi pi-check-circle text-orange-500"></i>
+                                                <span class="text-color-secondary">Asignadas</span>
                                             </div>
                                         </td>
-                                        <td class="py-2 font-semibold text-green-500">
-                                            {{ horasIndependienteCat() }} hrs
-                                        </td>
-                                    </tr>
-                                    <tr class="border-bottom-1 surface-border">
-                                        <td class="py-2 pr-3">
-                                            <div class="flex items-center gap-2">
-                                                <i class="pi pi-users text-orange-500"></i>
-                                                <span class="text-color-secondary">Acompañamiento directo</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-2 font-semibold text-orange-500">
-                                            {{ horasDirectoCat() }} hrs
+                                        <td class="py-2 font-semibold"
+                                            [class.text-orange-500]="!horasExcedidasSync"
+                                            [class.text-red-500]="horasExcedidasSync">
+                                            {{ horasAsignadasSync }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="py-2 pr-3">
                                             <div class="flex items-center gap-2">
-                                                <i class="pi pi-calculator text-primary"></i>
-                                                <span class="font-medium">Total disponible</span>
+                                                <i class="pi pi-hourglass"
+                                                    [class.text-orange-400]="!horasExcedidasSync"
+                                                    [class.text-red-500]="horasExcedidasSync"></i>
+                                                <span class="font-medium">Disponibles</span>
                                             </div>
                                         </td>
-                                        <td class="py-2 font-bold text-xl text-primary">
-                                            {{ horasTotalesDisponibles() }} hrs
+                                        <td class="py-2 font-bold text-xl"
+                                            [class.text-orange-500]="!horasExcedidasSync"
+                                            [class.text-red-500]="horasExcedidasSync">
+                                            {{ horasDisponiblesSync }}
                                         </td>
                                     </tr>
                                 </table>
                             </div>
 
-                            <div class="col-span-12 md:col-span-7 flex flex-column items-center justify-center">
-                                @if ((horasDirectoCat() ?? 0) + (horasIndependienteCat() ?? 0) > 0) {
-                                    <p-chart type="doughnut" [data]="chartData" [options]="chartOptions"
-                                        width="150" height="150">
-                                    </p-chart>
-                                }
+                            <div class="col-span-12 md:col-span-6 flex items-center justify-center">
+                                <p-knob [(ngModel)]="porcentajeHorasSync" [readonly]="true"
+                                    [min]="0" [max]="100" valueTemplate="{value}%" [size]="110">
+                                </p-knob>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TARJETA 3: Actividades asincrónicas -->
+                <div class="col-span-12 lg:col-span-4" style="min-height: 280px;">
+                    <div class="card h-full border-left-3"
+                        [class.border-green-400]="!horasExcedidasAsync"
+                        [class.border-red-500]="horasExcedidasAsync">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-semibold text-lg">Asincrónicas</span>
+                            <div class="flex items-center justify-center rounded-border"
+                                [class.bg-green-100]="!horasExcedidasAsync"
+                                [class.bg-red-100]="horasExcedidasAsync"
+                                style="width: 2.5rem; height: 2.5rem;">
+                                <i class="pi pi-home text-xl"
+                                    [class.text-green-500]="!horasExcedidasAsync"
+                                    [class.text-red-500]="horasExcedidasAsync"></i>
+                            </div>
+                        </div>
+                        <p class="text-color-secondary text-xs mt-0 mb-3">
+                            Trabajo independiente — disponible: <strong>{{ horasIndependienteCat() }} hrs</strong>
+                        </p>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 md:col-span-6">
+                                <table>
+                                    <tr class="border-bottom-1 surface-border">
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-check-circle text-green-500"></i>
+                                                <span class="text-color-secondary">Asignadas</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-semibold"
+                                            [class.text-green-500]="!horasExcedidasAsync"
+                                            [class.text-red-500]="horasExcedidasAsync">
+                                            {{ horasAsignadasAsync }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 pr-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-hourglass"
+                                                    [class.text-green-400]="!horasExcedidasAsync"
+                                                    [class.text-red-500]="horasExcedidasAsync"></i>
+                                                <span class="font-medium">Disponibles</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 font-bold text-xl"
+                                            [class.text-green-500]="!horasExcedidasAsync"
+                                            [class.text-red-500]="horasExcedidasAsync">
+                                            {{ horasDisponiblesAsync }}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="col-span-12 md:col-span-6 flex items-center justify-center">
+                                <p-knob [(ngModel)]="porcentajeHorasAsync" [readonly]="true"
+                                    [min]="0" [max]="100" valueTemplate="{value}%" [size]="110">
+                                </p-knob>
                             </div>
                         </div>
                     </div>
@@ -157,14 +210,24 @@
             </div>
         }
 
-        <!-- Alerta de horas excedidas -->
-        @if (horasExcedidas) {
-            <p-message severity="error" styleClass="w-full mb-4">
+        <!-- Alertas de horas excedidas por tipo -->
+        @if (horasExcedidasSync) {
+            <p-message severity="error" styleClass="w-full mb-3">
                 <span>
-                    Las horas asignadas en la secuencia
-                    (<strong>{{ horasAsignadas }} hrs</strong>) superan las horas disponibles
-                    (<strong>{{ horasTotalesDisponibles() }} hrs</strong>). Ajusta las horas de las
-                    actividades para no superar el límite de trabajo directo e independiente.
+                    Las horas <strong>sincrónicas</strong> asignadas
+                    (<strong>{{ horasAsignadasSync }} hrs</strong>) superan el límite de acompañamiento directo
+                    (<strong>{{ horasDirectoCat() }} hrs</strong>).
+                    Reduce {{ horasAsignadasSync - (horasDirectoCat() ?? 0) }} hrs en actividades sincrónicas.
+                </span>
+            </p-message>
+        }
+        @if (horasExcedidasAsync) {
+            <p-message severity="error" styleClass="w-full mb-3">
+                <span>
+                    Las horas <strong>asincrónicas</strong> asignadas
+                    (<strong>{{ horasAsignadasAsync }} hrs</strong>) superan el límite de trabajo independiente
+                    (<strong>{{ horasIndependienteCat() }} hrs</strong>).
+                    Reduce {{ horasAsignadasAsync - (horasIndependienteCat() ?? 0) }} hrs en actividades asincrónicas.
                 </span>
             </p-message>
         }
@@ -219,9 +282,20 @@
                             <tr>
                                 <th class="text-center p-2" style="width: 3rem;">#</th>
                                 <th class="p-2" style="min-width: 10rem;">Unidad / Módulo</th>
-                                <th class="p-2" style="min-width: 10rem;">Temas</th>
                                 <th class="p-2" style="min-width: 14rem;">
-                                    Actividades independientes de aprendizaje: Asincrónico
+                                    Temas
+                                    <span class="block text-xs font-normal text-color-secondary">
+                                        Desde Factores situacionales
+                                    </span>
+                                </th>
+                                <th class="text-center p-2" style="min-width: 8rem;">
+                                    Tipo de actividad
+                                </th>
+                                <th class="p-2" style="min-width: 14rem;">
+                                    Actividades de aprendizaje
+                                    <span class="block text-xs font-normal text-color-secondary">
+                                        Sincrónicas o asincrónicas
+                                    </span>
                                 </th>
                                 <th class="p-2" style="min-width: 14rem;">
                                     Producto de la actividad
@@ -237,7 +311,9 @@
                         <tbody>
                             @for (fila of secuenciaFormArray.controls; track $index) {
                                 <tr [formGroupName]="$index" class="border-bottom-1 surface-border"
-                                    [class.fila-excedida]="horasExcedidas">
+                                    [class.fila-sincrona]="fila.get('tipoActividad')?.value === 'sincrona' && !horasExcedidasSync"
+                                    [class.fila-asincrona]="fila.get('tipoActividad')?.value !== 'sincrona' && !horasExcedidasAsync"
+                                    [class.fila-excedida]="(fila.get('tipoActividad')?.value === 'sincrona' && horasExcedidasSync) || (fila.get('tipoActividad')?.value !== 'sincrona' && horasExcedidasAsync)">
 
                                     <!-- Número de fila -->
                                     <td class="text-center font-semibold text-primary p-2">
@@ -251,17 +327,56 @@
                                         </textarea>
                                     </td>
 
-                                    <!-- Temas -->
+                                    <!-- Temas (desde Factores situacionales) -->
                                     <td class="p-2">
-                                        <textarea pTextarea formControlName="temas" [autoResize]="true" rows="2"
-                                            placeholder="Temas a desarrollar" class="w-full">
-                                        </textarea>
+                                        @if (temasEncontrados()) {
+                                            <p-multiselect
+                                                formControlName="temas"
+                                                [options]="temasDisponibles()"
+                                                optionLabel="label"
+                                                optionValue="value"
+                                                placeholder="Selecciona temas"
+                                                display="chip"
+                                                [showClear]="true"
+                                                styleClass="w-full text-sm"
+                                                appendTo="body">
+                                            </p-multiselect>
+                                        } @else {
+                                            <span class="text-xs text-color-secondary italic">
+                                                <i class="pi pi-info-circle mr-1"></i>
+                                                Sin temas — diligencia primero
+                                                <strong>Factores situacionales</strong>
+                                            </span>
+                                        }
                                     </td>
 
-                                    <!-- Actividades independientes: Asincrónico -->
+                                    <!-- Tipo de actividad -->
+                                    <td class="text-center p-2">
+                                        <p-select
+                                            formControlName="tipoActividad"
+                                            [options]="tipoOptions"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Tipo"
+                                            styleClass="w-full text-sm">
+                                        </p-select>
+                                        @if (fila.get('tipoActividad')?.value === 'sincrona') {
+                                            <span class="text-xs text-orange-500 font-medium mt-1 block">
+                                                <i class="pi pi-users mr-1"></i>Directa
+                                            </span>
+                                        } @else {
+                                            <span class="text-xs text-green-500 font-medium mt-1 block">
+                                                <i class="pi pi-home mr-1"></i>Independiente
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <!-- Actividades -->
                                     <td class="p-2">
                                         <textarea pTextarea formControlName="actividadesAsync" [autoResize]="true" rows="2"
-                                            placeholder="Actividades asincrónicas que realizará el estudiante"
+                                            [placeholder]="fila.get('tipoActividad')?.value === 'sincrona'
+                                                ? 'Actividades sincrónicas con el docente'
+                                                : 'Actividades asincrónicas del estudiante'"
                                             class="w-full">
                                         </textarea>
                                     </td>
@@ -299,8 +414,38 @@
 
                         @if (secuenciaFormArray.length > 0) {
                             <tfoot>
+                                <!-- Fila de totales por tipo -->
                                 <tr class="horas-total-row">
-                                    <td colspan="6" class="text-right pr-3 py-2 font-semibold">
+                                    <td colspan="3" class="text-right pr-3 py-2 text-sm text-color-secondary font-medium">
+                                        Subtotales por tipo:
+                                    </td>
+                                    <td class="text-center py-2" colspan="2">
+                                        <span class="inline-flex items-center gap-2 mr-4">
+                                            <i class="pi pi-users text-orange-500 text-xs"></i>
+                                            <span class="text-xs text-color-secondary">Sincrónicas:</span>
+                                            <span class="font-semibold text-sm"
+                                                [class.text-orange-500]="!horasExcedidasSync"
+                                                [class.text-red-500]="horasExcedidasSync">
+                                                {{ horasAsignadasSync }}
+                                                @if (datosHorasDisponibles()) {
+                                                    <span class="text-xs font-normal"> / {{ horasDirectoCat() }}</span>
+                                                }
+                                            </span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-2">
+                                            <i class="pi pi-home text-green-500 text-xs"></i>
+                                            <span class="text-xs text-color-secondary">Asincrónicas:</span>
+                                            <span class="font-semibold text-sm"
+                                                [class.text-green-500]="!horasExcedidasAsync"
+                                                [class.text-red-500]="horasExcedidasAsync">
+                                                {{ horasAsignadasAsync }}
+                                                @if (datosHorasDisponibles()) {
+                                                    <span class="text-xs font-normal"> / {{ horasIndependienteCat() }}</span>
+                                                }
+                                            </span>
+                                        </span>
+                                    </td>
+                                    <td colspan="2" class="text-right pr-3 py-2 font-semibold">
                                         Total horas asignadas
                                     </td>
                                     <td class="text-center py-2 font-bold text-lg"
@@ -313,6 +458,42 @@
                                     </td>
                                     <td></td>
                                 </tr>
+
+                                <!-- Fila de disponibles por tipo -->
+                                @if (datosHorasDisponibles()) {
+                                    <tr class="horas-total-row">
+                                        <td colspan="3" class="text-right pr-3 py-2 text-sm text-color-secondary font-medium">
+                                            Horas disponibles:
+                                        </td>
+                                        <td class="text-center py-1" colspan="2">
+                                            <span class="inline-flex items-center gap-2 mr-4">
+                                                <i class="pi pi-hourglass text-orange-400 text-xs"></i>
+                                                <span class="font-semibold text-sm"
+                                                    [class.text-orange-500]="!horasExcedidasSync"
+                                                    [class.text-red-500]="horasExcedidasSync">
+                                                    {{ horasDisponiblesSync }} hrs síncronas
+                                                </span>
+                                            </span>
+                                            <span class="inline-flex items-center gap-2">
+                                                <i class="pi pi-hourglass text-green-400 text-xs"></i>
+                                                <span class="font-semibold text-sm"
+                                                    [class.text-green-500]="!horasExcedidasAsync"
+                                                    [class.text-red-500]="horasExcedidasAsync">
+                                                    {{ horasDisponiblesAsync }} hrs asincrónicas
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td colspan="2" class="text-right pr-3 py-1 font-semibold text-color-secondary">
+                                            Total disponible
+                                        </td>
+                                        <td class="text-center py-1 font-bold text-lg"
+                                            [class.text-primary]="!horasExcedidas"
+                                            [class.text-red-500]="horasExcedidas">
+                                            {{ horasDisponibles }}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                }
                             </tfoot>
                         }
                     </table>
@@ -321,16 +502,25 @@
 
             <!-- Actions -->
             <div class="mt-4 flex justify-between items-center">
-                <p-button icon="pi pi-plus" label="Agregar fila" [outlined]="true"
+                <p-button icon="pi pi-plus" label="Agregar actividad" [outlined]="true"
                     (onClick)="agregarFila()">
                 </p-button>
 
                 @if (datosHorasDisponibles()) {
-                    <small [class.text-color-secondary]="!horasExcedidas" [class.text-red-500]="horasExcedidas">
-                        {{ horasExcedidas
-                            ? 'Horas excedidas — reduce ' + (horasAsignadas - horasTotalesDisponibles()) + ' hrs'
-                            : 'Horas disponibles: ' + horasDisponibles }}
-                    </small>
+                    <div class="flex items-center gap-4">
+                        <small [class.text-orange-500]="!horasExcedidasSync" [class.text-red-500]="horasExcedidasSync">
+                            <i class="pi pi-users mr-1"></i>
+                            {{ horasExcedidasSync
+                                ? 'Síncronas excedidas — reduce ' + (horasAsignadasSync - (horasDirectoCat() ?? 0)) + ' hrs'
+                                : 'Síncronas disponibles: ' + horasDisponiblesSync + ' hrs' }}
+                        </small>
+                        <small [class.text-green-500]="!horasExcedidasAsync" [class.text-red-500]="horasExcedidasAsync">
+                            <i class="pi pi-home mr-1"></i>
+                            {{ horasExcedidasAsync
+                                ? 'Asincrónicas excedidas — reduce ' + (horasAsignadasAsync - (horasIndependienteCat() ?? 0)) + ' hrs'
+                                : 'Asincrónicas disponibles: ' + horasDisponiblesAsync + ' hrs' }}
+                        </small>
+                    </div>
                 }
             </div>
         </div>
