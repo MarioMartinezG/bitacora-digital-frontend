@@ -48,6 +48,24 @@ export class TutorReviewService extends BaseHttpService {
         });
     }
 
+    actualizarEstadoProfesor(estudianteId: number, seccionCodigo: string, estadoProfesor: string): Observable<ProgresoSeccionDTO> {
+        return this.patch<ProgresoSeccionDTO>('/api/bitacora/progreso/estado-profesor', {
+            estudianteId,
+            seccionCodigo,
+            estadoProfesor
+        });
+    }
+
+    limpiarEstadoProfesor(estudianteId: number, seccionCodigo: string): Observable<ProgresoSeccionDTO> {
+        return this.delete<ProgresoSeccionDTO>(
+            `/api/bitacora/progreso/estado-profesor/usuario/${estudianteId}/seccion/${seccionCodigo}`
+        );
+    }
+
+    aprobarBitacora(estudianteId: number): Observable<void> {
+        return this.post<void>(`/api/bitacora/progreso/aprobar/${estudianteId}`, {});
+    }
+
     obtenerTutorId(): number {
         const usuario = JSON.parse(this.loginService.getUser() ?? '{}');
         return usuario.id;

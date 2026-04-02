@@ -74,6 +74,22 @@ export abstract class BaseBitacoraComponent implements OnInit, OnDestroy {
   /** Progreso expuesto como readonly */
   readonly progress = this._progress.asReadonly();
 
+  /**
+   * Porcentaje a mostrar en el header del módulo, considerando el criterio del tutor.
+   * Si alguna subsección NO está completada por el tutor, se limita al 90%
+   * para no mostrar 100% mientras haya observaciones pendientes.
+   */
+  readonly displayPercentage = computed(() => {
+    const raw = this._progress().totalPercentage;
+    const estados = this.estadosTutor();
+    if (estados.length === 0) return raw;
+    const todasCompletado = estados.every(e => e.estado === 'completado');
+    return todasCompletado ? raw : Math.min(raw, 90);
+  });
+
+  /** Estado derivado del displayPercentage (nunca mostrará 'completado' si hay observaciones del tutor) */
+  readonly displayEstado = computed(() => calcularEstadoAvance(this.displayPercentage()));
+
   /** Estado de guardado expuesto para el template */
   get saveState(): SaveState {
     return this.autoSaveService.saveState();

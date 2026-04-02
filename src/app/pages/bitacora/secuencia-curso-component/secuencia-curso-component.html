@@ -247,8 +247,8 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <p-tag
-                                [severity]="getSeverity(progress().estado)"
-                                [value]="progress().totalPercentage + '% ' + getLabel(progress().estado)" />
+                                [severity]="getSeverity(displayEstado())"
+                                [value]="displayPercentage() + '% ' + getLabel(displayEstado())" />
                             <app-bitacora-comment-button
                                 [seccionCodigo]="seccionCodigo"
                                 subseccionCodigo="secuencia"

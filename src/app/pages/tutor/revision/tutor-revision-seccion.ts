@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { switchMap } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +14,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { KnobModule } from 'primeng/knob';
 import { ChartModule } from 'primeng/chart';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { DividerModule } from 'primeng/divider';
 import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
 import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
 import { TutorReviewService } from '../../../core/services/tutor-review.service';
@@ -41,24 +44,115 @@ interface PanelView {
     ocultarEstado?: boolean;
 }
 
+const DESCRIPCIONES_MODULOS: Record<string, string> = {
+    'observar': 'Revisa las situaciones de aula registradas por el docente. Verifica que se hayan identificado casos relevantes, se haya actuado de manera oportuna y los registros sean descriptivos y precisos.',
+    'caracteriza': 'Revisa la información básica del curso: programa, tipo de asignatura, créditos y horas asignadas. Asegúrate de que la justificación de la asignatura sea clara y coherente con los objetivos del programa.',
+    'factores': 'Evalúa el análisis del ecosistema de aprendizaje: número de estudiantes, características del grupo y resultados de aprendizaje esperados. Verifica que los temas y contenidos estén bien estructurados.',
+    'actividades': 'Revisa las actividades de aprendizaje propuestas. Verifica que estén alineadas con los resultados de aprendizaje, usen metodologías apropiadas y sean coherentes con el tiempo disponible.',
+    'evaluacion': 'Evalúa el diseño de la evaluación: instrumentos, técnicas y momentos evaluativos. Verifica que sean pertinentes, variados y coherentes con los resultados de aprendizaje definidos.',
+    'secuencia': 'Revisa la secuencia y cronograma de actividades. Verifica que las horas sincrónicas y asincrónicas estén correctamente distribuidas y no superen los límites establecidos en la identificación del curso.',
+    'calificacion': 'Revisa la escala de calificación propuesta. Verifica que los criterios de evaluación sean claros, medibles y coherentes con cada resultado de aprendizaje del curso.',
+    'bibliografia': 'Evalúa los medios educativos y recursos bibliográficos seleccionados. Verifica que sean pertinentes, accesibles para los estudiantes y estén actualizados.'
+};
+
 @Component({
     selector: 'app-tutor-revision-seccion',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, KnobModule, ChartModule, CommentThreadComponent, EstadoTutorSelectorComponent],
+    imports: [CommonModule, FormsModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, KnobModule, ChartModule, ProgressBarModule, DividerModule, CommentThreadComponent, EstadoTutorSelectorComponent],
     template: `
         <div class="flex flex-col gap-4">
-            <div class="flex items-center gap-3 flex-wrap">
+            <!-- Navegación -->
+            <div class="flex items-center gap-3">
                 <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" (onClick)="volver()" />
-                <h3 class="m-0 flex-1">{{ seccionNombre }}</h3>
-                <span class="text-surface-400">(Solo lectura)</span>
-                <p-button
-                    [label]="revisado ? 'Revisado' : 'Marcar como revisado'"
-                    [icon]="revisado ? 'pi pi-check-circle' : 'pi pi-circle'"
-                    [severity]="revisado ? undefined : 'secondary'"
-                    (onClick)="toggleRevisado(!revisado)"
-                    [disabled]="guardandoRevisado()"
-                    [style]="{'min-width': '12rem'}"
-                />
+                <p-tag severity="secondary" value="Solo lectura" icon="pi pi-eye" />
+            </div>
+
+            <!-- Card de información y evaluación del módulo -->
+            <div class="card">
+                <div class="flex flex-col gap-4">
+
+                    <!-- Título + descripción -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="pi pi-book text-primary text-xl"></i>
+                            <span class="font-semibold text-lg">{{ seccionNombre }}</span>
+                        </div>
+                        <p class="text-color-secondary m-0 text-sm leading-relaxed">{{ descripcionModulo }}</p>
+                    </div>
+
+                    <p-divider />
+
+                    <!-- Selector de estado -->
+                    <div>
+                        <span class="font-semibold text-sm block mb-3">Calificación de este módulo</span>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+                            <!-- Pendiente -->
+                            <div class="flex flex-col gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all"
+                                [class.border-surface-300]="estadoModulo() !== 'pendiente'"
+                                [class.border-surface-500]="estadoModulo() === 'pendiente'"
+                                [class.bg-surface-100]="estadoModulo() === 'pendiente'"
+                                [class.opacity-60]="guardandoEstado() && estadoModulo() !== 'pendiente'"
+                                (click)="!guardandoEstado() && establecerEstadoModulo('pendiente')">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi pi-clock text-xl text-color-secondary"></i>
+                                    <span class="font-semibold text-sm">Pendiente</span>
+                                    @if (estadoModulo() === 'pendiente') {
+                                        <i class="pi pi-check-circle text-primary ml-auto"></i>
+                                    }
+                                </div>
+                                <p class="text-xs text-color-secondary m-0">Aún no has revisado este módulo. El estudiante puede continuar trabajando en él.</p>
+                            </div>
+
+                            <!-- Solicitud de correcciones -->
+                            <div class="flex flex-col gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all"
+                                [class.border-surface-300]="estadoModulo() !== 'correcciones'"
+                                [class.border-orange-400]="estadoModulo() === 'correcciones'"
+                                [class.bg-orange-50]="estadoModulo() === 'correcciones'"
+                                [class.opacity-60]="guardandoEstado() && estadoModulo() !== 'correcciones'"
+                                (click)="!guardandoEstado() && establecerEstadoModulo('correcciones')">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi pi-exclamation-circle text-xl text-orange-500"></i>
+                                    <span class="font-semibold text-sm">Solicitud de correcciones</span>
+                                    @if (estadoModulo() === 'correcciones') {
+                                        <i class="pi pi-check-circle text-orange-500 ml-auto"></i>
+                                    }
+                                </div>
+                                <p class="text-xs text-color-secondary m-0">El estudiante debe revisar y corregir el contenido de este módulo según tus observaciones.</p>
+                            </div>
+
+                            <!-- Completado -->
+                            <div class="flex flex-col gap-2 p-4 rounded-lg border-2 transition-all"
+                                [class.border-surface-200]="estadoModulo() !== 'completado' && !moduloConContenido()"
+                                [class.border-surface-300]="estadoModulo() !== 'completado' && moduloConContenido()"
+                                [class.border-green-400]="estadoModulo() === 'completado'"
+                                [class.bg-green-50]="estadoModulo() === 'completado'"
+                                [class.bg-surface-50]="!moduloConContenido()"
+                                [class.opacity-50]="!moduloConContenido()"
+                                [class.cursor-not-allowed]="!moduloConContenido()"
+                                [class.cursor-pointer]="moduloConContenido()"
+                                [class.opacity-60]="guardandoEstado() && estadoModulo() !== 'completado'"
+                                (click)="!guardandoEstado() && moduloConContenido() && establecerEstadoModulo('completado')">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi pi-check-circle text-xl"
+                                        [class.text-green-500]="moduloConContenido()"
+                                        [class.text-surface-300]="!moduloConContenido()"></i>
+                                    <span class="font-semibold text-sm">Completado</span>
+                                    @if (estadoModulo() === 'completado') {
+                                        <i class="pi pi-check-circle text-green-500 ml-auto"></i>
+                                    }
+                                </div>
+                                @if (!moduloConContenido()) {
+                                    <p class="text-xs text-surface-400 m-0 italic">El estudiante aún no ha diligenciado este módulo.</p>
+                                } @else {
+                                    <p class="text-xs text-color-secondary m-0">El módulo cumple con todos los requisitos. El estudiante puede avanzar al siguiente.</p>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
             @if (cargando()) {
@@ -220,6 +314,7 @@ interface PanelView {
                     }
                 }
 
+                @if (seccionCodigo !== 'secuencia') {
                 <div class="card">
                     <p-accordion [value]="panelValues" [multiple]="true">
                         @for (panel of paneles(); track panel.key) {
@@ -350,6 +445,137 @@ interface PanelView {
                         }
                     </p-accordion>
                 </div>
+                } @else {
+                    <!-- Tabla de solo lectura — secuencia y cronograma -->
+                    @if (secuenciaFilas().length === 0) {
+                        <p-message severity="info" styleClass="w-full">
+                            <span>El estudiante aún no ha agregado actividades a la secuencia.</span>
+                        </p-message>
+                    } @else {
+                        <div class="card overflow-x-auto">
+                            <table class="w-full text-sm border-collapse">
+                                <thead>
+                                    <tr class="border-b border-surface-200">
+                                        <th class="text-center p-2 font-semibold text-surface-500 w-10">#</th>
+                                        <th class="p-2 font-semibold text-surface-500" style="min-width:10rem">Unidad / Módulo</th>
+                                        <th class="p-2 font-semibold text-surface-500" style="min-width:12rem">Temas</th>
+                                        <th class="text-center p-2 font-semibold text-surface-500" style="min-width:8rem">Tipo</th>
+                                        <th class="p-2 font-semibold text-surface-500" style="min-width:14rem">Actividades de aprendizaje</th>
+                                        <th class="p-2 font-semibold text-surface-500" style="min-width:14rem">Producto de la actividad</th>
+                                        <th class="p-2 font-semibold text-surface-500" style="min-width:10rem">Evidencia</th>
+                                        <th class="text-center p-2 font-semibold text-surface-500 w-16">Horas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (fila of secuenciaFilas(); track $index) {
+                                        <tr class="border-b border-surface-100"
+                                            [class.bg-orange-50]="fila.tipoActividad === 'sincrona' && !secuenciaHorasExcedidasSync()"
+                                            [class.bg-green-50]="fila.tipoActividad !== 'sincrona' && !secuenciaHorasExcedidasAsync()"
+                                            [class.bg-red-50]="(fila.tipoActividad === 'sincrona' && secuenciaHorasExcedidasSync()) || (fila.tipoActividad !== 'sincrona' && secuenciaHorasExcedidasAsync())">
+                                            <td class="text-center p-2 font-semibold text-primary">{{ $index + 1 }}</td>
+                                            <td class="p-2">{{ fila.unidad || '—' }}</td>
+                                            <td class="p-2">
+                                                @if (fila.temas?.length > 0) {
+                                                    <div class="flex flex-wrap gap-1">
+                                                        @for (tema of fila.temas; track tema) {
+                                                            <span class="px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-xs">{{ tema }}</span>
+                                                        }
+                                                    </div>
+                                                } @else {
+                                                    <span class="text-surface-400 italic text-xs">Sin temas</span>
+                                                }
+                                            </td>
+                                            <td class="text-center p-2">
+                                                @if (fila.tipoActividad === 'sincrona') {
+                                                    <span class="inline-flex items-center gap-1 text-orange-600 font-medium text-xs">
+                                                        <i class="pi pi-users"></i>Sincrónica
+                                                    </span>
+                                                } @else {
+                                                    <span class="inline-flex items-center gap-1 text-green-600 font-medium text-xs">
+                                                        <i class="pi pi-home"></i>Asincrónica
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="p-2 text-surface-700">{{ fila.actividadesAsync || '—' }}</td>
+                                            <td class="p-2 text-surface-700">{{ fila.producto || '—' }}</td>
+                                            <td class="p-2 text-surface-700">{{ fila.evidencia || '—' }}</td>
+                                            <td class="text-center p-2 font-semibold">{{ fila.horas ?? 0 }}</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="border-t-2 border-surface-300 bg-surface-50">
+                                        <td colspan="3" class="text-right pr-3 py-2 text-xs text-surface-500 font-medium">Subtotales por tipo:</td>
+                                        <td class="text-center py-2" colspan="2">
+                                            <span class="inline-flex items-center gap-1 mr-4">
+                                                <i class="pi pi-users text-orange-500 text-xs"></i>
+                                                <span class="text-xs text-surface-500">Síncronas:</span>
+                                                <span class="font-semibold text-sm"
+                                                    [class.text-orange-500]="!secuenciaHorasExcedidasSync()"
+                                                    [class.text-red-500]="secuenciaHorasExcedidasSync()">
+                                                    {{ secuenciaHorasSync() }}
+                                                    @if (secuenciaDatosHorasDisponibles()) {
+                                                        <span class="text-xs font-normal"> / {{ secuenciaHorasDirecto() }}</span>
+                                                    }
+                                                </span>
+                                            </span>
+                                            <span class="inline-flex items-center gap-1">
+                                                <i class="pi pi-home text-green-500 text-xs"></i>
+                                                <span class="text-xs text-surface-500">Asincrónicas:</span>
+                                                <span class="font-semibold text-sm"
+                                                    [class.text-green-500]="!secuenciaHorasExcedidasAsync()"
+                                                    [class.text-red-500]="secuenciaHorasExcedidasAsync()">
+                                                    {{ secuenciaHorasAsync() }}
+                                                    @if (secuenciaDatosHorasDisponibles()) {
+                                                        <span class="text-xs font-normal"> / {{ secuenciaHorasIndependiente() }}</span>
+                                                    }
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td colspan="2" class="text-right pr-3 py-2 font-semibold text-surface-600">Total horas asignadas</td>
+                                        <td class="text-center py-2 font-bold text-lg"
+                                            [class.text-primary]="!secuenciaHorasExcedidas()"
+                                            [class.text-red-500]="secuenciaHorasExcedidas()">
+                                            {{ secuenciaHorasAsignadas() }}
+                                            @if (secuenciaDatosHorasDisponibles()) {
+                                                <span class="text-xs font-normal"> / {{ secuenciaTotalHoras() }}</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    @if (secuenciaDatosHorasDisponibles()) {
+                                        <tr class="bg-surface-50">
+                                            <td colspan="3" class="text-right pr-3 py-1 text-xs text-surface-500 font-medium">Horas disponibles:</td>
+                                            <td class="text-center py-1" colspan="2">
+                                                <span class="inline-flex items-center gap-1 mr-4">
+                                                    <i class="pi pi-hourglass text-orange-400 text-xs"></i>
+                                                    <span class="font-semibold text-sm"
+                                                        [class.text-orange-500]="!secuenciaHorasExcedidasSync()"
+                                                        [class.text-red-500]="secuenciaHorasExcedidasSync()">
+                                                        {{ secuenciaHorasDisponiblesSync() }} hrs síncronas
+                                                    </span>
+                                                </span>
+                                                <span class="inline-flex items-center gap-1">
+                                                    <i class="pi pi-hourglass text-green-400 text-xs"></i>
+                                                    <span class="font-semibold text-sm"
+                                                        [class.text-green-500]="!secuenciaHorasExcedidasAsync()"
+                                                        [class.text-red-500]="secuenciaHorasExcedidasAsync()">
+                                                        {{ secuenciaHorasDisponiblesAsync() }} hrs asincrónicas
+                                                    </span>
+                                                </span>
+                                            </td>
+                                            <td colspan="2" class="text-right pr-3 py-1 font-semibold text-surface-500">Total disponible</td>
+                                            <td class="text-center py-1 font-bold text-lg"
+                                                [class.text-primary]="!secuenciaHorasExcedidas()"
+                                                [class.text-red-500]="secuenciaHorasExcedidas()">
+                                                {{ secuenciaHorasDisponibles() }}
+                                            </td>
+                                        </tr>
+                                    }
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                }
             }
         </div>
 
@@ -374,8 +600,12 @@ export class TutorRevisionSeccion implements OnInit {
     seccionNombre = '';
     cargando = signal(true);
     paneles = signal<PanelView[]>([]);
-    revisado = false;
-    guardandoRevisado = signal(false);
+    estadoModulo = signal<'pendiente' | 'correcciones' | 'completado'>('pendiente');
+    guardandoEstado = signal(false);
+    moduloConContenido = signal(false);
+    modulosRevisados = signal(0);
+    totalModulos = 8;
+    porcentajeRevisado = computed(() => Math.round((this.modulosRevisados() / this.totalModulos) * 100));
     panelValues: string[] = [];
     estadosTutor = signal<EstadoTutorSubseccionDTO[]>([]);
     comentariosCounts = signal<Record<string, number>>({});
@@ -399,6 +629,26 @@ export class TutorRevisionSeccion implements OnInit {
     secuenciaHorasExcedidas = computed(() => this.secuenciaTotalHoras() > 0 && this.secuenciaHorasAsignadas() > this.secuenciaTotalHoras());
     secuenciaDatosHorasDisponibles = computed(() => this.secuenciaTotalHoras() > 0);
 
+    secuenciaFilas = signal<any[]>([]);
+    secuenciaHorasSync = signal<number>(0);
+    secuenciaHorasAsync = signal<number>(0);
+    secuenciaHorasExcedidasSync = computed(() =>
+        this.secuenciaHorasDirecto() > 0 && this.secuenciaHorasSync() > this.secuenciaHorasDirecto()
+    );
+    secuenciaHorasExcedidasAsync = computed(() =>
+        this.secuenciaHorasIndependiente() > 0 && this.secuenciaHorasAsync() > this.secuenciaHorasIndependiente()
+    );
+    secuenciaHorasDisponiblesSync = computed(() =>
+        Math.max(this.secuenciaHorasDirecto() - this.secuenciaHorasSync(), 0)
+    );
+    secuenciaHorasDisponiblesAsync = computed(() =>
+        Math.max(this.secuenciaHorasIndependiente() - this.secuenciaHorasAsync(), 0)
+    );
+
+    get descripcionModulo(): string {
+        return DESCRIPCIONES_MODULOS[this.seccionCodigo] || 'Revisa el contenido de este módulo y asigna un estado de revisión.';
+    }
+
     ngOnInit(): void {
         this.estudianteId = Number(this.route.snapshot.paramMap.get('estudianteId'));
         this.seccionCodigo = this.route.snapshot.paramMap.get('seccionCodigo') || '';
@@ -410,7 +660,11 @@ export class TutorRevisionSeccion implements OnInit {
     private cargarDatos(): void {
         this.tutorReviewService.obtenerRespuestasEstudiante(this.estudianteId, this.seccionCodigo).subscribe({
             next: (respuesta) => {
-                this.construirPaneles(respuesta?.datos || {});
+                const datos = respuesta?.datos || {};
+                this.construirPaneles(datos);
+                this.moduloConContenido.set(
+                    !!respuesta && respuesta.estadoAvance !== 'sin_avances' && Object.keys(datos).length > 0
+                );
                 if (this.seccionCodigo === 'secuencia') {
                     this.calcularHorasAsignadas(respuesta?.datos);
                 }
@@ -418,6 +672,7 @@ export class TutorRevisionSeccion implements OnInit {
             },
             error: () => {
                 this.construirPaneles({});
+                this.moduloConContenido.set(false);
                 this.cargando.set(false);
             }
         });
@@ -447,9 +702,20 @@ export class TutorRevisionSeccion implements OnInit {
 
     private calcularHorasAsignadas(datos: any): void {
         const filas: any[] = Array.isArray(datos?.secuenciaCurso) ? datos.secuenciaCurso : [];
-        const asignadas = filas.reduce((sum, f) => sum + (Number(f.horas) || 0), 0);
-        this.secuenciaHorasAsignadas.set(asignadas);
-        // El porcentaje se recalcula en actualizarChartSecuencia cuando llegan las horas de referencia
+        // Backward compat
+        const filasNorm = filas.map(f => ({
+            ...f,
+            unidad: f.unidad || f.modulo || '',
+            producto: f.producto || f.descripcion || '',
+            tipoActividad: f.tipoActividad || 'asincrona',
+            temas: Array.isArray(f.temas) ? f.temas : []
+        }));
+        this.secuenciaFilas.set(filasNorm);
+        const sync  = filasNorm.filter(f => f.tipoActividad === 'sincrona').reduce((s, f) => s + (Number(f.horas) || 0), 0);
+        const async_ = filasNorm.filter(f => f.tipoActividad !== 'sincrona').reduce((s, f) => s + (Number(f.horas) || 0), 0);
+        this.secuenciaHorasSync.set(sync);
+        this.secuenciaHorasAsync.set(async_);
+        this.secuenciaHorasAsignadas.set(sync + async_);
     }
 
     private actualizarChartSecuencia(): void {
@@ -774,22 +1040,42 @@ export class TutorRevisionSeccion implements OnInit {
         this.tutorReviewService.obtenerProgresoIndividual(this.estudianteId).subscribe({
             next: (progreso) => {
                 const seccion = progreso.secciones?.[this.seccionCodigo];
-                this.revisado = seccion?.revisado ?? false;
+                this.estadoModulo.set(this.derivarEstadoModulo(seccion?.revisado, seccion?.estadoProfesor));
+                const revisados = Object.values(progreso.secciones ?? {}).filter(s => s.revisado === true).length;
+                this.modulosRevisados.set(revisados);
             }
         });
     }
 
-    toggleRevisado(nuevoValor: boolean): void {
-        this.guardandoRevisado.set(true);
-        this.tutorReviewService.marcarRevisado(this.estudianteId, this.seccionCodigo, nuevoValor).subscribe({
-            next: (resultado) => {
-                this.revisado = resultado.revisado ?? nuevoValor;
-                this.guardandoRevisado.set(false);
-            },
+    private derivarEstadoModulo(revisado?: boolean, estadoProfesor?: string): 'pendiente' | 'correcciones' | 'completado' {
+        if (revisado) return 'completado';
+        if (estadoProfesor === 'en_desarrollo' || estadoProfesor === 'sin_avances') return 'correcciones';
+        return 'pendiente';
+    }
+
+    establecerEstadoModulo(nuevoEstado: 'pendiente' | 'correcciones' | 'completado'): void {
+        if (this.guardandoEstado()) return;
+        this.guardandoEstado.set(true);
+
+        const estadoAnterior = this.estadoModulo();
+        this.estadoModulo.set(nuevoEstado);
+
+        const revisado = nuevoEstado === 'completado';
+        const estadoProfesor = nuevoEstado === 'completado' ? 'completado'
+            : nuevoEstado === 'correcciones' ? 'en_desarrollo'
+            : null;
+
+        const guardarEstado$ = estadoProfesor
+            ? this.tutorReviewService.actualizarEstadoProfesor(this.estudianteId, this.seccionCodigo, estadoProfesor)
+            : this.tutorReviewService.limpiarEstadoProfesor(this.estudianteId, this.seccionCodigo);
+
+        this.tutorReviewService.marcarRevisado(this.estudianteId, this.seccionCodigo, revisado).pipe(
+            switchMap(() => guardarEstado$)
+        ).subscribe({
+            next: () => this.guardandoEstado.set(false),
             error: () => {
-                // Revertir el toggle en caso de error
-                this.revisado = !nuevoValor;
-                this.guardandoRevisado.set(false);
+                this.estadoModulo.set(estadoAnterior);
+                this.guardandoEstado.set(false);
             }
         });
     }
