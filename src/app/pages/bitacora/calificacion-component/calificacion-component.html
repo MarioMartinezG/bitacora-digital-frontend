@@ -10,8 +10,8 @@
                     <div class="flex items-center gap-3">
                         <h3 class="m-0">Calificación</h3>
                         <p-tag
-                            [severity]="getSeverity(progress().estado)"
-                            [value]="getLabel(progress().estado) + ' (' + progress().totalPercentage + '%)'">
+                            [severity]="getSeverity(displayEstado())"
+                            [value]="getLabel(displayEstado()) + ' (' + displayPercentage() + '%)'">
                         </p-tag>
                     </div>
                     <div class="flex items-center gap-3">
