@@ -28,7 +28,7 @@
     </p-tab>
     <p-tab value="1">
       <i class="pi pi-star mr-2"></i>
-      Graduados
+      Certificados
       <span class="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">{{ graduadosBase().length }}</span>
     </p-tab>
     <p-tab value="2">
@@ -90,7 +90,7 @@
                           (click)="confirmarToggleActivo(usuario)"
                           [pTooltip]="usuario.activo ? 'Desactivar' : 'Activar'" />
                 <p-button icon="pi pi-star" [rounded]="true" [outlined]="true" severity="warn"
-                          (click)="confirmarGraduar(usuario)" pTooltip="Marcar como graduado" />
+                          (click)="confirmarGraduar(usuario)" pTooltip="Certificar usuario" />
               </div>
             </td>
           </tr>
@@ -149,7 +149,7 @@
             <td>{{ usuario.nombre }}</td>
             <td>{{ usuario.correo }}</td>
             <td>
-              <p-tag value="Graduado" severity="contrast" icon="pi pi-star" />
+              <p-tag value="Certificado" severity="contrast" icon="pi pi-star" />
             </td>
             <td>{{ formatFecha(usuario.ultimoAcceso) }}</td>
             <td>
@@ -179,7 +179,7 @@
           <tr><td colspan="5" class="text-center p-8">
             <div class="flex flex-col items-center gap-3">
               <i class="pi pi-star text-4xl text-gray-400"></i>
-              <p class="text-gray-500 m-0">No hay estudiantes graduados</p>
+              <p class="text-gray-500 m-0">No hay estudiantes certificados</p>
             </div>
           </td></tr>
         </ng-template>

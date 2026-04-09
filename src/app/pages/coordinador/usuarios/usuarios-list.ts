@@ -239,10 +239,10 @@ export class UsuariosList implements OnInit {
 
   confirmarGraduar(usuario: Usuario): void {
     this.confirmationService.confirm({
-      message: `¿Marcar a <strong>${usuario.nombre}</strong> como graduado? El usuario ya no podrá iniciar sesión.`,
-      header: 'Marcar como Graduado',
+      message: `¿Certificar a <strong>${usuario.nombre}</strong>? El usuario ya no podrá iniciar sesión.`,
+      header: 'Certificar usuario',
       icon: 'pi pi-star',
-      acceptLabel: 'Sí, graduar', rejectLabel: 'Cancelar',
+      acceptLabel: 'Sí, certificar', rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-success',
       accept: () => this.marcarGraduado(usuario)
     });
@@ -250,7 +250,7 @@ export class UsuariosList implements OnInit {
 
   confirmarReactivar(usuario: Usuario): void {
     this.confirmationService.confirm({
-      message: `¿Reactivar a <strong>${usuario.nombre}</strong>? Se revertirá su estado de graduado.`,
+      message: `¿Reactivar a <strong>${usuario.nombre}</strong>? Se revertirá su estado de certificado.`,
       header: 'Reactivar Usuario',
       icon: 'pi pi-replay',
       acceptLabel: 'Sí, reactivar', rejectLabel: 'Cancelar',
@@ -273,9 +273,9 @@ export class UsuariosList implements OnInit {
     this.usuariosService.marcarGraduado(usuario.id).subscribe({
       next: () => {
         this.usuarios.update(list => list.map(u => u.id === usuario.id ? { ...u, graduado: true, activo: false } : u));
-        this.messageService.add({ severity: 'success', summary: 'Graduado', detail: `${usuario.nombre} marcado como graduado`, life: 3000 });
+        this.messageService.add({ severity: 'success', summary: 'Certificado', detail: `${usuario.nombre} certificado correctamente`, life: 3000 });
       },
-      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo graduar al usuario', life: 3000 })
+      error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo certificar al usuario', life: 3000 })
     });
   }
 
@@ -346,7 +346,7 @@ export class UsuariosList implements OnInit {
   }
 
   getEstadoLabel(u: Usuario): string {
-    if (u.graduado) return 'Graduado';
+    if (u.graduado) return 'Certificado';
     return u.activo ? 'Activo' : 'Inactivo';
   }
 
