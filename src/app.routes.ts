@@ -10,6 +10,8 @@ import { Dashboard } from './app/pages/dashboard/dashboard';
 import { Documentation } from './app/pages/documentation/documentation';
 import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
+import { Notificaciones } from './app/pages/notificaciones/notificaciones';
+import { SolicitudesSesion } from './app/pages/solicitudes-sesion/solicitudes-sesion';
 
 export const appRoutes: Routes = [
     {
@@ -22,7 +24,11 @@ export const appRoutes: Routes = [
         component: AppLayout,
         children: [
             { path: '', component: Dashboard },
-            { path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') },
+            { path: 'bitacora', loadChildren: () => import('./app/pages/bitacora/bitacora.routes') },
+            { path: 'notificaciones', component: Notificaciones },
+            { path: 'solicitudes-sesion', component: SolicitudesSesion },
+            { path: 'tutor', loadChildren: () => import('./app/pages/tutor/tutor.routes'), data: { roles: [2, 3] } },
+            { path: 'coordinador', loadChildren: () => import('./app/pages/coordinador/coordinador.routes'), data: { roles: [3] } },
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ],

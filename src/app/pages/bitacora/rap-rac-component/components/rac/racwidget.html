@@ -1,0 +1,113 @@
+<p class="text-gray-600 mb-4">
+    Ingresa los Resultados de Aprendizaje correspondientes a cada dimensión del aprendizaje significativo:
+</p>
+
+<div [formGroup]="formGroup" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+    <!-- Compromiso o valoracion -->
+    <div class="card">
+        <div class="flex items-center gap-3 mb-2">
+            <i class="pi pi-bolt text-primary text-2xl"></i>
+            <h3 class="m-0 text-lg font-semibold">Compromiso o valoración</h3>
+        </div>
+        <p class="text-sm text-gray-700 mb-3">
+            Refleja la actitud y disposición del estudiante hacia el aprendizaje y su entorno.
+        </p>
+        <textarea
+            pTextarea
+            [autoResize]="true"
+            formControlName="compromiso"
+            placeholder="Escribe el Resultado de Aprendizaje..."
+            class="w-full">
+        </textarea>
+    </div>
+
+    <!-- Dimensiones humanas -->
+    <div class="card">
+        <div class="flex items-center gap-3 mb-2">
+            <i class="pi pi-users text-green-500 text-2xl"></i>
+            <h3 class="m-0 text-lg font-semibold">Dimensiones humanas del aprendizaje</h3>
+        </div>
+        <p class="text-sm text-gray-700 mb-3">
+            Considera emociones, valores y relaciones en el proceso de aprendizaje.
+        </p>
+        <textarea
+            pTextarea
+            [autoResize]="true"
+            formControlName="humanas"
+            placeholder="Escribe el Resultado de Aprendizaje..."
+            class="w-full">
+        </textarea>
+    </div>
+
+    <!-- Conocimiento fundamental -->
+    <div class="card">
+        <div class="flex items-center gap-3 mb-2">
+            <i class="pi pi-book text-orange-500 text-2xl"></i>
+            <h3 class="m-0 text-lg font-semibold">Conocimiento fundamental</h3>
+        </div>
+        <p class="text-sm text-gray-700 mb-3">
+            Enfocado en los conceptos, teorías y principios esenciales del curso.
+        </p>
+        <textarea
+            pTextarea
+            [autoResize]="true"
+            formControlName="conocimiento"
+            placeholder="Escribe el Resultado de Aprendizaje..."
+            class="w-full">
+        </textarea>
+    </div>
+
+    <!-- Aplicacion del aprendizaje -->
+    <div class="card">
+        <div class="flex items-center gap-3 mb-2">
+            <i class="pi pi-cog text-cyan-600 text-2xl"></i>
+            <h3 class="m-0 text-lg font-semibold">Aplicación del aprendizaje</h3>
+        </div>
+        <p class="text-sm text-gray-700 mb-3">
+            Desarrolla la capacidad de aplicar los conocimientos en contextos reales.
+        </p>
+        <textarea
+            pTextarea
+            [autoResize]="true"
+            formControlName="aplicacion"
+            placeholder="Escribe el Resultado de Aprendizaje..."
+            class="w-full">
+        </textarea>
+    </div>
+
+    <!-- Integracion -->
+    <div class="card">
+        <div class="flex items-center gap-3 mb-2">
+            <i class="pi pi-link text-indigo-500 text-2xl"></i>
+            <h3 class="m-0 text-lg font-semibold">Integración</h3>
+        </div>
+        <p class="text-sm text-gray-700 mb-3">
+            Relaciona los conocimientos entre diferentes áreas o disciplinas.
+        </p>
+        <textarea
+            pTextarea
+            [autoResize]="true"
+            formControlName="integracion"
+            placeholder="Escribe el Resultado de Aprendizaje..."
+            class="w-full">
+        </textarea>
+    </div>
+
+    <!-- Aprender a aprender -->
+    <div class="card">
+        <div class="flex items-center gap-3 mb-2">
+            <i class="pi pi-compass text-purple-500 text-2xl"></i>
+            <h3 class="m-0 text-lg font-semibold">Aprender a aprender</h3>
+        </div>
+        <p class="text-sm text-gray-700 mb-3">
+            Promueve la autonomía, reflexión y mejora contínua del propio proceso de aprendizaje.
+        </p>
+        <textarea
+            pTextarea
+            [autoResize]="true"
+            formControlName="aprender"
+            placeholder="Escribe el Resultado de Aprendizaje..."
+            class="w-full">
+        </textarea>
+    </div>
+</div>

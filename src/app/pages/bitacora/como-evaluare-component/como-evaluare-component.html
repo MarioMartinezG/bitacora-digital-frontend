@@ -1,0 +1,378 @@
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <p-fluid>
+        <div class="flex flex-col gap-4">
+
+            <!-- ===== STICKY HEADER ===== -->
+            <div class="sticky-header-global">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <h3 class="m-0">Diseño de la evaluación</h3>
+                        <p-tag
+                            [severity]="getSeverity(displayEstado())"
+                            [value]="getLabel(displayEstado()) + ' (' + displayPercentage() + '%)'">
+                        </p-tag>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <app-save-status-indicator
+                            [saveState]="saveState"
+                            (onRetry)="retryOnError()">
+                        </app-save-status-indicator>
+                        <app-export-button
+                            [seccionCodigo]="seccionCodigo"
+                            [progress]="progress()"
+                            [formData]="form.getRawValue()" />
+                        <p-button
+                            label="Guardar"
+                            icon="pi pi-save"
+                            (onClick)="saveManually()"
+                            [disabled]="!saveState.isDirty"
+                            size="small">
+                        </p-button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== INTRO ===== -->
+            <div class="card">
+                <div class="flex items-start gap-3">
+                    <i class="pi pi-info-circle text-primary text-xl mt-0.5 flex-shrink-0"></i>
+                    <p class="m-0 text-sm leading-relaxed">
+                        Ya te aproximaste a los principios conceptuales y los requerimientos técnicos para el diseño
+                        de tu evaluación de curso. Ahora organiza tu plan de evaluación en el siguiente instrumento
+                        que te ayudará a hacer un mapeo de ese diseño.
+                    </p>
+                </div>
+            </div>
+
+            <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
+
+                <!-- ===== PLAN DE EVALUACIÓN POR ACTIVIDAD ===== -->
+                <div class="card">
+                    <p-fieldset legend="Plan de evaluación por actividad" [toggleable]="true">
+                        <ng-template pTemplate="header">
+                            <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                                <p-tag
+                                    [severity]="getSeverity(getDisplayEstado('evaluacion'))"
+                                    [value]="getLabel(getDisplayEstado('evaluacion'))"
+                                    size="small">
+                                </p-tag>
+                                <app-bitacora-comment-button
+                                    [seccionCodigo]="seccionCodigo"
+                                    subseccionCodigo="evaluacion"
+                                    [badge]="comentariosCounts()['evaluacion'] || 0" />
+                            </div>
+                        </ng-template>
+
+                        @if (!actividadesLoaded()) {
+                            <div class="flex justify-center p-6">
+                                <i class="pi pi-spin pi-spinner text-2xl text-surface-400"></i>
+                            </div>
+                        } @else if (actividadesList().length === 0) {
+                            <p-message severity="warn" styleClass="w-full" icon="pi pi-exclamation-triangle">
+                                <span>
+                                    No se encontraron actividades de aprendizaje. Completa el módulo de
+                                    <strong>Actividades de Aprendizaje</strong> primero para poder diseñar
+                                    tu evaluación.
+                                </span>
+                            </p-message>
+                        } @else {
+                            <div formArrayName="actividadesEvaluacion" class="flex flex-col gap-5">
+                                @for (ctrl of actividadesEvalArray.controls; track $index; let idx = $index) {
+                                    @let act = actividadesList()[idx];
+                                    <div class="eval-actividad-card">
+                                        <div [formGroupName]="idx" class="flex flex-col gap-4">
+
+                                            <!-- Cabecera -->
+                                            <div class="flex items-center gap-2">
+                                                <div class="actividad-eval-badge flex-shrink-0">{{ idx + 1 }}</div>
+                                                <h4 class="m-0 font-semibold text-base">
+                                                    {{ act.nombre || ('Actividad ' + (idx + 1)) }}
+                                                </h4>
+                                            </div>
+
+                                            <!-- Info de solo lectura -->
+                                            <div class="readonly-info-section">
+                                                <div class="flex items-center gap-1.5 mb-3">
+                                                    <span class="text-xs font-semibold text-surface-500 uppercase tracking-wide">
+                                                        Información de la actividad de aprendizaje
+                                                    </span>
+                                                    <i class="pi pi-lock text-surface-400 text-xs"
+                                                       pTooltip="Para modificar esta información, dirígete al módulo de Actividades de Aprendizaje"
+                                                       tooltipPosition="right"></i>
+                                                </div>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+
+                                                    @if (act.ra) {
+                                                        <div class="info-field-card md:col-span-2">
+                                                            <div class="info-field-icon">
+                                                                <i class="pi pi-star-fill text-xs text-primary"></i>
+                                                            </div>
+                                                            <div class="info-field-content">
+                                                                <span class="info-field-label">Resultado de Aprendizaje</span>
+                                                                <span class="info-field-value">{{ act.ra }}</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+
+                                                    @if (act.dimension?.length) {
+                                                        <div class="info-field-card">
+                                                            <div class="info-field-icon">
+                                                                <i class="pi pi-compass text-xs text-purple-500"></i>
+                                                            </div>
+                                                            <div class="info-field-content">
+                                                                <span class="info-field-label">Dimensión(es)</span>
+                                                                <div class="flex flex-wrap gap-1 mt-1">
+                                                                    @for (dim of act.dimension; track dim) {
+                                                                        <span class="dimension-chip">{{ dim }}</span>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+
+                                                    @if (act.metodologia) {
+                                                        <div class="info-field-card">
+                                                            <div class="info-field-icon">
+                                                                <i class="pi pi-bolt text-xs text-orange-500"></i>
+                                                            </div>
+                                                            <div class="info-field-content">
+                                                                <span class="info-field-label">Metodología</span>
+                                                                <span class="info-field-value font-semibold">{{ getMetodologiaLabel(act.metodologia) }}</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+
+                                                    @if (act.tema) {
+                                                        <div class="info-field-card">
+                                                            <div class="info-field-icon">
+                                                                <i class="pi pi-book text-xs text-blue-500"></i>
+                                                            </div>
+                                                            <div class="info-field-content">
+                                                                <span class="info-field-label">Tema</span>
+                                                                <span class="info-field-value font-semibold">{{ act.tema }}</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+
+                                                    @if (act.subtema) {
+                                                        <div class="info-field-card">
+                                                            <div class="info-field-icon">
+                                                                <i class="pi pi-list text-xs text-cyan-500"></i>
+                                                            </div>
+                                                            <div class="info-field-content">
+                                                                <span class="info-field-label">Subtema</span>
+                                                                <span class="info-field-value font-semibold">{{ act.subtema }}</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+
+                                                    @if (act.descripcion) {
+                                                        <div class="info-field-card md:col-span-2">
+                                                            <div class="info-field-icon">
+                                                                <i class="pi pi-align-left text-xs text-green-500"></i>
+                                                            </div>
+                                                            <div class="info-field-content">
+                                                                <span class="info-field-label">Descripción de la actividad de aprendizaje</span>
+                                                                <span class="info-field-value">{{ act.descripcion }}</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+
+                                                </div>
+                                            </div>
+
+                                            <p-divider styleClass="my-0" />
+
+                                            <!-- Campos de evaluación -->
+                                            <div class="flex flex-col gap-4">
+                                                <span class="text-xs font-semibold text-surface-500 uppercase tracking-wide">
+                                                    Diseño de la evaluación para esta actividad
+                                                </span>
+
+                                                <!-- Descripción de la actividad de evaluación -->
+                                                <div class="flex flex-col gap-2">
+                                                    <label class="font-medium text-sm">
+                                                        <i class="pi pi-align-left text-sm text-surface-400 mr-1"></i>
+                                                        Descripción de la actividad de evaluación
+                                                    </label>
+                                                    <textarea pTextarea
+                                                        formControlName="descripcionEvaluacion"
+                                                        [autoResize]="true"
+                                                        rows="3"
+                                                        class="w-full"
+                                                        placeholder="Describe cómo evaluarás esta actividad...">
+                                                    </textarea>
+                                                </div>
+
+                                                <!-- Tipo de evaluación + Momento -->
+                                                <div class="flex flex-col md:flex-row gap-4">
+                                                    <div class="flex flex-col gap-2 w-full">
+                                                        <label class="font-medium text-sm">
+                                                            <i class="pi pi-list-check text-sm text-surface-400 mr-1"></i>
+                                                            Tipo de evaluación
+                                                        </label>
+                                                        <p-select
+                                                            formControlName="tipoEvaluacion"
+                                                            [options]="tipoEvaluacionOpciones"
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="Seleccione un tipo"
+                                                            appendTo="body"
+                                                            class="w-full">
+                                                        </p-select>
+                                                    </div>
+                                                    <div class="flex flex-col gap-2 w-full">
+                                                        <label class="font-medium text-sm">
+                                                            <i class="pi pi-clock text-sm text-surface-400 mr-1"></i>
+                                                            Momento
+                                                        </label>
+                                                        <p-select
+                                                            formControlName="momento"
+                                                            [options]="momentosOpciones"
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="Seleccione un momento"
+                                                            appendTo="body"
+                                                            class="w-full">
+                                                        </p-select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Actores + Medios -->
+                                                <div class="flex flex-col md:flex-row gap-4">
+                                                    <div class="flex flex-col gap-2 w-full">
+                                                        <label class="font-medium text-sm">
+                                                            <i class="pi pi-users text-sm text-surface-400 mr-1"></i>
+                                                            Actores
+                                                        </label>
+                                                        <p-select
+                                                            formControlName="actores"
+                                                            [options]="actoresOpciones"
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="Seleccione los actores"
+                                                            appendTo="body"
+                                                            class="w-full">
+                                                        </p-select>
+                                                    </div>
+                                                    <div class="flex flex-col gap-2 w-full">
+                                                        <label class="font-medium text-sm">
+                                                            <i class="pi pi-file text-sm text-surface-400 mr-1"></i>
+                                                            Medios
+                                                        </label>
+                                                        <p-multiselect
+                                                            formControlName="medios"
+                                                            [options]="mediosOpciones"
+                                                            [group]="true"
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="Seleccione medios"
+                                                            scrollHeight="250px"
+                                                            display="chip"
+                                                            appendTo="body"
+                                                            class="w-full">
+                                                            <ng-template let-group #group>
+                                                                <div class="flex items-center gap-2 font-semibold text-primary">
+                                                                    <span>{{ group.label }}</span>
+                                                                </div>
+                                                            </ng-template>
+                                                        </p-multiselect>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Técnicas -->
+                                                <div class="flex flex-col gap-2">
+                                                    <label class="font-medium text-sm">
+                                                        <i class="pi pi-cog text-sm text-surface-400 mr-1"></i>
+                                                        Técnicas
+                                                    </label>
+                                                    <p-multiselect
+                                                        formControlName="tecnicas"
+                                                        [options]="tecnicasOpciones"
+                                                        [group]="true"
+                                                        optionLabel="label"
+                                                        optionValue="value"
+                                                        placeholder="Seleccione técnicas"
+                                                        scrollHeight="250px"
+                                                        display="chip"
+                                                        appendTo="body"
+                                                        class="w-full">
+                                                        <ng-template let-group #group>
+                                                            <div class="flex items-center gap-2 font-semibold text-primary">
+                                                                <span>{{ group.label }}</span>
+                                                            </div>
+                                                        </ng-template>
+                                                    </p-multiselect>
+                                                </div>
+
+                                                <!-- Instrumentos -->
+                                                <div class="flex flex-col gap-2">
+                                                    <label class="font-medium text-sm">
+                                                        <i class="pi pi-wrench text-sm text-surface-400 mr-1"></i>
+                                                        Instrumentos
+                                                    </label>
+                                                    <p-multiselect
+                                                        formControlName="instrumentos"
+                                                        [options]="instrumentosOpciones"
+                                                        optionLabel="label"
+                                                        optionValue="value"
+                                                        placeholder="Seleccione instrumentos"
+                                                        scrollHeight="250px"
+                                                        display="chip"
+                                                        appendTo="body"
+                                                        class="w-full">
+                                                    </p-multiselect>
+                                                </div>
+
+                                                <!-- Validación con IA -->
+                                                <div class="flex flex-col gap-2 pt-1">
+                                                    <p-button
+                                                        label="Validar con TEIA"
+                                                        icon="pi pi-sparkles"
+                                                        size="small"
+                                                        [loading]="evaluacionValidation()[idx]?.loading ?? false"
+                                                        [disabled]="!ctrl.get('descripcionEvaluacion')?.value || !ctrl.get('tipoEvaluacion')?.value || !ctrl.get('momento')?.value || !ctrl.get('actores')?.value"
+                                                        (onClick)="validateEvaluacion(idx)"
+                                                        pTooltip="Verifica si el diseño de evaluación es coherente con la actividad de aprendizaje"
+                                                        tooltipPosition="top">
+                                                    </p-button>
+
+                                                    @if (evaluacionValidation()[idx]?.result; as vResult) {
+                                                        <div class="validation-result-box">
+                                                            <div class="flex items-center gap-2 mb-2">
+                                                                <p-tag
+                                                                    [severity]="getVerdictSeverity(vResult.verdict)"
+                                                                    [value]="vResult.verdict"
+                                                                    styleClass="text-xs">
+                                                                </p-tag>
+                                                                <span class="text-xs text-surface-400">
+                                                                    {{ vResult.processing_time_ms ? (vResult.processing_time_ms / 1000 | number:'1.1-1') + 's' : '' }}
+                                                                </span>
+                                                            </div>
+                                                            <p class="m-0 text-sm">{{ vResult.justification }}</p>
+                                                        </div>
+                                                    }
+
+                                                    @if (evaluacionValidation()[idx]?.error) {
+                                                        <p-message severity="error" styleClass="w-full">
+                                                            <span>{{ evaluacionValidation()[idx]!.error }}</span>
+                                                        </p-message>
+                                                    }
+                                                </div>
+
+                                            </div><!-- /eval fields -->
+                                        </div><!-- /formGroupName -->
+                                    </div><!-- /eval-actividad-card -->
+                                }
+                            </div><!-- /formArrayName -->
+                        }
+                    </p-fieldset>
+                </div>
+
+            </form>
+
+        </div>
+    </p-fluid>
+}

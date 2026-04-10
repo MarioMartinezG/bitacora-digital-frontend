@@ -1,0 +1,111 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button label="Nuevo Tema" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNewTopic()" />
+        <p-button label="Nuevo Subtema" icon="pi pi-plus" severity="secondary" outlined (click)="openNewSubtopic()"
+            [disabled]="!topics || topics.length === 0" tooltip="Se tiene que crear por lo menos un tema primero"
+            tooltipPosition="top" />
+    </ng-template>
+</p-toolbar>
+
+<p-table [value]="tableRows" [tableStyle]="{ 'min-width': '50rem' }">
+    <ng-template #header>
+        <tr>
+            <th>#</th>
+            <th>Módulo/Unidad/Tema</th>
+            <th>Acciones Tema</th>
+            <th>Subtema</th>
+            <th>Acciones Subtema</th>
+        </tr>
+    </ng-template>
+
+    <ng-template #body let-row let-rowIndex="rowIndex">
+        <tr>
+            <td>{{ rowIndex + 1 }}</td>
+
+            <!-- Tema -->
+            <td *ngIf="row.isFirstSub" [attr.rowspan]="row.rowspan">
+                {{ row.topic.name }}
+            </td>
+            <td *ngIf="row.isFirstSub" [attr.rowspan]="row.rowspan" class="text-center">
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                    (click)="editTopicDialog(row.topic)"></p-button>
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                    (click)="deleteTopic(row.topic.id)"></p-button>
+            </td>
+
+            <!-- Subtema -->
+            <td>
+                {{ row.subtopic?.name || '-' }}
+            </td>
+            <td class="text-center">
+                <p-button *ngIf="row.subtopic" icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                    (click)="editSubtopicDialog(row.subtopic)"></p-button>
+                <p-button *ngIf="row.subtopic" icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                    (click)="deleteSubtopic(row.subtopic.id)"></p-button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+
+
+
+<p-dialog [(visible)]="topicDialog" [style]="{ width: '450px' }" header="Nuevo Tema" [modal]="true" [closable]="false">
+
+    <!-- Contenido del diálogo -->
+    <ng-template #content>
+        <div class="flex flex-col gap-4">
+            <div class="flex flex-col">
+                <label for="topicName" class="block font-bold mb-2">Nombre del Tema</label>
+                <input pInputText [(ngModel)]="topic.name" id="topicName" required autofocus
+                    class="w-full p-inputtext" />
+
+                <small class="text-red-500" *ngIf="submitted && !topic.name">
+                    El nombre es obligatorio.
+                </small>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- Footer del diálogo -->
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideTopicDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveTopic()" />
+    </ng-template>
+
+</p-dialog>
+
+
+
+<p-dialog [(visible)]="subtopicDialog" [style]="{ width: '450px' }" header="Nuevo Subtema" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-4">
+
+            <!-- Selección de Tema -->
+            <div class="flex flex-col">
+                <label for="topicAutocomplete" class="block font-bold mb-2">Tema</label>
+                <p-autocomplete [(ngModel)]="selectedTopic" [suggestions]="filteredTopics"
+                    (completeMethod)="filterTopics($event)" optionLabel="name" [dropdown]="true"
+                    appendTo="body" placeholder="Seleccione un tema"></p-autocomplete>
+                <small class="text-red-500" *ngIf="submitted && !selectedTopic">
+                    Debe seleccionar un tema.
+                </small>
+            </div>
+
+            <!-- Nombre del Subtema -->
+            <div class="flex flex-col">
+                <label for="subtopicName" class="block font-bold mb-2">Nombre del Subtema</label>
+                <input pInputText id="subtopicName" [(ngModel)]="subtopic.name" required autofocus
+                    class="w-full p-inputtext" />
+                <small class="text-red-500" *ngIf="submitted && !subtopic.name">El nombre es obligatorio.</small>
+            </div>
+
+        </div>
+    </ng-template>
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideSubtopicDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveSubtopic()" />
+    </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

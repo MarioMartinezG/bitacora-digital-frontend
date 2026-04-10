@@ -1,0 +1,313 @@
+<div class="flex flex-col gap-4">
+  <div class="flex items-center gap-3 flex-wrap">
+    <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" (onClick)="volver()" />
+    <h3 class="m-0 flex-1">{{ seccionNombre }}</h3>
+    <span class="text-surface-400">(Solo lectura)</span>
+    @if (revisado()) {
+      <p-tag severity="success" value="Revisado por tutor" icon="pi pi-check-circle" />
+    } @else {
+      <p-tag severity="warn" value="Pendiente de revisión" icon="pi pi-clock" />
+    }
+  </div>
+
+  @if (cargando()) {
+    <div class="flex justify-center p-8">
+      <i class="pi pi-spin pi-spinner text-4xl"></i>
+    </div>
+  } @else {
+
+    <!-- Cards de distribución de horas (solo sección secuencia) -->
+    @if (seccionCodigo === 'secuencia') {
+      @if (!secuenciaCaracterizaCargada()) {
+        <div class="flex justify-center p-4 mb-4">
+          <i class="pi pi-spin pi-spinner text-2xl text-surface-400"></i>
+        </div>
+      } @else if (!secuenciaDatosHorasDisponibles()) {
+        <p-message severity="warn" styleClass="w-full mb-4">
+          <span>
+            El estudiante aún no ha diligenciado las horas en
+            <strong>Identificación de tu curso</strong>. Las cards de distribución
+            estarán disponibles cuando complete ese módulo.
+          </span>
+        </p-message>
+      } @else {
+        <div class="grid grid-cols-12 gap-4 mb-4">
+
+          <!-- Distribución de horas -->
+          <div class="col-span-12 lg:col-span-6">
+            <div class="card h-full">
+              <div class="flex items-center justify-between mb-4">
+                <span class="font-semibold text-lg">Distribución de horas</span>
+                <div class="flex items-center justify-center bg-blue-100 rounded-border"
+                  style="width: 2.5rem; height: 2.5rem;">
+                  <i class="pi pi-clock text-blue-500 text-xl"></i>
+                </div>
+              </div>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-5">
+                  <table>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-bookmark text-blue-500"></i>
+                          <span class="text-color-secondary">Créditos</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold">{{ secuenciaNumeroCreditos() ?? '—' }}</td>
+                    </tr>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-clock text-gray-500"></i>
+                          <span class="text-color-secondary">Horas totales</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold">{{ secuenciaTotalHoras() }}</td>
+                    </tr>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-check-circle text-green-500"></i>
+                          <span class="text-color-secondary">Horas asignadas</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold"
+                        [class.text-green-500]="!secuenciaHorasExcedidas()"
+                        [class.text-red-500]="secuenciaHorasExcedidas()">
+                        {{ secuenciaHorasAsignadas() }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-hourglass text-primary"></i>
+                          <span class="font-medium">Horas disponibles</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-bold text-xl"
+                        [class.text-primary]="!secuenciaHorasExcedidas()"
+                        [class.text-red-500]="secuenciaHorasExcedidas()">
+                        {{ secuenciaHorasExcedidas()
+                          ? '-' + (secuenciaHorasAsignadas() - secuenciaTotalHoras())
+                          : secuenciaHorasDisponibles() }}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                  <p-knob [ngModel]="secuenciaPorcentaje()" [readonly]="true"
+                    [min]="0" [max]="100" valueTemplate="{value}%" [size]="150">
+                  </p-knob>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Distribución por tipo de trabajo -->
+          <div class="col-span-12 lg:col-span-6">
+            <div class="card h-full">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-lg">Distribución por tipo de trabajo</span>
+                <div class="flex items-center justify-center bg-orange-100 rounded-border"
+                  style="width: 2.5rem; height: 2.5rem;">
+                  <i class="pi pi-chart-pie text-orange-500 text-xl"></i>
+                </div>
+              </div>
+              <p class="text-color-secondary text-xs mt-0 mb-3">
+                Valores de referencia definidos en Identificación de tu curso
+              </p>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-5">
+                  <table>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-home text-green-500"></i>
+                          <span class="text-color-secondary">Trabajo independiente</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold text-green-500">{{ secuenciaHorasIndependiente() }} hrs</td>
+                    </tr>
+                    <tr class="border-bottom-1 surface-border">
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-users text-orange-500"></i>
+                          <span class="text-color-secondary">Acompañamiento directo</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-semibold text-orange-500">{{ secuenciaHorasDirecto() }} hrs</td>
+                    </tr>
+                    <tr>
+                      <td class="py-2 pr-3">
+                        <div class="flex items-center gap-2">
+                          <i class="pi pi-calculator text-primary"></i>
+                          <span class="font-medium">Total disponible</span>
+                        </div>
+                      </td>
+                      <td class="py-2 font-bold text-xl text-primary">{{ secuenciaTotalHoras() }} hrs</td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-span-12 md:col-span-7 flex items-center justify-center">
+                  @if (secuenciaChartData()) {
+                    <p-chart type="doughnut" [data]="secuenciaChartData()"
+                      [options]="secuenciaChartOptions" width="150" height="150">
+                    </p-chart>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      }
+    }
+
+    <div class="card">
+      <p-accordion [value]="panelValues" [multiple]="true">
+        @for (panel of paneles(); track panel.key) {
+          <p-accordion-panel [value]="panel.key">
+            <p-accordion-header>
+              <div class="flex items-center justify-between w-full gap-2">
+                <span>{{ panel.label }}</span>
+                <div class="flex items-center gap-2">
+                  @if (esTambienTutor && !panel.ocultarEstado) {
+                    <div (click)="$event.stopPropagation()">
+                      <app-estado-tutor-selector
+                        [estudianteId]="estudianteId"
+                        [seccionCodigo]="seccionCodigo"
+                        [subseccionCodigo]="panel.key"
+                        [estadoActual]="getEstadoInicial(panel)" />
+                    </div>
+                  }
+                  @if (!panel.ocultarComentario) {
+                    <p-button
+                      icon="pi pi-comments"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="secondary"
+                      [badge]="getComentarioCount(panel.comentarioKey || panel.key)"
+                      badgeSeverity="info"
+                      (onClick)="abrirComentarios(panel.comentarioKey || panel.key); $event.stopPropagation()"
+                    />
+                  }
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content>
+              <div class="pt-4">
+                <!-- FIELDS -->
+                @if (panel.displayType === 'fields' && panel.fields) {
+                  @if (panelSinContenido(panel)) {
+                    <p-message severity="info" styleClass="w-full">
+                      <span>El estudiante aún no ha completado esta sección.</span>
+                    </p-message>
+                  } @else {
+                    <div class="flex flex-col gap-4">
+                      @for (campo of panel.fields; track campo.key) {
+                        <div class="flex flex-col gap-1">
+                          <label class="font-medium text-sm text-surface-500">{{ campo.label }}</label>
+                          <textarea
+                            pTextarea
+                            [value]="campo.value || '—'"
+                            [autoResize]="true"
+                            rows="1"
+                            readonly
+                            class="w-full"
+                            style="resize: none;">
+                          </textarea>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+
+                <!-- TABLE -->
+                @if (panel.displayType === 'table' && panel.rows && panel.columns) {
+                  <p-table
+                    [value]="panel.rows"
+                    [columns]="panel.columns"
+                    [paginator]="panel.rows.length > 10"
+                    [rows]="10"
+                    [rowsPerPageOptions]="[5, 10, 25]"
+                    [globalFilterFields]="getColumnKeys(panel)"
+                    sortMode="multiple"
+                    styleClass="p-datatable-sm p-datatable-striped"
+                    #dt>
+                    <ng-template pTemplate="caption">
+                      <div class="flex justify-end">
+                        <p-iconfield>
+                          <p-inputicon styleClass="pi pi-search" />
+                          <input
+                            pInputText
+                            type="text"
+                            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+                            placeholder="Buscar..." />
+                        </p-iconfield>
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="header" let-columns>
+                      <tr>
+                        @for (col of columns; track col.key) {
+                          <th [pSortableColumn]="col.key" class="whitespace-nowrap">
+                            {{ col.label }}
+                            <p-sortIcon [field]="col.key" />
+                          </th>
+                        }
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-row let-columns="columns">
+                      <tr>
+                        @for (col of columns; track col.key) {
+                          <td class="align-top text-sm">{{ formatCellValue(row[col.key]) }}</td>
+                        }
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage" let-columns>
+                      <tr>
+                        <td [attr.colspan]="columns.length" class="p-0">
+                          <p-message severity="info" styleClass="w-full">
+                            <span>El estudiante aún no ha completado esta sección.</span>
+                          </p-message>
+                        </td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                }
+
+                <!-- LIST -->
+                @if (panel.displayType === 'list') {
+                  @if (!panel.listItems || panel.listItems.length === 0) {
+                    <p-message severity="info" styleClass="w-full">
+                      <span>El estudiante aún no ha completado esta sección.</span>
+                    </p-message>
+                  } @else {
+                    <ul class="list-disc pl-6">
+                      @for (item of panel.listItems; track $index) {
+                        <li class="py-1 text-sm">{{ item }}</li>
+                      }
+                    </ul>
+                  }
+                }
+
+                <!-- INFO -->
+                @if (panel.displayType === 'info') {
+                  <p class="text-surface-500 text-sm italic">{{ panel.infoText }}</p>
+                }
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+        }
+      </p-accordion>
+    </div>
+  }
+</div>
+
+<app-comment-thread
+  [estudianteId]="estudianteId"
+  [seccionCodigo]="seccionCodigo"
+  [subseccionCodigo]="subseccionActiva"
+  [readOnly]="!esTambienTutor"
+  [(visible)]="comentariosVisible"
+  (comentarioAgregado)="onComentarioAgregado()"
+/>

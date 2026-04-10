@@ -1,0 +1,61 @@
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--surface-card);
+  padding: 1rem 0;
+  margin: -1rem 0 1rem 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+/* Sombra sutil cuando el header está pegado */
+.sticky-header::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Filas por tipo de actividad */
+.fila-sincrona {
+  background-color: color-mix(in srgb, #f97316 4%, transparent);
+}
+
+.fila-asincrona {
+  background-color: color-mix(in srgb, #22c55e 4%, transparent);
+}
+
+/* Fila con horas excedidas: resaltado sutil en rojo */
+.fila-excedida {
+  background-color: color-mix(in srgb, var(--p-red-500) 6%, transparent);
+}
+
+/* Fila de totales */
+.horas-total-row {
+  background-color: var(--p-surface-100);
+  border-top: 2px solid var(--p-surface-border);
+}
+
+/* Responsive: en móviles apilar verticalmente */
+@media (max-width: 640px) {
+  .sticky-header .flex {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .sticky-header .flex > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

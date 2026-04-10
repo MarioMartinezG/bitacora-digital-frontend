@@ -1,0 +1,78 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="flex flex-col gap-4 pt-3">
+
+  <div class="flex justify-between items-center">
+    <p class="text-surface-500 text-sm m-0">Gestiona los programas académicos disponibles en el formulario de identificación del curso</p>
+    <p-button label="Nuevo programa" icon="pi pi-plus" [disabled]="cargandoProgramas()" (click)="abrirNuevoPrograma()" />
+  </div>
+
+  <div class="border border-surface-200 dark:border-surface-700 rounded-xl bg-surface-0 dark:bg-surface-900 overflow-hidden">
+    @if (cargandoProgramas()) {
+      <div class="p-5 flex flex-col gap-3">
+        @for (i of [1,2,3,4,5]; track i) { <p-skeleton height="3rem" /> }
+      </div>
+    } @else {
+      <p-table [value]="programas()" [rowHover]="true" styleClass="p-datatable-sm">
+        <ng-template #header>
+          <tr>
+            <th>Nombre del programa</th>
+            <th style="width: 100px" class="text-center">Estado</th>
+            <th style="width: 110px" class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>
+              <span class="font-medium text-sm text-surface-900 dark:text-surface-0">{{ row.nombre }}</span>
+            </td>
+            <td class="text-center">
+              <p-tag [value]="row.activo ? 'Activo' : 'Inactivo'"
+                     [severity]="row.activo ? 'success' : 'secondary'" />
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-1">
+                <p-button icon="pi pi-pencil" severity="secondary" [outlined]="true" size="small"
+                          pTooltip="Editar" tooltipPosition="top" (click)="abrirEditarPrograma(row)" />
+                <p-button icon="pi pi-trash" severity="danger" [outlined]="true" size="small"
+                          pTooltip="Eliminar" tooltipPosition="top" (click)="confirmarEliminarPrograma(row)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3">
+              <div class="flex flex-col items-center justify-center py-10 text-center">
+                <i class="pi pi-book text-4xl text-surface-300 mb-3"></i>
+                <p class="text-surface-500 font-medium m-0">No hay programas configurados</p>
+                <p class="text-surface-400 text-sm m-0 mt-1">Haz clic en "Nuevo programa" para agregar el primero</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+</div>
+
+<!-- Dialog: Crear / Editar programa -->
+<p-dialog [header]="editandoProgramaId ? 'Editar programa' : 'Nuevo programa'"
+  [visible]="dialogProgramaVisible()" (visibleChange)="dialogProgramaVisible.set($event)"
+  [modal]="true" [style]="{ width: '420px' }"
+  [draggable]="false" [closable]="!guardandoPrograma()">
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label class="block font-medium text-sm mb-2">Nombre del programa <span class="text-red-500">*</span></label>
+      <input pInputText type="text" [(ngModel)]="nombrePrograma"
+             placeholder="Ej. Ingeniería de Sistemas" class="w-full" />
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true"
+              [disabled]="guardandoPrograma()" (click)="dialogProgramaVisible.set(false)" />
+    <p-button [label]="editandoProgramaId ? 'Guardar cambios' : 'Crear programa'"
+              icon="pi pi-check" [loading]="guardandoPrograma()" (click)="guardarPrograma()" />
+  </ng-template>
+</p-dialog>

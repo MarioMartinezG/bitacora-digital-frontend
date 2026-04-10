@@ -1,0 +1,185 @@
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <p-fluid>
+        <div class="flex flex-col gap-4">
+
+            <!-- ===== STICKY HEADER ===== -->
+            <div class="sticky-header-global">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <h3 class="m-0">Calificación</h3>
+                        <p-tag
+                            [severity]="getSeverity(displayEstado())"
+                            [value]="getLabel(displayEstado()) + ' (' + displayPercentage() + '%)'">
+                        </p-tag>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <app-save-status-indicator
+                            [saveState]="saveState"
+                            (onRetry)="retryOnError()">
+                        </app-save-status-indicator>
+                        <app-export-button
+                            [seccionCodigo]="seccionCodigo"
+                            [progress]="progress()"
+                            [formData]="form.getRawValue()" />
+                        <p-button
+                            label="Guardar"
+                            icon="pi pi-save"
+                            (onClick)="saveManually()"
+                            [disabled]="!saveState.isDirty"
+                            size="small">
+                        </p-button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== INTRO ===== -->
+            <div class="card">
+                <div class="flex items-start gap-3">
+                    <i class="pi pi-info-circle text-primary text-xl mt-0.5 flex-shrink-0"></i>
+                    <p class="m-0 text-sm leading-relaxed">
+                        Define los descriptores de desempeño para cada resultado de aprendizaje
+                        según la escala institucional de calificación. Por cada valoración, describe
+                        los criterios que el estudiante debe cumplir para obtener esa nota.
+                    </p>
+                </div>
+            </div>
+
+            <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
+
+                <div class="card">
+
+                    <!-- ===== TIPO DE PROGRAMA (fila compacta) ===== -->
+                    <div class="nivel-row">
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <i class="pi pi-graduation-cap text-primary text-sm"></i>
+                            <label class="font-medium text-sm whitespace-nowrap">
+                                Tipo de programa
+                            </label>
+                        </div>
+
+                        <p-select
+                            formControlName="nivel"
+                            [options]="nivelOpciones"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Selecciona pregrado o posgrado"
+                            appendTo="body"
+                            styleClass="nivel-select">
+                        </p-select>
+
+                        @if (form.get('nivel')?.value) {
+                            <span class="nivel-hint text-surface-500 text-sm">
+                                La escala aplica
+                                {{ form.get('nivel')?.value === 'posgrado' ? '7 valoraciones (incluye 3.5)' : '6 valoraciones' }}.
+                            </span>
+                        } @else {
+                            <span class="nivel-hint text-surface-400 text-sm italic">
+                                Selecciona el tipo para determinar la escala institucional.
+                            </span>
+                        }
+
+                        <div class="ml-auto">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('calificacion'))"
+                                [value]="getLabel(getDisplayEstado('calificacion'))"
+                                size="small">
+                            </p-tag>
+                        </div>
+                    </div>
+
+                    <p-divider styleClass="my-4" />
+
+                    <!-- ===== ESCALA POR RESULTADO DE APRENDIZAJE ===== -->
+                    <p-fieldset legend="Escala de calificación por resultado de aprendizaje" [toggleable]="true">
+                        <ng-template pTemplate="header">
+                            <div (click)="$event.stopPropagation()">
+                                <app-bitacora-comment-button
+                                    [seccionCodigo]="seccionCodigo"
+                                    subseccionCodigo="calificacion"
+                                    [badge]="comentariosCounts()['calificacion'] || 0" />
+                            </div>
+                        </ng-template>
+
+                        @if (!raLoaded()) {
+                            <div class="flex justify-center p-6">
+                                <i class="pi pi-spin pi-spinner text-2xl text-surface-400"></i>
+                            </div>
+                        } @else if (raList().length === 0) {
+                            <p-message severity="warn" styleClass="w-full" icon="pi pi-exclamation-triangle">
+                                <span>
+                                    No se encontraron resultados de aprendizaje. Completa el módulo de
+                                    <strong>Factores Situacionales</strong> primero para poder definir
+                                    la escala de calificación.
+                                </span>
+                            </p-message>
+                        } @else {
+                            <div formArrayName="resultados" class="flex flex-col gap-5">
+                                @for (ctrl of resultadosArray.controls; track $index; let idx = $index) {
+                                    <div class="ra-calificacion-card">
+                                        <div [formGroupName]="idx" class="flex flex-col gap-4">
+
+                                            <!-- Cabecera del RA -->
+                                            <div class="flex items-start gap-3">
+                                                <div class="ra-badge flex-shrink-0">{{ idx + 1 }}</div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-1.5 mb-1">
+                                                        <span class="text-xs font-semibold text-surface-500 uppercase tracking-wide">
+                                                            Resultado de Aprendizaje
+                                                        </span>
+                                                        <i class="pi pi-lock text-surface-400 text-xs"
+                                                           pTooltip="Para modificar los resultados de aprendizaje, dirígete al módulo de Factores Situacionales"
+                                                           tooltipPosition="right"></i>
+                                                    </div>
+                                                    <p class="m-0 text-sm text-color leading-relaxed">
+                                                        {{ raList()[idx] }}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <p-divider styleClass="my-0" />
+
+                                            <!-- Tabla de escala de calificación -->
+                                            <div class="escala-table">
+                                                <div class="escala-header">
+                                                    <div class="escala-col-valoracion">
+                                                        Valoración del criterio en la escala institucional
+                                                    </div>
+                                                    <div class="escala-col-descriptor">
+                                                        Descriptor de desempeño
+                                                    </div>
+                                                </div>
+
+                                                @for (item of escalaActual(); track item.formKey) {
+                                                    <div class="escala-row">
+                                                        <div class="escala-col-valoracion">
+                                                            <span [class]="getValoracionClass(item.valoracion)">{{ item.valoracion }}</span>
+                                                        </div>
+                                                        <div class="escala-col-descriptor">
+                                                            <textarea pTextarea
+                                                                [formControlName]="item.formKey"
+                                                                [autoResize]="true"
+                                                                rows="2"
+                                                                class="w-full"
+                                                                placeholder="Describe los criterios de desempeño para esta valoración...">
+                                                            </textarea>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </p-fieldset>
+
+                </div>
+
+            </form>
+
+        </div>
+    </p-fluid>
+}

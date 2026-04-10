@@ -1,0 +1,87 @@
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <div class="card">
+        <!-- Header sticky con titulo e indicador de guardado -->
+        <div class="sticky-header">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h4 class="m-0">RAP y RAC</h4>
+                    <p-tag
+                        [severity]="getSeverity(displayEstado())"
+                        [value]="getLabel(displayEstado()) + ' (' + displayPercentage() + '%)'">
+                    </p-tag>
+                </div>
+                <div class="flex items-center gap-3">
+                    <app-save-status-indicator
+                        [saveState]="saveState"
+                        (onRetry)="retryOnError()">
+                    </app-save-status-indicator>
+                    <app-export-button
+                        [seccionCodigo]="seccionCodigo"
+                        [progress]="progress()"
+                        [formData]="form.getRawValue()" />
+                    <p-button
+                        label="Guardar"
+                        icon="pi pi-save"
+                        (onClick)="saveManually()"
+                        [disabled]="!saveState.isDirty"
+                        size="small">
+                    </p-button>
+                </div>
+            </div>
+        </div>
+
+        <p-accordion [value]="['0', '1']" [multiple]="true">
+            <!-- Panel RAP -->
+            <p-accordion-panel value="0">
+                <p-accordion-header>
+                    <div class="flex items-center justify-between w-full">
+                        <span>Resultados de Aprendizaje del Programa (RAP)</span>
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('rap'))"
+                                [value]="getLabel(getDisplayEstado('rap'))"
+                                class="mr-2">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="rap"
+                                [badge]="comentariosCounts()['rap'] || 0" />
+                        </div>
+                    </div>
+                </p-accordion-header>
+                <p-accordion-content>
+                    <app-rapwidget
+                        [resultados]="getResultadosRap()"
+                        (onAgregar)="agregarResultadoRap($event)"
+                        (onEliminar)="eliminarResultadoRap($event)">
+                    </app-rapwidget>
+                </p-accordion-content>
+            </p-accordion-panel>
+
+            <!-- Panel RAC -->
+            <p-accordion-panel value="1">
+                <p-accordion-header>
+                    <div class="flex items-center justify-between w-full">
+                        <span>Resultados de Aprendizaje del Curso (RAC)</span>
+                        <div class="flex items-center gap-2">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('rac'))"
+                                [value]="getLabel(getDisplayEstado('rac'))"
+                                class="mr-2">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="rac"
+                                [badge]="comentariosCounts()['rac'] || 0" />
+                        </div>
+                    </div>
+                </p-accordion-header>
+                <p-accordion-content>
+                    <app-racwidget [formGroup]="racFormGroup"></app-racwidget>
+                </p-accordion-content>
+            </p-accordion-panel>
+        </p-accordion>
+    </div>
+}

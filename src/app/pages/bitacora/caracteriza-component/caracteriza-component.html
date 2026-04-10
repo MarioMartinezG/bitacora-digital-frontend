@@ -1,0 +1,246 @@
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+<p-fluid>
+    <!-- Header sticky -->
+    <div class="sticky-header-global">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <h3 class="m-0">Identificación de tu curso</h3>
+                <p-tag
+                    [severity]="getSeverity(displayEstado())"
+                    [value]="getLabel(displayEstado()) + ' (' + displayPercentage() + '%)'">
+                </p-tag>
+            </div>
+            <div class="flex items-center gap-3">
+                <app-save-status-indicator
+                    [saveState]="saveState"
+                    (onRetry)="retryOnError()">
+                </app-save-status-indicator>
+                <app-export-button
+                    [seccionCodigo]="seccionCodigo"
+                    [progress]="progress()"
+                    [formData]="form.getRawValue()" />
+                <p-button
+                    label="Guardar"
+                    icon="pi pi-save"
+                    (onClick)="saveManually()"
+                    [disabled]="!saveState.isDirty"
+                    size="small">
+                </p-button>
+            </div>
+        </div>
+    </div>
+
+    <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
+        <!-- Identificacion de la asignatura -->
+        <div class="flex mt-4">
+            <div class="card">
+                <p-fieldset legend="Identificación de la asignatura" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                            <div class="flex items-center gap-2">
+                                <p-tag
+                                    [severity]="getSeverity(getDisplayEstado('datosBasicos'))"
+                                    [value]="getLabel(getDisplayEstado('datosBasicos'))"
+                                    size="small">
+                                </p-tag>
+                                <app-bitacora-comment-button
+                                    [seccionCodigo]="seccionCodigo"
+                                    subseccionCodigo="datosBasicos"
+                                    [badge]="comentariosCounts()['datosBasicos'] || 0" />
+                            </div>
+                        </div>
+                    </ng-template>
+
+                    <p-message severity="info" styleClass="w-full mb-4" icon="pi pi-lightbulb">
+                        <span>
+                            Llena el espacio de <strong>IDENTIFICACIÓN DE TU CURSO</strong> informando
+                            sus características generales que están declaradas en el plan de estudios del programa.
+                        </span>
+                    </p-message>
+
+                    <div formGroupName="datosBasicos" class="card flex flex-col gap-4">
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Programa</label>
+                            <div class="col-span-12 md:col-span-10">
+                                <p-autoComplete
+                                    formControlName="programa"
+                                    [suggestions]="filteredProgramas"
+                                    optionLabel="name"
+                                    placeholder="Buscar programa"
+                                    dropdown
+                                    (completeMethod)="filterProgramas($event)">
+                                </p-autoComplete>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Nombre de asignatura</label>
+                            <div class="col-span-12 md:col-span-10">
+                                <input pInputText formControlName="nombreAsignatura" type="text" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Tipo de asignatura</label>
+                            <div class="col-span-12 md:col-span-10">
+                                <p-select
+                                    formControlName="tipoAsignatura"
+                                    [options]="tiposAsignatura"
+                                    optionLabel="name"
+                                    placeholder="Seleccione un tipo"
+                                    class="w-full">
+                                </p-select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-4">
+                            <label class="flex items-center col-span-12 md:col-span-2">Semestre</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="semestre"
+                                    mode="decimal"
+                                    [min]="1"
+                                    [max]="12"
+                                    [showButtons]="true"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Periodo Académico</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-select
+                                    formControlName="periodoAcademico"
+                                    [options]="periodos"
+                                    optionLabel="name"
+                                    placeholder="Seleccione un periodo"
+                                    class="w-full">
+                                </p-select>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Prerrequisito</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-toggleButton
+                                    formControlName="prerequisito"
+                                    onLabel="Si"
+                                    offLabel="No"
+                                    class="w-full">
+                                </p-toggleButton>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Materia Prerrequisito</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <input
+                                    pInputText
+                                    formControlName="materiaPrerequisito"
+                                    type="text"
+                                    placeholder="Ej: Algebra Lineal"
+                                    class="w-full" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-4 items-center">
+                            <label class="flex items-center col-span-12 md:col-span-2">Número de créditos</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="numeroCreditos"
+                                    [min]="1"
+                                    [max]="32"
+                                    [showButtons]="true"
+                                    mode="decimal"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Total horas de trabajo</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    [ngModel]="totalHoras"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [readonly]="true"
+                                    mode="decimal"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Horas de trabajo directo</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="horasDirecto"
+                                    [min]="0"
+                                    [max]="totalHoras"
+                                    mode="decimal"
+                                    placeholder="Ej: 24"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+
+                            <label class="flex items-center col-span-12 md:col-span-2">Horas de trabajo independiente</label>
+                            <div class="col-span-12 md:col-span-4">
+                                <p-inputNumber
+                                    formControlName="horasIndependiente"
+                                    [min]="0"
+                                    [max]="totalHoras"
+                                    mode="decimal"
+                                    placeholder="Ej: 72"
+                                    class="w-full">
+                                </p-inputNumber>
+                            </div>
+                        </div>
+
+                        <!-- Mensajes de validación de horas -->
+                        @if (errorHorasNegativas) {
+                            <p-message severity="error" icon="pi pi-times-circle" styleClass="w-full">
+                                <span>Las horas de trabajo no pueden ser negativas.</span>
+                            </p-message>
+                        }
+                        @if (errorHorasExcedidas) {
+                            <p-message severity="error" icon="pi pi-times-circle" styleClass="w-full">
+                                <span>
+                                    Ningún campo puede superar el total de <strong>{{ totalHoras }} horas</strong>.
+                                    Verifica los valores ingresados.
+                                </span>
+                            </p-message>
+                        }
+                        @if (errorHoras) {
+                            <p-message severity="error" icon="pi pi-times-circle" styleClass="w-full">
+                                <span>
+                                    La suma de horas directas e independientes debe ser exactamente
+                                    <strong>{{ totalHoras }}</strong>. Es posible que hayas cambiado el número
+                                    de créditos después de ingresar las horas.
+                                </span>
+                            </p-message>
+                        }
+                    </div>
+                </p-fieldset>
+            </div>
+        </div>
+
+        <!-- Justificacion -->
+        <div class="flex mt-8">
+            <div class="card">
+                <p-fieldset legend="Justificación" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                            <p-tag
+                                [severity]="getSeverity(getDisplayEstado('justificacion'))"
+                                [value]="getLabel(getDisplayEstado('justificacion'))"
+                                size="small">
+                            </p-tag>
+                            <app-bitacora-comment-button
+                                [seccionCodigo]="seccionCodigo"
+                                subseccionCodigo="justificacion"
+                                [badge]="comentariosCounts()['justificacion'] || 0" />
+                        </div>
+                    </ng-template>
+
+                    <app-justificationwidget
+                        [formGroup]="justificacionFormGroup">
+                    </app-justificationwidget>
+                </p-fieldset>
+            </div>
+        </div>
+    </form>
+</p-fluid>
+}

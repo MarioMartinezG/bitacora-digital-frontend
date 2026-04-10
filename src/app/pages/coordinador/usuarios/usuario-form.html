@@ -1,0 +1,70 @@
+<p-toast />
+
+<div class="card">
+  <div class="font-semibold text-xl mb-4">{{ titulo }}</div>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.escape)="cancelar()">
+    <div class="flex flex-col gap-6">
+
+      <div>
+        <label for="nombre" class="block font-bold mb-2">Nombre completo</label>
+        <input pInputText id="nombre" formControlName="nombre" placeholder="Ingrese el nombre" class="w-full"
+               [class.ng-invalid]="isFieldInvalid('nombre')" [class.ng-dirty]="isFieldInvalid('nombre')" />
+        @if (isFieldInvalid('nombre')) {
+          <small class="text-red-500">El nombre es obligatorio</small>
+        }
+      </div>
+
+      <div>
+        <label for="correo" class="block font-bold mb-2">Correo electrónico</label>
+        <input pInputText id="correo" formControlName="correo" type="email" placeholder="correo@ejemplo.com" class="w-full"
+               [class.ng-invalid]="isFieldInvalid('correo')" [class.ng-dirty]="isFieldInvalid('correo')" />
+        @if (isFieldInvalid('correo')) {
+          <small class="text-red-500">Ingrese un correo electrónico válido</small>
+        }
+      </div>
+
+      @if (isEditMode()) {
+        <div>
+          <label for="contrasena" class="block font-bold mb-2">
+            Nueva contraseña
+            <span class="font-normal text-gray-500">(dejar vacío para mantener la actual)</span>
+          </label>
+          <p-password id="contrasena" formControlName="contrasena"
+                      [toggleMask]="true" [feedback]="true"
+                      placeholder="Ingrese nueva contraseña (opcional)"
+                      styleClass="w-full"
+                      [inputStyleClass]="'w-full'" />
+        </div>
+      } @else {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+          <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
+          <div>
+            <p class="font-medium text-blue-800 mb-1">Contraseña por defecto</p>
+            <p class="text-sm text-blue-700 m-0">El usuario será creado con la contraseña temporal <strong>Unbosque</strong>. Se le enviará un correo con sus credenciales y se le solicitará cambiarla en su primer inicio de sesión.</p>
+          </div>
+        </div>
+      }
+
+      <div>
+        <label for="roles" class="block font-bold mb-2">Roles</label>
+        <p-multiselect id="roles" formControlName="roles"
+                       [options]="rolesOptions"
+                       optionLabel="label"
+                       optionValue="value"
+                       placeholder="Seleccione los roles"
+                       appendTo="body"
+                       styleClass="w-full"
+                       display="chip" />
+        @if (isFieldInvalid('roles')) {
+          <small class="text-red-500">Debe asignar al menos un rol</small>
+        }
+      </div>
+
+      <div class="flex justify-end gap-3 mt-4">
+        <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [outlined]="true" (click)="cancelar()" />
+        <p-button [label]="isEditMode() ? 'Actualizar' : 'Crear'" icon="pi pi-check"
+                  type="submit" [loading]="guardando()" />
+      </div>
+    </div>
+  </form>
+</div>

@@ -14,19 +14,21 @@
     align-items: center;
 
     .layout-topbar-logo-container {
-        width: 20rem;
         display: flex;
         align-items: center;
+        flex: 1;
+        min-width: 0;
     }
 
     .layout-topbar-logo {
         display: inline-flex;
         align-items: center;
-        font-size: 1.5rem;
+        font-size: 0.9rem;
         border-radius: var(--content-border-radius);
         color: var(--text-color);
         font-weight: 500;
         gap: 0.5rem;
+        white-space: nowrap;
 
         svg {
             width: 3rem;

@@ -1,0 +1,35 @@
+.sticky-header-global {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--surface-ground);
+  padding: 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.sticky-header-global::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .sticky-header-global .flex {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .sticky-header-global .flex > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

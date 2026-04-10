@@ -1,0 +1,181 @@
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <p-fluid>
+        <div class="flex flex-col gap-4">
+
+            <!-- ===== STICKY HEADER ===== -->
+            <div class="sticky-header-global">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <h3 class="m-0">Medios educativos</h3>
+                        <p-tag
+                            [severity]="getSeverity(displayEstado())"
+                            [value]="getLabel(displayEstado()) + ' (' + displayPercentage() + '%)'">
+                        </p-tag>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <app-save-status-indicator
+                            [saveState]="saveState"
+                            (onRetry)="retryOnError()">
+                        </app-save-status-indicator>
+                        <app-export-button
+                            [seccionCodigo]="seccionCodigo"
+                            [progress]="progress()"
+                            [formData]="form.getRawValue()" />
+                        <p-button
+                            label="Guardar"
+                            icon="pi pi-save"
+                            (onClick)="saveManually()"
+                            [disabled]="!saveState.isDirty"
+                            size="small">
+                        </p-button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== INTRO ===== -->
+            <div class="card">
+                <div class="flex items-start gap-3">
+                    <i class="pi pi-info-circle text-primary text-xl mt-0.5 flex-shrink-0"></i>
+                    <p class="m-0 text-sm leading-relaxed">
+                        En la siguiente tabla, crea el listado de medios educativos del curso.
+                    </p>
+                </div>
+            </div>
+
+            <form [formGroup]="form" (keydown.enter)="$event.preventDefault()">
+
+                <!-- ===== LISTADO DE MEDIOS EDUCATIVOS ===== -->
+                <div class="card">
+                    <p-fieldset legend="Listado de medios educativos" [toggleable]="true">
+                        <ng-template pTemplate="header">
+                            <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+                                <p-tag
+                                    [severity]="getSeverity(getDisplayEstado('mediosEducativos'))"
+                                    [value]="getLabel(getDisplayEstado('mediosEducativos'))"
+                                    size="small">
+                                </p-tag>
+                                <app-bitacora-comment-button
+                                    [seccionCodigo]="seccionCodigo"
+                                    subseccionCodigo="mediosEducativos"
+                                    [badge]="comentariosCounts()['mediosEducativos'] || 0" />
+                            </div>
+                        </ng-template>
+
+                        @if (!factoresCargado()) {
+                            <div class="flex justify-center p-6">
+                                <i class="pi pi-spin pi-spinner text-2xl text-surface-400"></i>
+                            </div>
+                        } @else if (topics().length === 0) {
+                            <p-message severity="warn" styleClass="w-full" icon="pi pi-exclamation-triangle">
+                                <span>
+                                    No se han definido contenidos en <strong>Factores Situacionales</strong>.
+                                    Completa esa sección primero para poder asociar los medios educativos a los temas del curso.
+                                </span>
+                            </p-message>
+                        } @else {
+                            <div class="table-responsive">
+                                <table class="w-full" formArrayName="mediosEducativos">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2" class="p-2 text-center text-sm font-semibold surface-100 border-bottom-1 surface-border border-right-1">
+                                                Contenidos
+                                            </th>
+                                            <th colspan="3" class="p-2 text-center text-sm font-semibold surface-100 border-bottom-1 surface-border border-right-1">
+                                                Medios educativos relacionados con los temas
+                                            </th>
+                                            <th rowspan="2" class="p-2 text-sm font-semibold surface-100 border-bottom-1 surface-border" style="min-width: 12rem;">
+                                                Propósito pedagógico
+                                            </th>
+                                            <th rowspan="2" class="p-2 surface-100" style="width: 4rem;"></th>
+                                        </tr>
+                                        <tr>
+                                            <th class="p-2 text-sm font-semibold surface-50 border-bottom-1 surface-border" style="min-width: 10rem;">Temas</th>
+                                            <th class="p-2 text-sm font-semibold surface-50 border-bottom-1 surface-border border-right-1" style="min-width: 10rem;">Subtemas</th>
+                                            <th class="p-2 text-sm font-semibold surface-50 border-bottom-1 surface-border" style="min-width: 10rem;">Nombre</th>
+                                            <th class="p-2 text-sm font-semibold surface-50 border-bottom-1 surface-border" style="min-width: 12rem;">Descripción</th>
+                                            <th class="p-2 text-sm font-semibold surface-50 border-bottom-1 surface-border border-right-1" style="min-width: 10rem;">Referencia</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (medio of mediosFormArray.controls; track $index) {
+                                            <tr [formGroupName]="$index" class="border-bottom-1 surface-border">
+                                                <td class="p-2">
+                                                    <p-select
+                                                        formControlName="tema"
+                                                        [options]="topics()"
+                                                        optionLabel="name"
+                                                        optionValue="name"
+                                                        placeholder="Seleccione un tema"
+                                                        appendTo="body"
+                                                        class="w-full"
+                                                        (onChange)="onTemaChange($index)">
+                                                    </p-select>
+                                                </td>
+                                                <td class="p-2">
+                                                    <p-select
+                                                        formControlName="subtema"
+                                                        [options]="getSubtopicsForTema(medio.get('tema')?.value)"
+                                                        optionLabel="name"
+                                                        optionValue="name"
+                                                        placeholder="Seleccione un subtema"
+                                                        appendTo="body"
+                                                        class="w-full">
+                                                    </p-select>
+                                                </td>
+                                                <td class="p-2">
+                                                    <input pInputText formControlName="nombre"
+                                                        placeholder="Nombre del medio educativo" class="w-full" />
+                                                </td>
+                                                <td class="p-2">
+                                                    <textarea pTextarea formControlName="descripcion"
+                                                        placeholder="Descripción del medio" class="w-full"
+                                                        [autoResize]="true" rows="2">
+                                                    </textarea>
+                                                </td>
+                                                <td class="p-2">
+                                                    <input pInputText formControlName="referencia"
+                                                        placeholder="Referencia o URL" class="w-full" />
+                                                </td>
+                                                <td class="p-2">
+                                                    <textarea pTextarea formControlName="propositoPedagogico"
+                                                        placeholder="¿Para qué se usa este medio?" class="w-full"
+                                                        [autoResize]="true" rows="2">
+                                                    </textarea>
+                                                </td>
+                                                <td class="text-center p-2">
+                                                    <p-button icon="pi pi-trash" severity="danger" [text]="true"
+                                                        (onClick)="eliminarMedio($index)">
+                                                    </p-button>
+                                                </td>
+                                            </tr>
+                                        }
+
+                                        @if (mediosFormArray.length === 0) {
+                                            <tr>
+                                                <td colspan="7" class="text-center p-4 text-color-secondary text-sm">
+                                                    <i class="pi pi-inbox mr-2"></i>
+                                                    Haz clic en <strong>Agregar medio educativo</strong> para comenzar.
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+
+                        <div class="mt-4">
+                            <p-button icon="pi pi-plus" label="Agregar medio educativo" [outlined]="true"
+                                (onClick)="agregarMedio()">
+                            </p-button>
+                        </div>
+
+                    </p-fieldset>
+                </div>
+
+            </form>
+
+        </div>
+    </p-fluid>
+}

@@ -1,0 +1,22 @@
+<div class="user-menu-container">
+    <!-- Header con info del usuario -->
+    <div class="user-menu-header">
+        <div class="user-avatar">
+            <span>{{ userInitials }}</span>
+        </div>
+        <div class="user-info">
+            <span class="user-name">{{ userData?.nombre }}</span>
+            <span class="user-email">{{ userData?.correo }}</span>
+        </div>
+    </div>
+
+    <p-divider />
+
+    <!-- Cerrar sesión -->
+    <div class="user-menu-footer">
+        <button pRipple class="user-menu-item logout" (click)="onLogout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Cerrar Sesión</span>
+        </button>
+    </div>
+</div>

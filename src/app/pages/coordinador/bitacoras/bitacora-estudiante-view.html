@@ -1,0 +1,50 @@
+<div class="flex flex-col gap-4">
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" (onClick)="volver()" />
+    @if (cargando()) {
+      <p-skeleton width="12rem" height="1.5rem" />
+    } @else if (nombreEstudiante()) {
+      <div>
+        <h3 class="m-0">{{ nombreEstudiante() }}</h3>
+        <span class="text-surface-400 text-sm">{{ correoEstudiante() }}</span>
+      </div>
+    }
+    <span class="ml-auto text-surface-400 text-sm">
+      <i class="pi pi-eye mr-1"></i> Solo lectura
+    </span>
+  </div>
+
+  <!-- Section cards -->
+  @if (cargando()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+        <div class="card">
+          <p-skeleton height="6rem" />
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      @for (seccion of secciones(); track seccion.codigo) {
+        <div class="card cursor-pointer hover:shadow-lg transition-shadow" (click)="verSeccion(seccion.codigo)">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-semibold text-sm flex-1 min-w-0">{{ seccion.nombre }}</span>
+              <p-tag [severity]="getSeverity(seccion.estado)" [value]="getLabel(seccion.estado)" />
+            </div>
+            <p-progressbar [value]="seccion.porcentaje" [showValue]="true" styleClass="h-5" />
+            <div class="flex items-center justify-between gap-2">
+              <p-button icon="pi pi-eye" label="Ver" size="small" [text]="true" />
+              @if (seccion.revisado) {
+                <p-tag severity="success" value="Revisado" icon="pi pi-check-circle" />
+              } @else {
+                <p-tag severity="warn" value="Pendiente" icon="pi pi-clock" />
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

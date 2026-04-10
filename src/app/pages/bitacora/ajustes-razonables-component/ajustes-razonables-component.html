@@ -1,0 +1,101 @@
+@if (isLoading()) {
+    <app-loading></app-loading>
+} @else {
+    <div class="card">
+        <!-- Header sticky con titulo e indicador de guardado -->
+        <div class="sticky-header">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h4 class="m-0">Ajustes Razonables</h4>
+                    <div class="flex items-center gap-2">
+                        <p-tag
+                            [severity]="getSeverity(getDisplayEstado('ajustes'))"
+                            [value]="getLabel(getDisplayEstado('ajustes')) + ' (' + (getAjustesProgress()?.percentage || 0) + '%)'"
+                        />
+                        <app-bitacora-comment-button
+                            [seccionCodigo]="seccionCodigo"
+                            subseccionCodigo="ajustes"
+                            [badge]="comentariosCounts()['ajustes'] || 0" />
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <app-save-status-indicator
+                        [saveState]="saveState"
+                        (onRetry)="retryOnError()">
+                    </app-save-status-indicator>
+                    <app-export-button
+                        [seccionCodigo]="seccionCodigo"
+                        [progress]="progress()"
+                        [formData]="form.getRawValue()" />
+                    <p-button
+                        label="Guardar"
+                        icon="pi pi-save"
+                        (onClick)="saveManually()"
+                        [disabled]="!saveState.isDirty"
+                        size="small">
+                    </p-button>
+                </div>
+            </div>
+        </div>
+
+        <form [formGroup]="form">
+            <div formArrayName="ajustes">
+                <p-table [value]="ajustesData" [scrollable]="true" scrollHeight="480px" responsiveLayout="scroll">
+
+                    <ng-template pTemplate="colgroup">
+                        <colgroup>
+                            <col style="width:180px" />
+                            <col style="width:400px" />
+                            <col style="width:120px" />
+                            <col style="width:350px" />
+                        </colgroup>
+                    </ng-template>
+
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Desde</th>
+                            <th>Ajustes en</th>
+                            <th>Si/No</th>
+                            <th>¿Cómo hacerlo? ¿Qué necesitas para hacerlo?</th>
+                        </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-row let-i="rowIndex">
+                        <tr [formGroupName]="i">
+                            <!-- Celda 'Desde' solo si es la primera fila del grupo -->
+                            @if(isFirstOfGroup(i, row.desde)) {
+                                <td [attr.rowspan]="groupCountMap[row.desde]" class="font-bold align-middle bg-surface-50">
+                                    {{ row.desde }}
+                                </td>
+                            }
+
+                            <!-- Ajuste (solo lectura) -->
+                            <td class="align-top">{{ row.ajuste }}</td>
+
+                            <!-- Dropdown Si/No -->
+                            <td class="align-top">
+                                <p-select
+                                    [options]="opcionesSiNo"
+                                    formControlName="siNo"
+                                    placeholder="Seleccione"
+                                    class="w-full">
+                                </p-select>
+                            </td>
+
+                            <!-- Textarea -->
+                            <td>
+                                <textarea
+                                    pTextarea
+                                    formControlName="comoHacerlo"
+                                    rows="2"
+                                    class="w-full"
+                                    placeholder="Describe cómo lo harias...">
+                                </textarea>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </form>
+    </div>
+}

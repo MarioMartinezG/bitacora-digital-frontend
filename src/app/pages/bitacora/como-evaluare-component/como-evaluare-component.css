@@ -1,0 +1,135 @@
+/* ====== STICKY HEADER ====== */
+.sticky-header-global {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--surface-ground);
+  padding: 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.sticky-header-global::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .sticky-header-global .flex {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .sticky-header-global .flex > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ====== ACTIVIDAD CARD ====== */
+.eval-actividad-card {
+  border: 1.5px solid var(--surface-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  background: var(--surface-card);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Badge numerado de la actividad */
+.actividad-eval-badge {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--primary-color-text, white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ====== READONLY INFO SECTION ====== */
+.readonly-info-section {
+  background: var(--surface-ground);
+  border: 1px solid var(--surface-border);
+  border-radius: 0.625rem;
+  padding: 0.875rem 1rem;
+}
+
+/* Card individual de campo de solo lectura */
+.info-field-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+}
+
+/* Círculo de ícono */
+.info-field-icon {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--surface-ground);
+  border: 1px solid var(--surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Contenido: label + value */
+.info-field-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.info-field-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-color-secondary);
+}
+
+.info-field-value {
+  font-size: 0.875rem;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+/* ====== DIMENSION CHIPS ====== */
+.dimension-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--primary-50, #ede9fe);
+  color: var(--primary-700, #6d28d9);
+  border: 1px solid var(--primary-200, #c4b5fd);
+}
+
+/* ====== VALIDATION RESULT BOX ====== */
+.validation-result-box {
+  padding: 0.875rem 1rem;
+  border-radius: 0.625rem;
+  border: 1.5px solid var(--surface-border);
+  background: var(--surface-ground);
+}

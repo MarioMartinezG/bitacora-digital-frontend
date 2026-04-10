@@ -1,0 +1,420 @@
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { AccordionModule } from 'primeng/accordion';
+import { MessageModule } from 'primeng/message';
+import { TableModule } from 'primeng/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { KnobModule } from 'primeng/knob';
+import { ChartModule } from 'primeng/chart';
+import { CommentThreadComponent } from '../../../shared/components/comment-thread/comment-thread';
+import { EstadoTutorSelectorComponent } from '../../../shared/components/estado-tutor-selector/estado-tutor-selector';
+import { TutorReviewService } from '../../../core/services/tutor-review.service';
+import { EstadoTutorSubseccionService } from '../../../core/services/estado-tutor-subseccion.service';
+import { ComentarioSubseccionService } from '../../../core/services/comentario-subseccion.service';
+import { AuthStateService } from '../../../core/services/auth-state.service';
+import { EstadoTutorSubseccionDTO } from '../../../core/models/estado-tutor-subseccion.model';
+import { getSeverityByEstado, getLabelByEstado, EstadoAvance, UserRole } from '../../../core/models';
+import { BITACORA_LABELS, SELECT_VALUE_LABELS, PanelMeta } from '../../tutor/revision/bitacora-labels';
+import { CaracterizaJson } from '../../../core/models/bitacora.model';
+
+interface PanelView {
+  key: string;
+  label: string;
+  displayType: 'fields' | 'table' | 'list' | 'info';
+  fields?: { key: string; label: string; value: string }[];
+  rows?: any[];
+  columns?: { key: string; label: string }[];
+  listItems?: string[];
+  infoText?: string;
+  /** Clave de subsección unificada para comentarios (varios paneles pueden compartir hilo) */
+  comentarioKey?: string;
+  /** Si es true, no se muestra el botón de comentarios en este panel */
+  ocultarComentario?: boolean;
+  /** Si es true, no se muestra el selector de estado del tutor en este panel */
+  ocultarEstado?: boolean;
+}
+
+const SECCIONES_NOMBRES: Record<string, string> = {
+  'observar': 'Observar, registrar y actuar de manera oportuna',
+  'caracteriza': 'Identificación de tu curso',
+  'factores': 'Factores Situacionales',
+  'actividades': 'Actividades de Aprendizaje',
+  'evaluacion': 'Diseño de la evaluación',
+  'secuencia': 'Secuencia y cronograma',
+  'calificacion': 'Calificación',
+  'bibliografia': 'Medios educativos'
+};
+
+@Component({
+  selector: 'app-bitacora-seccion-view',
+  templateUrl: './bitacora-seccion-view.html',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ButtonModule, TagModule, AccordionModule, MessageModule, TableModule, InputTextModule, TextareaModule, IconFieldModule, InputIconModule, KnobModule, ChartModule, CommentThreadComponent, EstadoTutorSelectorComponent]
+})
+export class BitacoraSeccionView implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private tutorReviewService = inject(TutorReviewService);
+  private estadoTutorService = inject(EstadoTutorSubseccionService);
+  private comentarioService = inject(ComentarioSubseccionService);
+  private authStateService = inject(AuthStateService);
+
+  estudianteId = 0;
+  seccionCodigo = '';
+  seccionNombre = '';
+  cargando = signal(true);
+  paneles = signal<PanelView[]>([]);
+  panelValues: string[] = [];
+  estadosTutor = signal<EstadoTutorSubseccionDTO[]>([]);
+  comentariosCounts = signal<Record<string, number>>({});
+  comentariosVisible = false;
+  subseccionActiva = '';
+  getSeverity = getSeverityByEstado;
+  getLabel = getLabelByEstado;
+
+  /** Si el coordinador también es tutor, puede comentar y asignar estados */
+  esTambienTutor = false;
+  revisado = signal(false);
+
+  // Datos para la sección secuencia
+  secuenciaNumeroCreditos     = signal<number | null>(null);
+  secuenciaHorasDirecto       = signal<number>(0);
+  secuenciaHorasIndependiente = signal<number>(0);
+  secuenciaHorasAsignadas     = signal<number>(0);
+  secuenciaPorcentaje         = signal<number>(0);
+  secuenciaChartData          = signal<any>(null);
+  secuenciaCaracterizaCargada = signal(false);
+  secuenciaChartOptions       = { cutout: '60%', plugins: { legend: { display: false } } };
+
+  secuenciaTotalHoras          = computed(() => this.secuenciaHorasDirecto() + this.secuenciaHorasIndependiente());
+  secuenciaHorasDisponibles    = computed(() => Math.max(this.secuenciaTotalHoras() - this.secuenciaHorasAsignadas(), 0));
+  secuenciaHorasExcedidas      = computed(() => this.secuenciaTotalHoras() > 0 && this.secuenciaHorasAsignadas() > this.secuenciaTotalHoras());
+  secuenciaDatosHorasDisponibles = computed(() => this.secuenciaTotalHoras() > 0);
+
+  ngOnInit(): void {
+    this.estudianteId = Number(this.route.snapshot.paramMap.get('estudianteId'));
+    this.seccionCodigo = this.route.snapshot.paramMap.get('seccionCodigo') || '';
+    this.seccionNombre = SECCIONES_NOMBRES[this.seccionCodigo] || this.seccionCodigo;
+    this.esTambienTutor = this.authStateService.hasRole(UserRole.TUTOR);
+    this.cargarDatos();
+    this.cargarEstadoRevisado();
+  }
+
+  private cargarDatos(): void {
+    this.tutorReviewService.obtenerRespuestasEstudiante(this.estudianteId, this.seccionCodigo).subscribe({
+      next: (respuesta) => {
+        this.construirPaneles(respuesta?.datos || {});
+        if (this.seccionCodigo === 'secuencia') {
+          this.calcularHorasAsignadas(respuesta?.datos);
+        }
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.construirPaneles({});
+        this.cargando.set(false);
+      }
+    });
+
+    if (this.seccionCodigo === 'secuencia') {
+      this.tutorReviewService.obtenerRespuestasEstudiante(this.estudianteId, 'caracteriza').subscribe({
+        next: (respuesta) => {
+          const db = (respuesta?.datos as CaracterizaJson | undefined)?.datosBasicos;
+          this.secuenciaNumeroCreditos.set(db?.numeroCreditos ?? null);
+          this.secuenciaHorasDirecto.set(db?.horasDirecto ?? 0);
+          this.secuenciaHorasIndependiente.set(db?.horasIndependiente ?? 0);
+          this.actualizarChartSecuencia();
+          this.secuenciaCaracterizaCargada.set(true);
+        },
+        error: () => this.secuenciaCaracterizaCargada.set(true)
+      });
+    }
+
+    this.estadoTutorService.obtenerEstadosPorSeccion(this.estudianteId, this.seccionCodigo).subscribe({
+      next: (estados) => this.estadosTutor.set(estados)
+    });
+
+    this.comentarioService.obtenerConteoPorSeccion(this.estudianteId, this.seccionCodigo).subscribe({
+      next: (conteo) => this.comentariosCounts.set(conteo)
+    });
+  }
+
+  private calcularHorasAsignadas(datos: any): void {
+    const filas: any[] = Array.isArray(datos?.secuenciaCurso) ? datos.secuenciaCurso : [];
+    this.secuenciaHorasAsignadas.set(filas.reduce((sum, f) => sum + (Number(f.horas) || 0), 0));
+  }
+
+  private actualizarChartSecuencia(): void {
+    const directo       = this.secuenciaHorasDirecto();
+    const independiente = this.secuenciaHorasIndependiente();
+    const total         = directo + independiente;
+    const asignadas     = this.secuenciaHorasAsignadas();
+    this.secuenciaPorcentaje.set(total > 0 ? Math.min(Math.round((asignadas / total) * 100), 100) : 0);
+    this.secuenciaChartData.set({
+      labels: ['Trabajo independiente', 'Acompañamiento directo'],
+      datasets: [{
+        data: [independiente, directo],
+        backgroundColor: ['#22c55e', '#f97316'],
+        hoverBackgroundColor: ['#16a34a', '#ea580c']
+      }]
+    });
+  }
+
+  private construirPaneles(datos: any): void {
+    const seccionLabels = BITACORA_LABELS[this.seccionCodigo] || {};
+    const panelesResult: PanelView[] = [];
+    this.panelValues = [];
+
+    if (typeof datos !== 'object' || datos === null) {
+      datos = {};
+    }
+
+    // Iterar primero sobre los paneles definidos en BITACORA_LABELS para garantizar
+    // que se muestren todos aunque el estudiante no haya guardado datos aún
+    const labelKeys = Object.keys(seccionLabels);
+    const procesados = new Set<string>();
+
+    for (const panelKey of labelKeys) {
+      const panelData = datos[panelKey] ?? {};
+      this.procesarPanel(panelKey, panelData, seccionLabels, panelesResult);
+      procesados.add(panelKey);
+    }
+
+    // Agregar paneles extra solo si la sección no tiene labels definidos
+    // (evita mostrar campos obsoletos de versiones anteriores del formulario)
+    if (labelKeys.length === 0) {
+      for (const panelKey of Object.keys(datos)) {
+        if (procesados.has(panelKey)) continue;
+        this.procesarPanel(panelKey, datos[panelKey], seccionLabels, panelesResult);
+      }
+    }
+
+    this.paneles.set(panelesResult);
+  }
+
+  private procesarPanel(panelKey: string, panelData: any, seccionLabels: any, panelesResult: PanelView[]): void {
+    const meta: PanelMeta | undefined = seccionLabels[panelKey];
+    const panelLabel = meta?.panelLabel || panelKey;
+    const displayType = meta?.displayType || this.inferDisplayType(panelData);
+
+    const panel: PanelView = { key: panelKey, label: panelLabel, displayType, comentarioKey: meta?.comentarioKey, ocultarComentario: meta?.ocultarComentario, ocultarEstado: meta?.ocultarEstado };
+
+    switch (displayType) {
+      case 'table':
+        panel.columns = meta?.columns || this.inferColumns(panelData);
+        if (panelKey === 'contenidos' && !Array.isArray(panelData) && panelData?.topics) {
+          panel.rows = this.flattenContenidos(panelData);
+        } else {
+          panel.rows = Array.isArray(panelData) ? panelData : [];
+        }
+        break;
+      case 'list':
+        panel.listItems = Array.isArray(panelData)
+          ? panelData.map((item: any) => typeof item === 'string' ? item : this.formatAnyValue(item))
+          : [];
+        break;
+      case 'info':
+        const count = typeof panelData === 'object' && panelData?.count != null
+          ? panelData.count
+          : (Array.isArray(panelData) ? panelData.length : 0);
+        panel.infoText = `${count} ${meta?.infoLabel || 'registros'}`;
+        break;
+      case 'fields':
+      default:
+        panel.fields = this.buildFieldViews(panelKey, panelData, meta);
+        break;
+    }
+
+    panelesResult.push(panel);
+    this.panelValues.push(panelKey);
+  }
+
+  private inferDisplayType(data: any): 'fields' | 'table' | 'list' | 'info' {
+    if (Array.isArray(data)) {
+      if (data.length === 0) return 'table';
+      if (typeof data[0] === 'string') return 'list';
+      if (typeof data[0] === 'object') return 'table';
+    }
+    if (typeof data === 'object' && data !== null) {
+      const keys = Object.keys(data);
+      if (keys.length === 1 && keys[0] === 'count') return 'info';
+      return 'fields';
+    }
+    return 'fields';
+  }
+
+  private inferColumns(data: any): { key: string; label: string }[] {
+    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+      return Object.keys(data[0]).map(key => ({ key, label: key }));
+    }
+    return [];
+  }
+
+  /** Siempre incluye los campos definidos en meta, aunque el estudiante no los haya llenado */
+  private buildFieldViews(panelKey: string, panelData: any, meta?: PanelMeta): { key: string; label: string; value: string }[] {
+    const fieldLabels = meta?.fields || {};
+    const metaKeys = Object.keys(fieldLabels);
+
+    let safeData: Record<string, any>;
+    if (typeof panelData === 'object' && panelData !== null && !Array.isArray(panelData)) {
+      safeData = panelData;
+    } else if (metaKeys.length === 1 && (typeof panelData === 'string' || typeof panelData === 'number')) {
+      // Valor escalar: se mapea directamente al único campo definido en meta
+      safeData = { [metaKeys[0]]: panelData };
+    } else {
+      safeData = {};
+    }
+
+    const result: { key: string; label: string; value: string }[] = [];
+
+    if (metaKeys.length > 0) {
+      // Campos definidos en meta: siempre se muestran aunque estén vacíos
+      for (const key of metaKeys) {
+        const rawValue = safeData[key] ?? null;
+        if (typeof rawValue === 'boolean' && !fieldLabels[key]) continue;
+        result.push({ key, label: fieldLabels[key] || key, value: this.formatAnyValue(rawValue) });
+      }
+      // Campos extra en datos no definidos en meta (con valor)
+      for (const key of Object.keys(safeData)) {
+        if (key in fieldLabels) continue;
+        const rawValue = safeData[key];
+        if (typeof rawValue === 'boolean') continue;
+        const value = this.formatAnyValue(rawValue);
+        if (!value) continue;
+        result.push({ key, label: key, value });
+      }
+    } else {
+      for (const key of Object.keys(safeData)) {
+        const rawValue = safeData[key];
+        if (typeof rawValue === 'boolean') continue;
+        const value = this.formatAnyValue(rawValue);
+        if (!value) continue;
+        result.push({ key, label: key, value });
+      }
+    }
+
+    return result;
+  }
+
+  /** Indica si un panel de tipo fields no tiene ningún campo con valor */
+  panelSinContenido(panel: PanelView): boolean {
+    if (panel.displayType !== 'fields' || !panel.fields) return false;
+    return panel.fields.every(f => !f.value);
+  }
+
+  /** Calcula el estado del estudiante a partir de los datos cargados del panel */
+  getEstadoEstudiante(panel: PanelView): EstadoAvance {
+    switch (panel.displayType) {
+      case 'fields': {
+        if (!panel.fields || panel.fields.length === 0) return 'sin_avances';
+        const conValor = panel.fields.filter(f => f.value).length;
+        if (conValor === 0) return 'sin_avances';
+        if (conValor === panel.fields.length) return 'completado';
+        return 'en_desarrollo';
+      }
+      case 'table':
+        return (!panel.rows || panel.rows.length === 0) ? 'sin_avances' : 'completado';
+      case 'list':
+        return (!panel.listItems || panel.listItems.length === 0) ? 'sin_avances' : 'completado';
+      default:
+        return 'sin_avances';
+    }
+  }
+
+  /** Retorna el estado del tutor si ya lo asignó; si no, usa el estado del estudiante como valor inicial */
+  getEstadoInicial(panel: PanelView): EstadoAvance {
+    const estadoTutor = this.estadosTutor().find(e => e.subseccionCodigo === panel.key);
+    if (estadoTutor) {
+      return estadoTutor.estado as EstadoAvance;
+    }
+    return this.getEstadoEstudiante(panel);
+  }
+
+  getColumnKeys(panel: PanelView): string[] {
+    return panel.columns?.map(c => c.key) ?? [];
+  }
+
+  formatAnyValue(val: any): string {
+    if (val === null || val === undefined || val === '') return '';
+    if (typeof val === 'boolean') return val ? 'Sí' : 'No';
+    if (typeof val === 'number') return val.toString();
+    if (typeof val === 'string') return SELECT_VALUE_LABELS[val] || val;
+    if (Array.isArray(val)) {
+      if (val.length === 0) return '';
+      if (typeof val[0] === 'string') return val.map(v => SELECT_VALUE_LABELS[v] || v).join(', ');
+      if (typeof val[0] === 'object' && val[0]?.name) return val.map((v: any) => v.name).join(', ');
+      if (typeof val[0] === 'object' && val[0]?.label) return val.map((v: any) => v.label).join(', ');
+      return val.map((v: any) => this.formatAnyValue(v)).join(', ');
+    }
+    if (typeof val === 'object' && val.name) return val.name;
+    if (typeof val === 'object' && val.label) return val.label;
+    if (typeof val === 'object') {
+      return Object.entries(val)
+        .filter(([, v]) => v !== null && v !== undefined && v !== '' && v !== false)
+        .map(([k, v]) => { const f = this.formatAnyValue(v); return f ? `${k}: ${f}` : null; })
+        .filter(Boolean).join(' | ');
+    }
+    return String(val);
+  }
+
+  formatCellValue(val: any): string {
+    return this.formatAnyValue(val) || '-';
+  }
+
+  getEstadoTutor(subseccionCodigo: string): EstadoAvance {
+    const estado = this.estadosTutor().find(e => e.subseccionCodigo === subseccionCodigo);
+    return (estado?.estado as EstadoAvance) || 'sin_avances';
+  }
+
+  getComentarioCount(subseccionCodigo: string): string {
+    const count = this.comentariosCounts()[subseccionCodigo] || 0;
+    return count > 0 ? count + '' : '';
+  }
+
+  abrirComentarios(subseccionCodigo: string): void {
+    this.subseccionActiva = subseccionCodigo;
+    this.comentariosVisible = true;
+  }
+
+  onComentarioAgregado(): void {
+    this.comentarioService.obtenerConteoPorSeccion(this.estudianteId, this.seccionCodigo).subscribe({
+      next: (conteo) => this.comentariosCounts.set(conteo)
+    });
+  }
+
+  volver(): void {
+    this.router.navigate(['/home/coordinador/bitacoras', this.estudianteId]);
+  }
+
+  private flattenContenidos(data: any): any[] {
+    const topics: any[] = data.topics || [];
+    const subtopics: any[] = data.subtopics || [];
+    const rows: any[] = [];
+    for (const topic of topics) {
+      const topicSubs = subtopics.filter((s: any) => s.topicId === topic.id);
+      if (topicSubs.length === 0) {
+        rows.push({ tema: topic.name, subtema: '-' });
+      } else {
+        for (const sub of topicSubs) {
+          rows.push({ tema: topic.name, subtema: sub.name });
+        }
+      }
+    }
+    return rows;
+  }
+
+  private cargarEstadoRevisado(): void {
+    this.tutorReviewService.obtenerProgresoIndividual(this.estudianteId).subscribe({
+      next: (progreso) => {
+        const seccion = progreso.secciones?.[this.seccionCodigo];
+        this.revisado.set(seccion?.revisado ?? false);
+      }
+    });
+  }
+}

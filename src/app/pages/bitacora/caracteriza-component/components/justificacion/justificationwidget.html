@@ -1,0 +1,17 @@
+<div [formGroup]="formGroup" class="flex flex-col gap-4">
+    <p-message severity="info" styleClass="w-full" icon="pi pi-lightbulb">
+        <span>
+            Diligencia el espacio correspondiente a la <strong>Justificación</strong> dando cuenta de la
+            temática de la que se ocupa, la importancia de este curso en el plan de estudios y en el perfil
+            de egreso, y contextualiza acerca de cómo se desarrollará la asignatura.
+        </span>
+    </p-message>
+
+    <textarea
+        pTextarea
+        formControlName="respuesta"
+        placeholder="Escribe tu justificación..."
+        [autoResize]="true"
+        class="w-full">
+    </textarea>
+</div>

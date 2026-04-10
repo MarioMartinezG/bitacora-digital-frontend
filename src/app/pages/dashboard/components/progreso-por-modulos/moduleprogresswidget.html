@@ -1,0 +1,46 @@
+<div class="card">
+    <div class="flex justify-between items-center mb-6">
+        <div class="font-semibold text-xl">Progreso por módulo</div>
+    </div>
+    <ul class="list-none p-0 m-0">
+        @for (modulo of modulos; track modulo.seccionCodigo) {
+            <li class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <div class="flex-1 min-w-0 mr-4">
+                    <span class="text-surface-900 dark:text-surface-0 font-medium mr-2 mb-1 md:mb-0">
+                        {{ modulo.nombre }}
+                    </span>
+                    <div class="mt-1 flex items-center gap-2">
+                        <span class="text-muted-color">{{ modulo.momento }}</span>
+                        @if (modulo.etiqueta === 'aprobado') {
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                                <i class="pi pi-check-circle mr-1 text-xs"></i>Aprobado por tutor
+                            </span>
+                        } @else if (modulo.etiqueta === 'correcciones') {
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                                <i class="pi pi-exclamation-circle mr-1 text-xs"></i>Requiere atención
+                            </span>
+                        } @else if (modulo.etiqueta === 'en_revision') {
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
+                                <i class="pi pi-clock mr-1 text-xs"></i>En revisión
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="mt-2 md:mt-0 flex items-center flex-shrink-0" style="min-width: 200px; justify-content: flex-end;">
+                    <div class="bg-surface-300 dark:bg-surface-500 rounded-border overflow-hidden"
+                        style="height: 8px; width: 10rem;">
+                        <div class="h-full"
+                            [style.background-color]="modulo.color"
+                            [style.width.%]="modulo.porcentaje">
+                        </div>
+                    </div>
+                    <span class="font-medium text-right"
+                        style="min-width: 3rem;"
+                        [style.color]="modulo.color">
+                        {{ modulo.porcentaje }}%
+                    </span>
+                </div>
+            </li>
+        }
+    </ul>
+</div>

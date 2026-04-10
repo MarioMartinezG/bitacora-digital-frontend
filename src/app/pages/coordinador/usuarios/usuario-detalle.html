@@ -1,0 +1,83 @@
+<p-toast />
+<p-confirmdialog [style]="{ width: '450px' }" />
+
+@if (cargando()) {
+  <div class="flex justify-center p-8">
+    <i class="pi pi-spin pi-spinner text-4xl"></i>
+  </div>
+} @else if (usuario()) {
+  <div class="flex items-center gap-3 mb-6">
+    <p-button icon="pi pi-arrow-left" [rounded]="true" [outlined]="true" severity="secondary" (click)="volver()" />
+    <h2 class="m-0">Detalle de Usuario</h2>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <div class="card">
+        <div class="flex flex-col gap-5">
+          <div class="flex items-center gap-4 pb-4 border-b">
+            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-white text-2xl font-bold">
+              {{ usuario()!.nombre.charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <h3 class="m-0 mb-1">{{ usuario()!.nombre }}</h3>
+              <span class="text-gray-500">{{ usuario()!.correo }}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-gray-500 mb-1">Roles</label>
+              <div class="flex gap-1 flex-wrap">
+                @for (rolId of usuario()!.roles; track rolId) {
+                  <p-tag [value]="getRolLabel(rolId)" [severity]="getRolSeverity(rolId)" />
+                }
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-500 mb-1">Estado</label>
+              <p-tag [value]="usuario()!.activo ? 'Activo' : 'Inactivo'"
+                     [severity]="usuario()!.activo ? 'success' : 'danger'" />
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-500 mb-1">Fecha de creación</label>
+              <span>{{ formatFecha(usuario()!.fechaCreacion) }}</span>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-500 mb-1">Último acceso</label>
+              <span>{{ formatFecha(usuario()!.ultimoAcceso) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="font-semibold text-xl mb-4">Acciones</div>
+        <div class="flex flex-col gap-3">
+          <p-button label="Editar usuario" icon="pi pi-pencil"
+                    styleClass="w-full" [outlined]="true"
+                    (click)="editarUsuario()" />
+          <p-button [label]="usuario()!.activo ? 'Desactivar usuario' : 'Activar usuario'"
+                    [icon]="usuario()!.activo ? 'pi pi-lock' : 'pi pi-lock-open'"
+                    [severity]="usuario()!.activo ? 'danger' : 'success'"
+                    styleClass="w-full" [outlined]="true"
+                    (click)="confirmarToggleActivo()" />
+          <p-button label="Volver a lista" icon="pi pi-list"
+                    severity="secondary" styleClass="w-full" [outlined]="true"
+                    (click)="volver()" />
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center p-8">
+    <i class="pi pi-user text-4xl text-gray-400 mb-4"></i>
+    <p class="text-gray-500">Usuario no encontrado</p>
+    <p-button label="Volver a lista" icon="pi pi-arrow-left" (click)="volver()" />
+  </div>
+}

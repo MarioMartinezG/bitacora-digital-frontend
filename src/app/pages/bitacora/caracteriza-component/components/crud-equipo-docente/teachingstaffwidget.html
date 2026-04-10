@@ -1,0 +1,160 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button label="Nuevo" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNew()" />
+        <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined (click)="deleteSelectedTeachers()"
+            [disabled]="!selectedTeachingStaff || !selectedTeachingStaff.length" />
+    </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="teachers()" [rows]="10" [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedTeachingStaff" [rowHover]="true" dataKey="email">
+
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Equipo Docente</h5>
+        </div>
+    </ng-template>
+
+    <ng-template #header>
+        <tr>
+            <th style="width: 3rem">
+                <p-tableHeaderCheckbox />
+            </th>
+            <th pSortableColumn="rol">Cargo <p-sortIcon field="rol" /></th>
+            <th pSortableColumn="name">Nombre <p-sortIcon field="name" /></th>
+            <th pSortableColumn="email">Correo electrónico <p-sortIcon field="email" /></th>
+            <th pSortableColumn="attention">Modo de atención </th>
+            <th pSortableColumn="days">Días </th>
+            <th pSortableColumn="schedule">Horario <p-sortIcon field="schedule" /></th>
+            <th pSortableColumn="site">Lugar asignado</th>
+            <th style="min-width: 10rem"></th>
+        </tr>
+    </ng-template>
+
+    <ng-template #body let-teacher>
+        <tr>
+            <td style="width: 3rem">
+                <p-tableCheckbox [value]="teacher" />
+            </td>
+            <td>{{ teacher.rol }}</td>
+            <td>{{ teacher.name }}</td>
+            <td>{{ teacher.email }}</td>
+            <td>{{ teacher.attention }}</td>
+            <td>
+                <ng-container *ngIf="teacher.days?.length; else noDays">
+                    {{ teacher.days.join(', ') }}
+                </ng-container>
+                <ng-template #noDays>-</ng-template>
+            </td>
+            <td>{{ getFormattedSchedule(teacher) }}</td>
+
+            <td>{{ teacher.site }}</td>
+            <td>
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                    (click)="editTeacher(teacher)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                    (click)="deleteTeacher(teacher)" />
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<!-- Diálogo para agregar o editar docente -->
+<p-dialog [(visible)]="teacherDialog" [style]="{ width: '450px' }" header="Crear/Editar docente" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6">
+            <div>
+                <label for="rol" class="block font-bold mb-3">Cargo</label>
+                <p-select [(ngModel)]="teacher.rol" [options]="roles" optionLabel="label" optionValue="value"
+                    placeholder="Seleccione un rol" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !teacher.rol">Campo es obligatorio.</small>
+            </div>
+
+            <div>
+                <label for="name" class="block font-bold mb-3">Nombre docente</label>
+                <input type="text" pInputText id="name" [(ngModel)]="teacher.name" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !teacher.name">Nombre es obligatorio.</small>
+            </div>
+
+            <div>
+                <label for="email" class="block font-bold mb-3">Correo electrónico</label>
+                <input type="email" pInputText id="email" [(ngModel)]="teacher.email" required fluid />
+                <small class="text-red-500" *ngIf="submitted && !teacher.email">Correo es obligatorio.</small>
+            </div>
+
+            <div>
+                <span class="block font-bold mb-4">Modo de atención</span>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="flex items-center gap-2 col-span-6">
+                        <p-radiobutton name="attention" value="Presencial" [(ngModel)]="teacher.attention" />
+                        <label>Presencial</label>
+                    </div>
+                    <div class="flex items-center gap-2 col-span-6">
+                        <p-radiobutton name="attention" value="Virtual" [(ngModel)]="teacher.attention" />
+                        <label>Virtual</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campo condicional según modo de atención -->
+            <div *ngIf="teacher.attention === 'Presencial'" class="mt-4">
+                <label for="site" class="block font-bold mb-3">
+                    Ingrese el lugar físico de atención
+                </label>
+                <input type="text" pInputText id="site" [(ngModel)]="teacher.site" placeholder="Ej: Bloque A, Aula 203"
+                    fluid />
+            </div>
+
+            <div *ngIf="teacher.attention === 'Virtual'" class="mt-4">
+                <label for="link" class="block font-bold mb-3">
+                    Escriba el enlace del espacio virtual
+                </label>
+                <input type="url" pInputText id="link" [(ngModel)]="teacher.site"
+                    placeholder="Ej: https://teams.microsoft.com/..." fluid />
+            </div>
+            <!-- Selección de días de atención -->
+            <div class="mt-4">
+                <label for="days" class="block font-bold mb-3">
+                    Días de atención
+                </label>
+                <p-multiselect inputId="days" [options]="daysOptions" [(ngModel)]="teacher.days" optionLabel="label"
+                    optionValue="value" placeholder="Seleccione los días" display="chip"
+                    (onChange)="onDaysChange($event.value)" fluid />
+
+
+                <!-- Selección de horario -->
+                <div class="mt-4" *ngIf="!teacher.days?.includes('Cita previa')">
+                    <label class="block font-bold mb-3">Horario de atención</label>
+
+                    <div class="mt-4">
+                        <div class="flex gap-4">
+                            <div class="flex-auto">
+                                <label for="startTime" class="block font-bold mb-3">Hora de inicio</label>
+                                <p-datepicker inputId="startTime" [(ngModel)]="teacher.startTime" [timeOnly]="true"
+                                    hourFormat="12" showIcon="true" appendTo="body"
+                                    placeholder="Selecciona hora de inicio"></p-datepicker>
+                            </div>
+
+                            <div class="flex-auto">
+                                <label for="endTime" class="block font-bold mb-3">Hora de fin</label>
+                                <p-datepicker inputId="endTime" [(ngModel)]="teacher.endTime" [timeOnly]="true"
+                                    hourFormat="12" showIcon="true" appendTo="body"
+                                    placeholder="Selecciona hora de fin"></p-datepicker>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveTeacher()" />
+
+    </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

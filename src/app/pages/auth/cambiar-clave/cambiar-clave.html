@@ -1,0 +1,86 @@
+<app-floating-configurator />
+<app-loading></app-loading>
+<p-toast />
+
+<div class="login-background flex items-center justify-center min-h-screen overflow-hidden">
+  <div class="flex flex-col items-center justify-center w-full">
+    <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%); max-width: 520px; width: 100%;">
+      <div class="w-full bg-surface-0 dark:bg-surface-900 py-16 px-8 sm:px-16" style="border-radius: 53px">
+
+        <div class="text-center mb-8">
+          <div class="flex flex-col items-center mb-4">
+            <img src="Logo_de_la_Universidad_El_Bosque.png" alt="logo_UEB" width="100" height="110">
+          </div>
+          <h2 class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-2">Cambio de contraseña requerido</h2>
+          <p class="text-muted-color text-sm">Por seguridad, debes establecer una nueva contraseña antes de continuar.</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="flex flex-col gap-5">
+
+            <div>
+              <label class="block text-surface-900 dark:text-surface-0 font-medium mb-2">Contraseña temporal actual</label>
+              <p-password formControlName="claveActual"
+                          placeholder="Ingresa tu contraseña temporal"
+                          [toggleMask]="true" [feedback]="false"
+                          styleClass="w-full" [inputStyleClass]="'w-full'" />
+              @if (isInvalid('claveActual')) {
+                <small class="text-red-500">La contraseña actual es obligatoria</small>
+              }
+            </div>
+
+            <div>
+              <label class="block text-surface-900 dark:text-surface-0 font-medium mb-2">Nueva contraseña</label>
+              <p-password formControlName="claveNueva"
+                          placeholder="Ingresa tu nueva contraseña"
+                          [toggleMask]="true" [feedback]="false"
+                          styleClass="w-full" [inputStyleClass]="'w-full'" />
+              @if (isInvalid('claveNueva') && form.get('claveNueva')?.errors?.['required']) {
+                <small class="text-red-500">La nueva contraseña es obligatoria</small>
+              }
+              @if (isInvalid('claveNueva') && form.get('claveNueva')?.errors?.['claveDebil']) {
+                <small class="text-red-500">La contraseña no cumple los requisitos de seguridad</small>
+              }
+            </div>
+
+            <!-- Indicador de requisitos -->
+            <div class="bg-surface-50 dark:bg-surface-800 rounded-lg p-4 border border-surface-200 dark:border-surface-700">
+              <p class="text-xs font-semibold text-surface-600 dark:text-surface-400 mb-3 uppercase tracking-wide">Requisitos de la contraseña</p>
+              <ul class="flex flex-col gap-2">
+                @for (req of requisitos; track req.texto) {
+                  <li class="flex items-center gap-2 text-sm">
+                    @if (cumpleRequisito(req)) {
+                      <i class="pi pi-check-circle text-green-500"></i>
+                      <span class="text-green-600 dark:text-green-400">{{ req.texto }}</span>
+                    } @else {
+                      <i class="pi pi-circle text-surface-400"></i>
+                      <span class="text-surface-500">{{ req.texto }}</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <div>
+              <label class="block text-surface-900 dark:text-surface-0 font-medium mb-2">Confirmar nueva contraseña</label>
+              <p-password formControlName="confirmarClave"
+                          placeholder="Confirma tu nueva contraseña"
+                          [toggleMask]="true" [feedback]="false"
+                          styleClass="w-full" [inputStyleClass]="'w-full'" />
+              @if (isInvalid('confirmarClave')) {
+                <small class="text-red-500">Debes confirmar la contraseña</small>
+              }
+              @if (form.errors?.['clavesNoCoinciden'] && form.get('confirmarClave')?.touched) {
+                <small class="text-red-500">Las contraseñas no coinciden</small>
+              }
+            </div>
+
+            <p-button type="submit" label="Establecer nueva contraseña" styleClass="w-full mt-2"
+                      [loading]="guardando" [disabled]="form.invalid" />
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

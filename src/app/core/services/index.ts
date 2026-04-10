@@ -1,3 +1,13 @@
 export { LoginService } from './login.service';
 export { LoadingService } from './loading.service';
 export { ToastService } from './toast.service';
+export { MenuService } from './menu.service';
+export { BitacoraService } from './bitacora.service';
+export { NotificationService } from './notification.service';
+export { WebSocketService } from './websocket.service';
+export { TutorService } from './tutor.service';
+export { AutoSaveService } from './auto-save.service';
+export { ComentarioSubseccionService } from './comentario-subseccion.service';
+export { EstadoTutorSubseccionService } from './estado-tutor-subseccion.service';
+export { TutorReviewService } from './tutor-review.service';
+export { ConfiguracionService } from './configuracion.service';
