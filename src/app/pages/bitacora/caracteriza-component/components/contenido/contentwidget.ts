@@ -44,7 +44,11 @@ export class Contentwidget implements OnInit {
     topicDialog = false;
     subtopicDialog = false;
 
-    constructor(private contentService: ContentService, private messageService: MessageService,) { }
+    constructor(
+        private contentService: ContentService,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService
+    ) { }
 
     ngOnInit() {
         this.loadData();
@@ -158,13 +162,41 @@ export class Contentwidget implements OnInit {
     }
 
     deleteTopic(id: number) {
-        this.contentService.deleteTopic(id);
-        this.loadData();
+        const topic = this.topics.find(t => t.id === id);
+        const subtopicCount = this.subtopics.filter(s => s.topicId === id).length;
+        const subtopicWarning = subtopicCount > 0
+            ? ` También se eliminarán los <strong>${subtopicCount} subtema(s)</strong> asociado(s).`
+            : '';
+
+        this.confirmationService.confirm({
+            message: `¿Deseas eliminar el tema <strong>${topic?.name}</strong>?${subtopicWarning}`,
+            header: 'Eliminar tema',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí, eliminar',
+            rejectLabel: 'Cancelar',
+            acceptButtonStyleClass: 'p-button-danger',
+            accept: () => {
+                this.contentService.deleteTopic(id);
+                this.loadData();
+            }
+        });
     }
 
     deleteSubtopic(id: number) {
-        this.contentService.deleteSubtopic(id);
-        this.loadData();
+        const subtopic = this.subtopics.find(s => s.id === id);
+
+        this.confirmationService.confirm({
+            message: `¿Deseas eliminar el subtema <strong>${subtopic?.name}</strong>?`,
+            header: 'Eliminar subtema',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí, eliminar',
+            rejectLabel: 'Cancelar',
+            acceptButtonStyleClass: 'p-button-danger',
+            accept: () => {
+                this.contentService.deleteSubtopic(id);
+                this.loadData();
+            }
+        });
     }
 
     hideTopicDialog() {
