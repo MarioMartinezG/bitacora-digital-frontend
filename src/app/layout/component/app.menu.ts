@@ -7,6 +7,7 @@ import { ToastModule } from 'primeng/toast';
 
 import { AppMenuitem } from './app.menuitem';
 import { LoginService, MenuService, ToastService } from '../../core/services';
+import { AuthStateService } from '../../core/services/auth-state.service';
 import { ApiError } from '../../core/models';
 
 @Component({
@@ -27,7 +28,8 @@ export class AppMenu {
     constructor(
         private menuService: MenuService,
         private toastService: ToastService,
-        private loginService: LoginService
+        private loginService: LoginService,
+        private authStateService: AuthStateService
     ) { }
 
     ngOnInit() {
@@ -42,6 +44,6 @@ export class AppMenu {
     }
 
     private getRoleFromUser() {
-        return JSON.parse(this.loginService.getUser() ?? '').role;
+        return this.authStateService.effectiveRole() ?? 1;
     }
 }

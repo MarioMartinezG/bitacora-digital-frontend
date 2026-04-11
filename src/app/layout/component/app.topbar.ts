@@ -64,10 +64,10 @@ import { AuthStateService } from '../../core/services/auth-state.service';
                             [hideOnOutsideClick]="true"
                         >
                             <i class="pi pi-book"></i>
-                            <span>Recursos</span>
+                            <span>Medios educativos</span>
                         </button>
                         <div class="hidden absolute right-0 top-full mt-2 w-80 border border-surface rounded-lg shadow-lg p-3" style="z-index: 9999; background-color: var(--surface-card); border-color: var(--surface-border);">
-                            <p class="font-semibold text-sm mb-3">Recursos bibliográficos</p>
+                            <p class="font-semibold text-sm mb-3">Medios educativos</p>
                             @for (recurso of recursos; track recurso.url) {
                             <a
                                 [href]="recurso.url"
