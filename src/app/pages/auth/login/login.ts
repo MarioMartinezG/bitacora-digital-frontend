@@ -76,6 +76,8 @@ export class LoginComponent {
           this.loadingService.hide();
           if (response.requiere_cambio_clave) {
             this.router.navigate(['/auth/cambiar-clave']);
+          } else if (response.user.roles && response.user.roles.length > 1) {
+            this.router.navigate(['/auth/select-role']);
           } else {
             this.router.navigate(['home']);
           }

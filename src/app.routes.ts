@@ -12,6 +12,7 @@ import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { Notificaciones } from './app/pages/notificaciones/notificaciones';
 import { SolicitudesSesion } from './app/pages/solicitudes-sesion/solicitudes-sesion';
+import { DocumentosGuia } from './app/pages/documentos-guia/documentos-guia';
 
 export const appRoutes: Routes = [
     {
@@ -27,6 +28,7 @@ export const appRoutes: Routes = [
             { path: 'bitacora', loadChildren: () => import('./app/pages/bitacora/bitacora.routes') },
             { path: 'notificaciones', component: Notificaciones },
             { path: 'solicitudes-sesion', component: SolicitudesSesion },
+            { path: 'documentos-guia', component: DocumentosGuia, data: { roles: [1] } },
             { path: 'tutor', loadChildren: () => import('./app/pages/tutor/tutor.routes'), data: { roles: [2, 3] } },
             { path: 'coordinador', loadChildren: () => import('./app/pages/coordinador/coordinador.routes'), data: { roles: [3] } },
             { path: 'documentation', component: Documentation },

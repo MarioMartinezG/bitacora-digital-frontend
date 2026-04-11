@@ -7,6 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { LoadingService, ToastService } from '../../../core/services';
 import { LoginService } from '../../../core/services/login.service';
+import { AuthStateService } from '../../../core/services/auth-state.service';
 import { AppFloatingConfigurator } from '../../../layout/component/app.floatingconfigurator';
 import { LoadingComponent } from '../../../utils/loading/loading';
 
@@ -54,6 +55,7 @@ export class CambiarClaveComponent {
     private fb: FormBuilder,
     private router: Router,
     private loginService: LoginService,
+    private authStateService: AuthStateService,
     private loadingService: LoadingService,
     private toastService: ToastService
   ) {
@@ -85,7 +87,8 @@ export class CambiarClaveComponent {
         this.guardando = false;
         this.loadingService.hide();
         this.toastService.showSuccess('Contraseña actualizada', 'Tu contraseña fue cambiada exitosamente');
-        setTimeout(() => this.router.navigate(['/home']), 1500);
+        const destino = this.authStateService.userRoles().length > 1 ? '/auth/select-role' : '/home';
+        setTimeout(() => this.router.navigate([destino]), 1500);
       },
       error: (err: any) => {
         this.guardando = false;

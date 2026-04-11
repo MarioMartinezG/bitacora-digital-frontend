@@ -1,0 +1,48 @@
+<app-floating-configurator />
+
+<div class="login-background flex items-center justify-center min-h-screen overflow-hidden">
+  <div class="flex flex-col items-center justify-center w-full">
+    <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%); max-width: 520px; width: 100%;">
+      <div class="w-full bg-surface-0 dark:bg-surface-900 py-16 px-8 sm:px-16" style="border-radius: 53px">
+
+        <div class="text-center mb-8">
+          <div class="flex flex-col items-center mb-4">
+            <img src="Logo_de_la_Universidad_El_Bosque.png" alt="logo_UEB" width="100" height="110">
+          </div>
+          <h2 class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-2">Selecciona tu rol</h2>
+          <p class="text-muted-color text-sm">Tienes más de un rol asignado. ¿Con cuál deseas ingresar?</p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          @for (rol of roles; track rol.id) {
+            <button
+              type="button"
+              (click)="selectRole(rol.id)"
+              class="flex items-center gap-4 w-full p-4 border-2 border-surface-200 dark:border-surface-700 rounded-2xl hover:border-primary hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200 cursor-pointer text-left bg-transparent"
+            >
+              <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 shrink-0">
+                <i [class]="rol.icon + ' text-primary text-xl'"></i>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-surface-900 dark:text-surface-0 font-semibold text-base">{{ rol.label }}</span>
+                <span class="text-muted-color text-sm">{{ rol.description }}</span>
+              </div>
+              <i class="pi pi-chevron-right text-muted-color ml-auto"></i>
+            </button>
+          }
+        </div>
+
+        <div class="text-center mt-8">
+          <button
+            type="button"
+            (click)="logout()"
+            class="text-muted-color hover:text-primary text-sm underline bg-transparent border-none cursor-pointer"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

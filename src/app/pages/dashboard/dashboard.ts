@@ -54,11 +54,13 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     const user = this.authStateService.getUserData();
+    const effectiveRole = this.authStateService.effectiveRole();
+
     if (user) {
-      this.userRole = user.role ?? user.roles[0] ?? 1;
+      this.userRole = effectiveRole ?? user.roles[0] ?? 1;
     }
 
-    if (this.authStateService.hasRole(UserRole.COORDINADOR)) {
+    if (effectiveRole === UserRole.COORDINADOR) {
       this.router.navigate(['/home/coordinador/dashboard']);
       return;
     }
@@ -68,7 +70,7 @@ export class Dashboard implements OnInit {
       error: () => {}
     });
 
-    if (this.authStateService.hasRole(UserRole.ESTUDIANTE)) {
+    if (effectiveRole === UserRole.ESTUDIANTE) {
       this.bitacoraService.obtenerTodasSecciones().subscribe({
         next: (data) => this.secciones = data
       });
