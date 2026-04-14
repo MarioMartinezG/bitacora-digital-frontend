@@ -20,7 +20,9 @@
   flex-direction: column;
   border: 1px solid var(--p-surface-border);
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 70vh;
 }
 
 /* Encabezado */
@@ -29,6 +31,9 @@
   grid-template-columns: 2fr 1fr 1fr 1fr;
   background-color: var(--p-surface-100);
   border-bottom: 2px solid var(--p-surface-border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .observar-header > div {
