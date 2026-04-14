@@ -29,6 +29,11 @@ export class DocumentosGuia {
       label: 'Unidad 3 - Diseño de cursos para el Éxito Académico',
       nombre: 'unidad-3-diseno-de-cursos-para-el-exito-academico-2026-Fg5MjKKg.pdf',
       url: '/assets/recursos/unidad-3-diseno-de-cursos-para-el-exito-academico-2026-Fg5MjKKg.pdf'
+    },
+    {
+      label: 'Manual de Usuario',
+      nombre: 'Manual_Estudiante.pdf',
+      url: '/assets/recursos/Manual_Estudiante.pdf'
     }
   ];
 }
