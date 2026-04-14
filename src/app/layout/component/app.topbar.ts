@@ -185,8 +185,8 @@ import { AuthStateService } from '../../core/services/auth-state.service';
                 >
                     <i class="pi pi-times" style="font-size: 0.9rem;"></i>
                 </button>
-                <div style="width: 3.5rem; height: 3.5rem; background: var(--surface-100, var(--surface-ground)); border: 1px solid var(--surface-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
-                    <i class="pi pi-graduation-cap" style="font-size: 1.5rem; color: var(--primary-color);"></i>
+                <div style="width: 4rem; height: 4rem; background: var(--surface-100, var(--surface-ground)); border: 1px solid var(--surface-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; overflow: hidden;">
+                    <img src="/favicon.ico" alt="TEIA" style="width: 2.4rem; height: 2.4rem; object-fit: contain;">
                 </div>
                 <h2 style="margin: 0 0 0.25rem; font-size: 1.3rem; font-weight: 700; color: var(--text-color); letter-spacing: 0.02em;">TEIA</h2>
                 <p style="margin: 0; font-size: 0.8rem; color: var(--text-color-secondary); line-height: 1.5;">
@@ -197,7 +197,7 @@ import { AuthStateService } from '../../core/services/auth-state.service';
             <!-- Descripción -->
             <div style="padding: 1.5rem 2rem 0; text-align: center;">
                 <p style="margin: 0; font-size: 0.9rem; color: var(--text-color-secondary); line-height: 1.7;">
-                    Proyecto de grado desarrollado en el marco del programa de
+                    Trabajo de grado desarrollado en el marco del programa de
                     <strong style="color: var(--text-color);">Ingeniería de Sistemas</strong>
                     de la <strong style="color: var(--text-color);">Universidad El Bosque</strong>.
                 </p>
