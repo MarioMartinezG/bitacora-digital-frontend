@@ -1,0 +1,8 @@
+# Forzar LF en archivos que se ejecutan en contenedores Linux
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.conf      text eol=lf
+*.template  text eol=lf
+
+# El resto de archivos de texto con el comportamiento por defecto del OS
+*           text=auto

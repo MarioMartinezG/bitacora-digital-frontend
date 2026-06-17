@@ -24,10 +24,10 @@ COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 
 # Copiar el entrypoint que inyecta las variables de entorno
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+RUN sed -i 's/\r//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
 # Cloud Run escucha en el puerto 8080 por defecto
-EXPOSE 8080
+EXPOSE 80
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
