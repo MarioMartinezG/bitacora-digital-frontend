@@ -1,0 +1,8 @@
+services:
+  frontend:
+    image: mmartinezg531/bitacora-digital-frontend:1.0.0
+    container_name: teia-frontend
+    ports:
+      - "80:80"
+    environment:
+      - BACKEND_URL=${BACKEND_URL}
